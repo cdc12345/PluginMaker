@@ -6,6 +6,7 @@ import net.mcreator.plugin.JavaPlugin;
 import net.mcreator.plugin.Plugin;
 import net.mcreator.plugin.events.PreGeneratorsLoadingEvent;
 import net.mcreator.plugin.events.workspace.MCreatorLoadedEvent;
+import net.mcreator.plugin.events.workspace.WorkspaceBuildStartedEvent;
 import net.mcreator.ui.MCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class PluginMain extends JavaPlugin {
-    private final Logger LOG = LogManager.getLogger("PluginMaker");
+    public static final Logger LOG = LogManager.getLogger("PluginMaker");
 
     public PluginMain(Plugin plugin) {
         super(plugin);
@@ -81,6 +82,10 @@ public class PluginMain extends JavaPlugin {
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
+        });
+
+        addListener(WorkspaceBuildStartedEvent.class,event -> {
+            FileIO.removeEmptyDirs(event.getMCreator().getGenerator().getModAssetsRoot());
         });
     }
 

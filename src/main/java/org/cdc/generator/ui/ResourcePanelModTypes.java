@@ -27,9 +27,12 @@ public class ResourcePanelModTypes extends AbstractResourcePanel<File> {
 
         addToolBarButton("workspace.textures.import",
                 UIRES.get("16px.open"), event -> {
-                    var file = FileDialogs.getFileChooserDialog(workspacePanel.getMCreator(), FileChooserType.OPEN, false, "*.png", new ExtensionFilter("PNG", "png"))[0];
-                    FileIO.copyFile(file, new File(mod_types,file.getName()));
-                    reloadElements();
+                    var files = FileDialogs.getFileChooserDialog(workspacePanel.getMCreator(), FileChooserType.OPEN, false, "*.png", new ExtensionFilter("PNG", "png"));
+                    if (files.length > 0) {
+                        var file = files[0];
+                        FileIO.copyFile(file, new File(mod_types, file.getName()));
+                        reloadElements();
+                    }
                 });
         addToolBarButton("common.delete_selected", UIRES.get("16px.delete"), e -> {
             deleteCurrentlySelected();

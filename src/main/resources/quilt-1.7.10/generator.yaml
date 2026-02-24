@@ -6,7 +6,7 @@ is_plugin_maker: true
 # gradle task definitions
 gradle:
   export_file: "build/libs/demo-plugin.zip"
-  run_client: exportToMyMCreator
+  run_client: exportToMCreator
 
 import_formatter:
   duplicates_whitelist:

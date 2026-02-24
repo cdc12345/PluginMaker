@@ -1,5 +1,7 @@
 package org.cdc.generator.ui.elements;
 
+import net.mcreator.minecraft.DataListEntry;
+import net.mcreator.minecraft.DataListLoader;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -14,10 +16,8 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.event.CellEditorListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
 import java.awt.*;
 import java.io.IOException;
 import java.io.StringReader;
@@ -30,15 +30,38 @@ import java.util.regex.Pattern;
 public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
     private static final Pattern nameMatcher = Pattern.compile("[a-zA-Z_1-9]+");
+    private final String[] columns = new String[]{"Name", "Readable name", "Type", "Texture", "Others"};
 
-    private JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
+    private final JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
 
     public List<DataListModElement.DataListEntry> entries;
 
     public DataListModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode);
 
-        this.entries = new ArrayList<>();
+        if (DataListLoader.getCache().containsKey(modElement.getRegistryName()) && !editingMode) {
+            this.entries = new ArrayList<>() {
+                {
+                    for (DataListEntry dataListEntry : DataListLoader.loadDataList(modElement.getRegistryName())) {
+                        var dataListEntry1 = new DataListModElement.DataListEntry(dataListEntry.getName(), dataListEntry.getReadableName(), dataListEntry.getType(), dataListEntry.getTexture());
+                        var ma = new HashMap<String, String>();
+                        if (dataListEntry.getOther() instanceof Map<?, ?> map) {
+                            map.forEach((key, value) -> {
+                                ma.put(key.toString(), value.toString());
+                            });
+                        }
+                        dataListEntry1.setOthers(ma);
+                        dataListEntry1.setBuiltIn(true);
+                        this.add(dataListEntry1);
+                    }
+                }
+            };
+            generateDataList.setSelected(false);
+        } else {
+            generateDataList.setSelected(true);
+            this.entries = new ArrayList<>();
+        }
+
 
         this.initGUI();
         this.finalizeGUI();
@@ -54,14 +77,12 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
                 L10N.label("elementgui.plugindatalist.generate_datalists")));
         generateDataList.setOpaque(false);
         generateConfig.add(generateDataList);
-        generateDataList.setSelected(true);
 
         JPanel listPanel = new JPanel(new BorderLayout());
         listPanel.setBorder(BorderFactory.createTitledBorder("List"));
         listPanel.setOpaque(false);
 
         JTable jTable = new JTable(new AbstractTableModel() {
-            String[] columns = new String[]{"Name", "Readable name", "Type", "Texture", "Others"};
 
             @Override
             public int getRowCount() {
@@ -76,14 +97,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
             @Override
             public Object getValueAt(int rowIndex, int columnIndex) {
                 var row = entries.get(rowIndex);
-
-                if (columnIndex == columns.length - 1) {
-                    var label = new JLabel(row.getOther().toString());
-                    label.setOpaque(false);
-                    return label;
-                }
-
-                var columns = new String[]{row.getName(), row.getReadableName(), row.getType(), row.getTexture()};
+                var columns = new String[]{row.getName(), row.getReadableName(), row.getType(), row.getTexture(), row.getOther().toString()};
                 return columns[columnIndex];
             }
 
@@ -94,9 +108,6 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == columns.length - 1) {
-                    return JLabel.class;
-                }
                 return String.class;
             }
 
@@ -110,87 +121,57 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
                 var row = entries.get(rowIndex);
                 switch (getColumnName(columnIndex)) {
                     case "Name" -> {
-                        if (nameMatcher.matcher(aValue.toString()).matches()) {
+                        if (nameMatcher.matcher(aValue.toString()).matches() && !row.isBuiltIn()) {
                             row.setName(aValue.toString());
                         } else {
-                            JOptionPane.showMessageDialog(listPanel, "It doesn't match the rule, redo!", "Warning", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(listPanel, "It doesn't match the rule!", "Warning", JOptionPane.WARNING_MESSAGE);
+                            return;
                         }
                     }
                     case "Readable name" -> row.setReadableName(aValue.toString());
                     case "Type" -> row.setType(aValue.toString());
                     case "Texture" -> row.setTexture(aValue.toString());
                 }
+                row.setBuiltIn(false);
             }
         });
-        jTable.setDefaultRenderer(JLabel.class, new DefaultTableCellRenderer() {
+        jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int rowIndex, int column) {
-                var value2 = ((JLabel) value).getText();
-                JLabel label = (JLabel) super.getTableCellRendererComponent(jTable, value2, isSelected, hasFocus, rowIndex, column);
-                label.setToolTipText(value2);
+                JLabel label = (JLabel) super.getTableCellRendererComponent(jTable, value, isSelected, hasFocus, rowIndex, column);
+                if (value != null)
+                    label.setToolTipText(value.toString());
                 return label;
             }
         });
-        jTable.setDefaultEditor(JLabel.class, new TableCellEditor() {
+        jTable.setDefaultEditor(String.class, new DefaultCellEditor(new JTextField()) {
 
             @Override
             public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex, int column) {
                 var row = entries.get(rowIndex);
-                JTextArea jTextArea = new JTextArea();
-                for (Map.Entry<String, String> other : row.getOthers()) {
-                    jTextArea.append(other.getKey() + "=" + other.getValue());
-                }
-                int op = JOptionPane.showConfirmDialog(mcreator, jTextArea, "Edit others", JOptionPane.YES_NO_OPTION);
-                if (op == JOptionPane.YES_OPTION) {
-                    String str = jTextArea.getText();
-                    var prop = new Properties();
-                    try {
-                        prop.load(new StringReader(str));
-                        var cacheMap = new HashMap<String, String>();
-                        prop.forEach((key, value) -> {
-                            cacheMap.put(key.toString(), value.toString());
-                        });
-                        row.setOthers(cacheMap);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                if (columns[column].equals("Others")) {
+                    JTextArea jTextArea = new JTextArea();
+                    for (Map.Entry<String, String> other : row.getOthers()) {
+                        jTextArea.append(other.getKey() + "=" + other.getValue());
                     }
+                    int op = JOptionPane.showConfirmDialog(mcreator, jTextArea, "Edit others(Format: properties)", JOptionPane.YES_NO_OPTION);
+                    if (op == JOptionPane.YES_OPTION) {
+                        String str = jTextArea.getText();
+                        var prop = new Properties();
+                        try {
+                            prop.load(new StringReader(str));
+                            var cacheMap = new HashMap<String, String>();
+                            prop.forEach((key, value) -> {
+                                cacheMap.put(key.toString(), value.toString());
+                            });
+                            row.setOthers(cacheMap);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    return null;
                 }
-                return null;
-            }
-
-            @Override
-            public Object getCellEditorValue() {
-                return null;
-            }
-
-            @Override
-            public boolean isCellEditable(EventObject anEvent) {
-                return true;
-            }
-
-            @Override
-            public boolean shouldSelectCell(EventObject anEvent) {
-                return true;
-            }
-
-            @Override
-            public boolean stopCellEditing() {
-                return true;
-            }
-
-            @Override
-            public void cancelCellEditing() {
-
-            }
-
-            @Override
-            public void addCellEditorListener(CellEditorListener l) {
-
-            }
-
-            @Override
-            public void removeCellEditorListener(CellEditorListener l) {
-
+                return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
             }
         });
         jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -221,16 +202,16 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
         addrow.addActionListener(e -> {
             entries.add(new DataListModElement.DataListEntry("name", "", "", ""));
-            SwingUtilities.invokeLater(() -> {
-                jTable.invalidate();
+            SwingUtilities.invokeLater(()->{
+                jTable.repaint();
                 jTable.revalidate();
             });
         });
         remrow.addActionListener(e -> {
             var rowIndex = jTable.getSelectedRow();
             entries.remove(rowIndex);
-            SwingUtilities.invokeLater(() -> {
-                jTable.invalidate();
+            SwingUtilities.invokeLater(()->{
+                jTable.repaint();
                 jTable.revalidate();
             });
         });

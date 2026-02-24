@@ -31,14 +31,18 @@ public class ResourcePanelTemplates extends AbstractResourcePanel<File> {
 
         addToolBarButton("workspace.textures.import",
                 UIRES.get("16px.open"), event -> {
-                    var file = FileDialogs.getFileChooserDialog(workspacePanel.getMCreator(), FileChooserType.OPEN, false, "*.png", new ExtensionFilter("Templates", "aitpl", "ptpl", "json", "cmdtpl", "ftpl", "png"))[0];
-                    switch (FileUtils.getFileExtension(file)) {
-                        case "aitpl", "cmdtpl", "ftpl", "ptpl" ->
-                                FileIO.copyFile(file, new File(templatesFile, FileUtils.getFileExtension(file) + "/" + file.getName()));
-                        case "png" -> FileIO.copyFile(file, new File(templatesFile, "textures/" + file.getName()));
-                        case "json" -> FileIO.copyFile(file, new File(templatesFile, "animations/" + file.getName()));
+                    var files = FileDialogs.getFileChooserDialog(workspacePanel.getMCreator(), FileChooserType.OPEN, false, "", new ExtensionFilter("Templates", "png","ptpl","aitpl","cmdtpl","ftpl","json"));
+                    if (files.length > 0) {
+                        var file = files[0];
+                        switch (FileUtils.getFileExtension(file)) {
+                            case "aitpl", "cmdtpl", "ftpl", "ptpl" ->
+                                    FileIO.copyFile(file, new File(templatesFile, FileUtils.getFileExtension(file) + "/" + file.getName()));
+                            case "png" -> FileIO.copyFile(file, new File(templatesFile, "textures/" + file.getName()));
+                            case "json" ->
+                                    FileIO.copyFile(file, new File(templatesFile, "animations/" + file.getName()));
+                        }
+                        reloadElements();
                     }
-                    reloadElements();
                 });
         addToolBarButton("common.delete_selected", UIRES.get("16px.delete"), e -> {
             deleteCurrentlySelected();
@@ -61,6 +65,7 @@ public class ResourcePanelTemplates extends AbstractResourcePanel<File> {
         filterModel.removeAllElements();
         Stream<Path> templates = null;
         try {
+            templatesFile.mkdirs();
             templates = Files.walk(templatesFile.toPath(), 2);
             filterModel.addAll(templates.map(Path::toFile).filter(File::isFile).toList());
 
