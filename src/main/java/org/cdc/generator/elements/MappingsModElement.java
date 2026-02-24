@@ -7,7 +7,7 @@ import org.cdc.generator.utils.GeneratorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@SuppressWarnings("unused")
 public class MappingsModElement extends GeneratableElement {
 
     public String generatorName;
