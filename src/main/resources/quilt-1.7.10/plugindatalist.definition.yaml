@@ -1,0 +1,5 @@
+templates:
+  - template: datalist.yaml.ftl # loaded from datapack generator
+    writer: file
+    condition: generateDataList
+    name: "@RESROOT/datalists/@registryname.yaml"

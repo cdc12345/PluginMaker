@@ -1,15 +1,16 @@
 {
-  "id": "demo_java_plugin",
+  "id": "plugin_generator",
   "supportedversions": [
     202600199999,
-    2026001
+    2026001,
+    2025003
   ],
   "weight": 0,
-  "javaplugin": "net.mcreator.demojavaplugin.DemoJavaPlugin",
+  "javaplugin": "org.cdc.generator.PluginMain",
   "info": {
-    "name": "MCreator demo Java plugin",
+    "name": "MCreator plugin generator",
     "version": "1.0",
-    "description": "Demo Java plugin to demonstrate a typical Java plugin structure",
-    "author": "Pylo"
+    "description": "make your mcreator",
+    "author": "cdc12345"
   }
 }
