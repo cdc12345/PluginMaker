@@ -12,11 +12,16 @@ import java.util.Set;
 public class DataListModElement extends GeneratableElement {
 
     public boolean generateDataList;
+    public String datalistName;
 
     public List<DataListEntry> entries;
 
     public DataListModElement(ModElement element) {
         super(element);
+    }
+
+    public String getDatalistName() {
+        return datalistName;
     }
 
     public static class DataListEntry implements Cloneable{

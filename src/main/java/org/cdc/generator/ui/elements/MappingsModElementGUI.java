@@ -3,6 +3,7 @@ package org.cdc.generator.ui.elements;
 import net.mcreator.generator.Generator;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.SearchableComboBox;
+import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
@@ -118,7 +119,10 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 							defaultMapping.addItem(entry.getValue().toString());
 						}
 					}
-					SwingUtilities.invokeLater(defaultMapping::revalidate);
+					SwingUtilities.invokeLater(()->{
+						defaultMapping.repaint();
+						defaultMapping.revalidate();
+					});
 				}
 
 			}
@@ -213,7 +217,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 					for (String entry : row.getMappingContent()) {
 						jTextArea.append(entry);
 					}
-					int op = JOptionPane.showConfirmDialog(mcreator, jTextArea, "Edit Mapping",
+					int op = JOptionPane.showConfirmDialog(mcreator, jTextArea, "Edit Mapping (one line one item)",
 							JOptionPane.YES_NO_OPTION);
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
@@ -268,7 +272,8 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				var set = new HashSet<String>();
 				for (Map.Entry<?, ?> entry : memory.entrySet()) {
 					var key = entry.getKey().toString();
-					if (!key.matches("(_default|_mcreator_map_template)")) {
+					// exclude
+					if (!GeneratorUtils.MAPPING_INNER_KEY.matcher(key).matches()) {
 						set.add(key);
 						if (entry.getValue() instanceof List<?> list) {
 							var ar = new ArrayList<String>();
@@ -315,13 +320,13 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		generator.setSelectedItem(generatableElement.generatorName);
 		defaultMapping.setSelectedItem(generatableElement.defaultMapping);
 		mcreatorMapTemplate.setSelectedItem(generatableElement.mcreatorMapTemplate);
-		mappingsContent = generatableElement.mappingsContent.stream().map(a -> {
+		mappingsContent = new ArrayList<>(generatableElement.mappingsContent.stream().map(a -> {
 			try {
 				return a.clone();
 			} catch (CloneNotSupportedException e) {
 				throw new RuntimeException(e);
 			}
-		}).toList();
+		}).toList());
 	}
 
 	@Override public MappingsModElement getElementFromGUI() {
@@ -345,12 +350,11 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 	}
 
 	@Override public void reloadDataLists() {
-		var datalistn = datalistName.getSelectedItem();
-		datalistName.removeAllItems();
+		ArrayList<String> stringArrayList = new ArrayList<>();
 		for (ModElement element : mcreator.getWorkspaceInfo()
 				.getElementsOfType(ModElementTypes.DATA_LIST.getRegistryName())) {
-			datalistName.addItem(element.getName());
+			stringArrayList.add(element.getName());
 		}
-		datalistName.setSelectedItem(datalistn);
+		ComboBoxUtil.updateComboBoxContents(datalistName,stringArrayList);
 	}
 }

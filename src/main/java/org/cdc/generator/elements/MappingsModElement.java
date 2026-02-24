@@ -65,10 +65,6 @@ public class MappingsModElement extends GeneratableElement {
             return mappingContent;
         }
 
-        public String getFirst() {
-            return mappingContent.getFirst();
-        }
-
         public boolean isEdited(MappingsModElement mappingsModElement) {
             var list = GeneratorUtils.getMappingResult(mappingsModElement.getGeneratorName(),
                     mappingsModElement.getDatalistName(), name);

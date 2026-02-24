@@ -7,8 +7,12 @@ import org.cdc.generator.PluginMain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class GeneratorUtils {
+
+	public static final Pattern MAPPING_INNER_KEY = Pattern.compile("(_default|_mcreator_map_template)");
+
 	public static boolean isNotPluginGenerator(Generator generator) {
 		return !generator.getGeneratorConfiguration().getRaw().containsKey("is_plugin_maker");
 	}
