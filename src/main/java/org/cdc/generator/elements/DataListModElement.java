@@ -3,7 +3,6 @@ package org.cdc.generator.elements;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,7 @@ public class DataListModElement extends GeneratableElement {
         super(element);
     }
 
-    public static class DataListEntry {
+    public static class DataListEntry implements Cloneable{
         private String name;
         // map readable_name
         private String readableName;
@@ -109,6 +108,13 @@ public class DataListModElement extends GeneratableElement {
 
         public void setBuiltIn(boolean builtIn) {
             this.builtIn = builtIn;
+        }
+
+        @Override public DataListEntry clone() throws CloneNotSupportedException {
+			DataListEntry dataListEntry = (DataListEntry) super.clone();
+            dataListEntry.others = new HashMap<>(others);
+            dataListEntry.builtIn = builtIn;
+            return dataListEntry;
         }
     }
 }

@@ -46,9 +46,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
                         var dataListEntry1 = new DataListModElement.DataListEntry(dataListEntry.getName(), dataListEntry.getReadableName(), dataListEntry.getType(), dataListEntry.getTexture());
                         var ma = new HashMap<String, String>();
                         if (dataListEntry.getOther() instanceof Map<?, ?> map) {
-                            map.forEach((key, value) -> {
-                                ma.put(key.toString(), value.toString());
-                            });
+                            map.forEach((key, value) -> ma.put(key.toString(), value.toString()));
                         }
                         dataListEntry1.setOthers(ma);
                         dataListEntry1.setBuiltIn(true);
@@ -161,9 +159,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
                         try {
                             prop.load(new StringReader(str));
                             var cacheMap = new HashMap<String, String>();
-                            prop.forEach((key, value) -> {
-                                cacheMap.put(key.toString(), value.toString());
-                            });
+                            prop.forEach((key, value) -> cacheMap.put(key.toString(), value.toString()));
                             row.setOthers(cacheMap);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
@@ -239,7 +235,13 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
     @Override
     protected void openInEditingMode(DataListModElement generatableElement) {
-        this.entries = generatableElement.entries;
+        this.entries = generatableElement.entries.stream().map(a->{
+            try {
+                return a.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
         this.generateDataList.setSelected(generatableElement.generateDataList);
     }
 
@@ -247,7 +249,13 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
     public DataListModElement getElementFromGUI() {
         DataListModElement dataListModElement = new DataListModElement(modElement);
         dataListModElement.generateDataList = generateDataList.isSelected();
-        dataListModElement.entries = entries;
+        dataListModElement.entries = entries.stream().map(a->{
+			try {
+				return a.clone();
+			} catch (CloneNotSupportedException e) {
+				throw new RuntimeException(e);
+			}
+		}).toList();
         return dataListModElement;
     }
 

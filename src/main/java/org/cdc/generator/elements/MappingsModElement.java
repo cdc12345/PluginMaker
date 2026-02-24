@@ -6,6 +6,7 @@ import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.utils.GeneratorUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MappingsModElement extends GeneratableElement {
 
@@ -15,7 +16,7 @@ public class MappingsModElement extends GeneratableElement {
     public String defaultMapping;
     // map _mcreator_map_template
     public String mcreatorMapTemplate;
-    public ArrayList<MappingEntry> mappingsContent;
+    public List<MappingEntry> mappingsContent;
 
     public MappingsModElement(ModElement element) {
         super(element);
@@ -46,7 +47,7 @@ public class MappingsModElement extends GeneratableElement {
         return mcreatorMapTemplate;
     }
 
-    public static class MappingEntry {
+    public static class MappingEntry implements Cloneable{
         private String name;
         private ArrayList<String> mappingContent;
 
@@ -75,6 +76,13 @@ public class MappingsModElement extends GeneratableElement {
                 return !list.equals(this.getMappingContent());
             }
             return true;
+        }
+
+        @Override public MappingEntry clone() throws CloneNotSupportedException {
+            MappingEntry mappingEntry = (MappingEntry) super.clone();
+            mappingEntry.name = name;
+            mappingEntry.mappingContent = new ArrayList<>(mappingContent);
+            return mappingEntry;
         }
     }
 }
