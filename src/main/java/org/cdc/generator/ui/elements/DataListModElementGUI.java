@@ -12,7 +12,6 @@ import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.AggregatedValidationResult;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.PluginMain;
 import org.cdc.generator.elements.DataListModElement;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -223,13 +222,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 	}
 
 	@Override protected void openInEditingMode(DataListModElement generatableElement) {
-		this.entries = new ArrayList<>(generatableElement.entries.stream().map(a -> {
-			try {
-				return a.clone();
-			} catch (CloneNotSupportedException e) {
-				throw new RuntimeException(e);
-			}
-		}).toList());
+		this.entries = new ArrayList<>(generatableElement.entries);
 		this.generateDataList.setSelected(generatableElement.generateDataList);
 		this.datalistName.setText(generatableElement.datalistName);
 	}
@@ -254,22 +247,17 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
 	@Override public void reloadDataLists() {
 		if (DataListLoader.getCache().containsKey(datalistName.getText()) && entries.isEmpty()) {
-			PluginMain.LOG.info(datalistName.getText());
-			this.entries = new ArrayList<>() {
-				{
-					for (DataListEntry dataListEntry : DataListLoader.loadDataList(datalistName.getText())) {
-						var dataListEntry1 = new DataListModElement.DataListEntry(dataListEntry.getName(),
-								dataListEntry.getReadableName(), dataListEntry.getType(), dataListEntry.getTexture());
-						var ma = new HashMap<String, String>();
-						if (dataListEntry.getOther() instanceof Map<?, ?> map) {
-							map.forEach((key, value) -> ma.put(key.toString(), value.toString()));
-						}
-						dataListEntry1.setOthers(ma);
-						dataListEntry1.setBuiltIn(true);
-						this.add(dataListEntry1);
-					}
+			for (DataListEntry dataListEntry : DataListLoader.loadDataList(datalistName.getText())) {
+				var dataListEntry1 = new DataListModElement.DataListEntry(dataListEntry.getName(),
+						dataListEntry.getReadableName(), dataListEntry.getType(), dataListEntry.getTexture());
+				var ma = new HashMap<String, String>();
+				if (dataListEntry.getOther() instanceof Map<?, ?> map) {
+					map.forEach((key, value) -> ma.put(key.toString(), value.toString()));
 				}
-			};
+				dataListEntry1.setOthers(ma);
+				dataListEntry1.setBuiltIn(true);
+				entries.add(dataListEntry1);
+			}
 		}
 	}
 }

@@ -42,12 +42,12 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 	private final SearchableComboBox<String> defaultMapping = new SearchableComboBox<>();
 	private final VComboBox<String> mcreatorMapTemplate = new VComboBox<>();
 
-	public List<MappingsModElement.MappingEntry> mappingsContent;
+	public List<MappingsModElement.MappingEntry> mappingEntries;
 
 	public MappingsModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
 
-		this.mappingsContent = new ArrayList<>();
+		this.mappingEntries = new ArrayList<>();
 
 		if (editingMode) {
 			generator.setEnabled(false);
@@ -167,7 +167,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 
 		JTable jTable = new JTable(new AbstractTableModel() {
 			@Override public int getRowCount() {
-				return mappingsContent.size();
+				return mappingEntries.size();
 			}
 
 			@Override public int getColumnCount() {
@@ -175,7 +175,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			}
 
 			@Override public Object getValueAt(int rowIndex, int columnIndex) {
-				var row = mappingsContent.get(rowIndex);
+				var row = mappingEntries.get(rowIndex);
 				var columns = new String[] { row.getName(), row.getMappingContent().toString() };
 				return columns[columnIndex];
 			}
@@ -211,7 +211,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			@Override
 			public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
 					int column) {
-				var row = mappingsContent.get(rowIndex);
+				var row = mappingEntries.get(rowIndex);
 				if (columns[column].equals("Mapping")) {
 					JTextArea jTextArea = new JTextArea();
 					for (String entry : row.getMappingContent()) {
@@ -248,7 +248,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		impfile.addActionListener(e -> {
 			var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
 			impfile.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			mappingsContent.clear();
+			mappingEntries.clear();
 			String mappingname;
 			if (datalist != null) {
 				mappingname = datalist.getRegistryName();
@@ -261,7 +261,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				if (datalist != null) {
 					for (DataListModElement.DataListEntry entry : ((DataListModElement) Objects.requireNonNull(
 							datalist.getGeneratableElement())).entries) {
-						mappingsContent.add(new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
+						mappingEntries.add(new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
 						SwingUtilities.invokeLater(() -> {
 							defaultMapping.invalidate();
 							defaultMapping.revalidate();
@@ -280,9 +280,9 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 							for (Object o : list) {
 								ar.add(o.toString());
 							}
-							mappingsContent.add(new MappingsModElement.MappingEntry(key, ar));
+							mappingEntries.add(new MappingsModElement.MappingEntry(key, ar));
 						} else {
-							mappingsContent.add(new MappingsModElement.MappingEntry(key,
+							mappingEntries.add(new MappingsModElement.MappingEntry(key,
 									new ArrayList<>(List.of(entry.getValue().toString()))));
 						}
 					}
@@ -292,7 +292,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 					for (DataListModElement.DataListEntry entry : ((DataListModElement) Objects.requireNonNull(
 							datalist.getGeneratableElement())).entries) {
 						if (!set.contains(entry.getName()))
-							mappingsContent.add(
+							mappingEntries.add(
 									new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
 					}
 				}
@@ -320,13 +320,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		generator.setSelectedItem(generatableElement.generatorName);
 		defaultMapping.setSelectedItem(generatableElement.defaultMapping);
 		mcreatorMapTemplate.setSelectedItem(generatableElement.mcreatorMapTemplate);
-		mappingsContent = new ArrayList<>(generatableElement.mappingsContent.stream().map(a -> {
-			try {
-				return a.clone();
-			} catch (CloneNotSupportedException e) {
-				throw new RuntimeException(e);
-			}
-		}).toList());
+		mappingEntries = new ArrayList<>(generatableElement.mappingsContent);
 	}
 
 	@Override public MappingsModElement getElementFromGUI() {
@@ -335,7 +329,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		element.generatorName = generator.getSelectedItem();
 		element.defaultMapping = defaultMapping.getSelectedItem();
 		element.mcreatorMapTemplate = mcreatorMapTemplate.getSelectedItem();
-		element.mappingsContent = mappingsContent.stream().map(a -> {
+		element.mappingsContent = mappingEntries.stream().map(a -> {
 			try {
 				return a.clone();
 			} catch (CloneNotSupportedException e) {
