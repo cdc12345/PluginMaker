@@ -6,9 +6,11 @@ import net.mcreator.plugin.PluginLoader;
 import net.mcreator.ui.component.tree.FilterTreeNode;
 import net.mcreator.ui.component.tree.FilteredTreeModel;
 import net.mcreator.ui.component.tree.JFileTree;
+import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.minecraft.recourcepack.ResourcePackTreeCellRenderer;
 import net.mcreator.ui.workspace.IReloadableFilterable;
 import net.mcreator.ui.workspace.WorkspacePanel;
+import org.cdc.generator.PluginMain;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,6 +47,13 @@ public class ResourcePanelCorePack extends JPanel implements IReloadableFilterab
             }
         });
         popupMenu.add(copyName);
+        JMenuItem openInExplorer = L10N.menu("resourcepanel.corepack.menus.open_in_explorer");
+        openInExplorer.addActionListener(e->{
+            if (model.getRoot() instanceof FilterTreeNode ro){
+                var count = tree.getSelectionPath().getPathCount();
+                PluginMain.LOG.info(ro.getChildAt(count).getUserObject());
+            }
+        });
 
         tree.setComponentPopupMenu(popupMenu);
 
@@ -79,6 +88,7 @@ public class ResourcePanelCorePack extends JPanel implements IReloadableFilterab
             }
         }
         JFileTree.addFileNodeToRoot(root, fileTree.root());
+
         model.setRoot(root);
         model.refilter();
     }

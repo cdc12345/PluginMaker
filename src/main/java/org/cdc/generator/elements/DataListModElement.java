@@ -25,21 +25,35 @@ public class DataListModElement extends GeneratableElement {
     }
 
     public static class DataListEntry implements Cloneable{
+        public static DataListEntry copyValueOf(net.mcreator.minecraft.DataListEntry dataListEntry){
+            var dataListEntry1 = new DataListModElement.DataListEntry(dataListEntry.getName(),
+                    dataListEntry.getReadableName(), dataListEntry.getType(), dataListEntry.getTexture(),
+                    dataListEntry.getDescription());
+            var ma = new HashMap<String, String>();
+            if (dataListEntry.getOther() instanceof Map<?, ?> map) {
+                map.forEach((key, value) -> ma.put(key.toString(), value.toString()));
+            }
+            dataListEntry1.setOthers(ma);
+            return dataListEntry1;
+        }
+
         private String name;
         // map readable_name
         private String readableName;
         private String type;
         private String texture;
+        private String description;
         // map other
         private Map<String,String> others;
 
         private boolean builtIn;
 
-        public DataListEntry(String name, @Nullable String readable_name, @Nullable String type, @Nullable String texture) {
+        public DataListEntry(String name, @Nullable String readable_name, @Nullable String type, @Nullable String texture,@Nullable String description) {
             this.name = name;
             this.readableName = readable_name;
             this.type = type;
             this.texture = texture;
+            this.description = description;
             this.builtIn = false;
             this.others = new HashMap<>();
         }
@@ -76,6 +90,10 @@ public class DataListModElement extends GeneratableElement {
             return others.entrySet();
         }
 
+        public String getDescription() {
+            return description;
+        }
+
         public Map<String,String> getOther(){
             if (this.others == null) {
                 this.others = new HashMap<>();
@@ -99,6 +117,10 @@ public class DataListModElement extends GeneratableElement {
             this.texture = texture;
         }
 
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
         public void setOthers(Map<String, String> others) {
             if (others == null) {
                 this.others = new HashMap<>();
@@ -120,6 +142,12 @@ public class DataListModElement extends GeneratableElement {
             dataListEntry.others = new HashMap<>(others);
             dataListEntry.builtIn = builtIn;
             return dataListEntry;
+        }
+
+        @Override public String toString() {
+            return "DataListEntry{" + "name='" + name + '\'' + ", readableName='" + readableName + '\'' + ", type='"
+                    + type + '\'' + ", texture='" + texture + '\'' + ", description='" + description + '\''
+                    + ", others=" + others + ", builtIn=" + builtIn + '}';
         }
     }
 }

@@ -11,6 +11,7 @@ import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
+import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.elements.MappingsModElement;
@@ -20,9 +21,12 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
@@ -32,6 +36,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 
@@ -44,10 +49,14 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 
 	public List<MappingsModElement.MappingEntry> mappingEntries;
 
+	// the 0 is the last search index
+	private final ArrayList<Integer> lastSearchResult;
+
 	public MappingsModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
 
 		this.mappingEntries = new ArrayList<>();
+		this.lastSearchResult = new ArrayList<>(List.of(0));
 
 		if (editingMode) {
 			generator.setEnabled(false);
@@ -154,6 +163,23 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		bar.setOpaque(false);
 		bar.setOpaque(false);
 
+		JPanel buttons = new JPanel(new GridLayout(1, 2));
+		buttons.setOpaque(false);
+		VTextField searchbar = new VTextField();
+		searchbar.setCustomDefaultMessage("click to search");
+		searchbar.setValidator(() -> {
+			if (lastSearchResult.size() == 1) {
+				return new ValidationResult(ValidationResult.Type.ERROR, "No results");
+			}
+			return ValidationResult.PASSED;
+		});
+		JButton upSearch = new JButton(UIRES.get("18px.up"));
+		upSearch.setOpaque(false);
+		JButton downSearch = new JButton(UIRES.get("18px.down"));
+		downSearch.setOpaque(false);
+		buttons.add(upSearch);
+		buttons.add(downSearch);
+
 		var impfile = new JButton(UIRES.get("impfile"));
 		impfile.setToolTipText("Import from element or memory");
 		impfile.setOpaque(false);
@@ -226,7 +252,8 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 							throw new RuntimeException(e);
 						}
 						row.setEdited(MappingsModElement.MappingEntry.isEdited(generator.getSelectedItem(),
-								GeneratorUtils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()), row));
+								GeneratorUtils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()),
+								row));
 					}
 					return null;
 				}
@@ -234,6 +261,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			}
 		});
 		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		jTable.setFillsViewportHeight(true);
 		jTable.setOpaque(false);
 
 		JScrollPane scrollPane = new JScrollPane(jTable);
@@ -284,8 +312,43 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				jTable.revalidate();
 			});
 		});
+		searchbar.getDocument().addDocumentListener(new DocumentListener() {
+			@Override public void insertUpdate(DocumentEvent e) {
+				doSearch(searchbar);
+			}
+
+			@Override public void removeUpdate(DocumentEvent e) {
+				doSearch(searchbar);
+			}
+
+			@Override public void changedUpdate(DocumentEvent e) {
+				doSearch(searchbar);
+			}
+		});
+		searchbar.registerKeyboardAction(a -> {
+			downSearch.doClick();
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_FOCUSED);
+		downSearch.addActionListener(a -> {
+			var index = lastSearchResult.getFirst() + 1;
+			if (index >= lastSearchResult.size()) {
+				index = 1;
+			}
+			jTable.changeSelection(lastSearchResult.get(index), 0, false, false);
+			lastSearchResult.set(0, index);
+			downSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
+		});
+		upSearch.addActionListener(a -> {
+			var index = lastSearchResult.getFirst() - 1;
+			if (index < 1) {
+				index = lastSearchResult.size() - 1;
+			}
+			jTable.changeSelection(lastSearchResult.get(index), 0, false, false);
+			lastSearchResult.set(0, index);
+			upSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
+		});
 
 		bar.add(impfile);
+		bar.add(PanelUtils.centerAndEastElement(searchbar, buttons));
 
 		mapping.add("Center", scrollPane);
 		mapping.add("North", bar);
@@ -330,5 +393,19 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			stringArrayList.add(element.getName());
 		}
 		ComboBoxUtil.updateComboBoxContents(datalistName, stringArrayList);
+	}
+
+	private void doSearch(VTextField searchbar) {
+		lastSearchResult.clear();
+		// cache
+		lastSearchResult.add(0);
+		for (int i = 0; i < mappingEntries.size(); i++) {
+			var entry = mappingEntries.get(i);
+			if (Stream.of(entry.getName(), entry.getMappingContent().toString())
+					.anyMatch(a -> a != null && a.contains(searchbar.getText()))) {
+				lastSearchResult.add(i);
+			}
+		}
+		searchbar.getValidationStatus();
 	}
 }

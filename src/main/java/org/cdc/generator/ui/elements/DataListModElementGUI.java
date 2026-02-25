@@ -18,6 +18,8 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
@@ -30,21 +32,27 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
 	private static final Pattern nameMatcher = Pattern.compile("[a-zA-Z_1-9]+");
-	private final String[] columns = new String[] { "Name", "Readable name", "Type", "Texture", "Others" };
+	private final String[] columns = new String[] { "Name", "Readable name", "Type", "Texture", "Description",
+			"Others" };
 
 	private final JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
 	private final VTextField datalistName = new VTextField();
 
 	public List<DataListModElement.DataListEntry> entries;
 
+	// the 0 is the last search index
+	private ArrayList<Integer> lastSearchResult;
+
 	public DataListModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
 
 		this.entries = new ArrayList<>();
+		this.lastSearchResult = new ArrayList<>(List.of(0));
 
 		if (editingMode) {
 			datalistName.setEnabled(false);
@@ -67,8 +75,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 					.equals(datalistName.getText().toLowerCase(Locale.ROOT))) {
 				return ValidationResult.PASSED;
 			}
-			return new ValidationResult(ValidationResult.Type.ERROR, "You must use whole english and whole lower letters");
+			return new ValidationResult(ValidationResult.Type.ERROR,
+					"You must use whole english and whole lower letters");
 		});
+		datalistName.setCustomDefaultMessage("Enter to load");
 		datalistName.setText(modElement.getRegistryName());
 		generateConfig.add(datalistName);
 
@@ -89,13 +99,13 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 			}
 
 			@Override public int getColumnCount() {
-				return 5;
+				return columns.length;
 			}
 
 			@Override public Object getValueAt(int rowIndex, int columnIndex) {
 				var row = entries.get(rowIndex);
 				var columns = new String[] { row.getName(), row.getReadableName(), row.getType(), row.getTexture(),
-						row.getOther().toString() };
+						row.getDescription(), row.getOther().toString() };
 				return columns[columnIndex];
 			}
 
@@ -113,6 +123,9 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
 			@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 				var row = entries.get(rowIndex);
+				if (aValue == null) {
+					return;
+				}
 				switch (getColumnName(columnIndex)) {
 				case "Name" -> {
 					if (nameMatcher.matcher(aValue.toString()).matches()) {
@@ -125,6 +138,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				case "Readable name" -> row.setReadableName(aValue.toString());
 				case "Type" -> row.setType(aValue.toString());
 				case "Texture" -> row.setTexture(aValue.toString());
+				case "Description" -> row.setDescription(aValue.toString());
 				}
 			}
 		});
@@ -173,10 +187,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 			}
 		});
 		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		jTable.setFillsViewportHeight(true);
 		jTable.setOpaque(false);
 
 		JScrollPane scrollPane = new JScrollPane(jTable);
-		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.setOpaque(false);
 
 		JToolBar bar = new JToolBar();
@@ -198,8 +212,26 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
 		bar.add(remrow);
 
+		JPanel buttons = new JPanel(new GridLayout(1, 2));
+		buttons.setOpaque(false);
+		VTextField searchbar = new VTextField();
+		searchbar.setCustomDefaultMessage("click to search");
+		searchbar.setValidator(() -> {
+			if (lastSearchResult.size() == 1) {
+				return new ValidationResult(ValidationResult.Type.ERROR, "No results");
+			}
+			return ValidationResult.PASSED;
+		});
+		JButton upSearch = new JButton(UIRES.get("18px.up"));
+		upSearch.setOpaque(false);
+		JButton downSearch = new JButton(UIRES.get("18px.down"));
+		downSearch.setOpaque(false);
+		buttons.add(upSearch);
+		buttons.add(downSearch);
+		bar.add(PanelUtils.centerAndEastElement(searchbar, buttons));
+
 		addrow.addActionListener(e -> {
-			entries.add(new DataListModElement.DataListEntry("name", "", "", ""));
+			entries.add(new DataListModElement.DataListEntry("name", "", "", "", ""));
 			SwingUtilities.invokeLater(() -> {
 				jTable.repaint();
 				jTable.revalidate();
@@ -224,6 +256,40 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				}
 			}
 		});
+		searchbar.getDocument().addDocumentListener(new DocumentListener() {
+			@Override public void insertUpdate(DocumentEvent e) {
+				doSearch(searchbar);
+			}
+
+			@Override public void removeUpdate(DocumentEvent e) {
+				doSearch(searchbar);
+			}
+
+			@Override public void changedUpdate(DocumentEvent e) {
+				doSearch(searchbar);
+			}
+		});
+		searchbar.registerKeyboardAction(a -> {
+			downSearch.doClick();
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_FOCUSED);
+		downSearch.addActionListener(a -> {
+			var index = lastSearchResult.getFirst() + 1;
+			if (index >= lastSearchResult.size()) {
+				index = 1;
+			}
+			jTable.changeSelection(lastSearchResult.get(index), 0, false, false);
+			lastSearchResult.set(0, index);
+			downSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
+		});
+		upSearch.addActionListener(a -> {
+			var index = lastSearchResult.getFirst() - 1;
+			if (index < 1) {
+				index = lastSearchResult.size() - 1;
+			}
+			jTable.changeSelection(lastSearchResult.get(index), 0, false, false);
+			lastSearchResult.set(0, index);
+			upSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
+		});
 
 		listPanel.add("North", bar);
 		listPanel.add("Center", scrollPane);
@@ -231,18 +297,33 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		addPage("datalist", PanelUtils.totalCenterInPanel(
 				PanelUtils.northAndCenterElement(generateConfig, listPanel))).lazyValidate(() -> {
 			Set<String> names = new HashSet<>();
-			for (DataListModElement.DataListEntry entry : entries) {
+			for (int i = 0; i < entries.size(); i++) {
+				var entry = entries.get(i);
 				if (!names.contains(entry.getName())) {
 					names.add(entry.getName());
 				} else {
-					jTable.setBorder(BorderFactory.createLineBorder(Color.RED));
+					jTable.changeSelection(i, 0, false, false);
 					return new AggregatedValidationResult.FAIL("Duplicative name in datalist");
 				}
 
 			}
-			jTable.setBorder(BorderFactory.createEmptyBorder());
 			return new AggregatedValidationResult.PASS();
 		}).validate(datalistName);
+	}
+
+	private void doSearch(VTextField searchbar) {
+		lastSearchResult.clear();
+		// cache
+		lastSearchResult.add(0);
+		for (int i = 0; i < entries.size(); i++) {
+			var entry = entries.get(i);
+			if (Stream.of(entry.getName(), entry.getReadableName(), entry.getDescription(), entry.getTexture(),
+							entry.getType(), entry.getOther().toString())
+					.anyMatch(a -> a != null && a.contains(searchbar.getText()))) {
+				lastSearchResult.add(i);
+			}
+		}
+		searchbar.getValidationStatus();
 	}
 
 	@Override protected void openInEditingMode(DataListModElement generatableElement) {
@@ -272,13 +353,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 	@Override public void reloadDataLists() {
 		if (DataListLoader.getCache().containsKey(datalistName.getText()) && entries.isEmpty()) {
 			for (DataListEntry dataListEntry : DataListLoader.loadDataList(datalistName.getText())) {
-				var dataListEntry1 = new DataListModElement.DataListEntry(dataListEntry.getName(),
-						dataListEntry.getReadableName(), dataListEntry.getType(), dataListEntry.getTexture());
-				var ma = new HashMap<String, String>();
-				if (dataListEntry.getOther() instanceof Map<?, ?> map) {
-					map.forEach((key, value) -> ma.put(key.toString(), value.toString()));
-				}
-				dataListEntry1.setOthers(ma);
+				var dataListEntry1 = DataListModElement.DataListEntry.copyValueOf(dataListEntry);
 				dataListEntry1.setBuiltIn(true);
 				entries.add(dataListEntry1);
 			}
