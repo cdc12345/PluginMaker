@@ -11,7 +11,7 @@ public class Rules {
 	public static final Pattern DATALIST_ENTRY_NAME = Pattern.compile("[a-zA-Z_1-9]+");
 	public static final Pattern DATALIST_NAME = Pattern.compile("[a-z]+");
 
-	public static Validator getDataListValidator(VTextField datalistName){
+	public static Validator getDataListNameValidator(VTextField datalistName){
 		return () -> {
 			if (Rules.DATALIST_NAME.matcher(datalistName.getText()).matches()) {
 				return ValidationResult.PASSED;

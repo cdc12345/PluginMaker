@@ -75,9 +75,8 @@ public class MappingsModElement extends GeneratableElement {
 			return mappingContent.getFirst();
 		}
 
-		public MappingEntry setEdited(boolean edited) {
+		public void setEdited(boolean edited) {
 			this.edited = edited;
-			return this;
 		}
 
 		@UsedByReflection

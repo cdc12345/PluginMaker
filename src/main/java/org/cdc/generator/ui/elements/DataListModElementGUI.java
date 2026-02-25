@@ -67,7 +67,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/datalistname"),
 				L10N.label("elementgui.plugindatalist.datalistname")));
 
-		datalistName.setValidator(Rules.getDataListValidator(datalistName));
+		datalistName.setValidator(Rules.getDataListNameValidator(datalistName));
 		datalistName.setCustomDefaultMessage("Enter to load");
 		datalistName.setText(modElement.getRegistryName());
 		generateConfig.add(datalistName);
