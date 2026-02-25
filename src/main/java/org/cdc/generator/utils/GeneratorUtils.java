@@ -1,12 +1,11 @@
 package org.cdc.generator.utils;
 
 import net.mcreator.generator.Generator;
-import net.mcreator.ui.MCreator;
+import net.mcreator.workspace.Workspace;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.PluginMain;
 import org.cdc.generator.elements.DataListModElement;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +19,7 @@ public class GeneratorUtils {
 		return !generator.getGeneratorConfiguration().getRaw().containsKey("is_plugin_maker");
 	}
 
-	public static Set<String> getAllSupportedGenerators(MCreator mCreator) {
+	public static Set<String> getAllSupportedGenerators() {
 		return Generator.GENERATOR_CACHE.keySet();
 	}
 
@@ -35,19 +34,22 @@ public class GeneratorUtils {
 				} else if (oe instanceof List<?> list) {
 					return new ArrayList<>(list.stream().map(Object::toString).toList());
 				} else {
-					return new ArrayList<String>(List.of(oe.toString()));
+					return new ArrayList<>(List.of(oe.toString()));
 				}
 			}
 		}
 		return null;
 	}
 
-	public static String getDataListName(MCreator mCreator,String name){
-		var datalist = mCreator.getWorkspace().getModElementByName(name);
+	public static String getDataListName(Workspace workspace,String name){
+		var datalist = workspace.getModElementByName(name);
+		if (datalist == null){
+			return null;
+		}
 		return getDataListName(datalist);
 	}
 
-	public static String getDataListName(@Nonnull ModElement modElement){
+	public static String getDataListName(ModElement modElement){
 		if (modElement.getGeneratableElement() instanceof DataListModElement dataListModElement){
 			return dataListModElement.datalistName;
 		}

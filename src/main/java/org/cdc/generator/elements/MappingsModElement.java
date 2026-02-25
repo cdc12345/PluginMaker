@@ -2,7 +2,6 @@ package org.cdc.generator.elements;
 
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
-import net.mcreator.minecraft.RegistryNameFixer;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.utils.GeneratorUtils;
 
@@ -23,15 +22,17 @@ public class MappingsModElement extends GeneratableElement {
 		super(element);
 	}
 
+	@UsedByReflection
 	public String getGeneratorName() {
 		return generatorName;
 	}
 
+	@UsedByReflection
 	public String getDatalistName() {
 		if (datalistName == null) {
 			return null;
 		}
-		return RegistryNameFixer.fromCamelCase(datalistName);
+		return GeneratorUtils.getDataListName(getModElement().getWorkspace(),datalistName);
 	}
 
 	@UsedByReflection public String getDefaultMapping() {

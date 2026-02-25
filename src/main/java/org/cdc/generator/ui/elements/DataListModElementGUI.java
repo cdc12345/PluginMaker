@@ -10,6 +10,7 @@ import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.AggregatedValidationResult;
+import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
@@ -60,10 +61,20 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
 		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/datalistname"),
 				L10N.label("elementgui.plugindatalist.datalistname")));
+
+		datalistName.setValidator(() -> {
+			if (nameMatcher.matcher(datalistName.getText()).matches() && datalistName.getText()
+					.equals(datalistName.getText().toLowerCase(Locale.ROOT))) {
+				return ValidationResult.PASSED;
+			}
+			return new ValidationResult(ValidationResult.Type.ERROR, "You must use whole english and whole lower letters");
+		});
+		datalistName.setText(modElement.getRegistryName());
 		generateConfig.add(datalistName);
 
 		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/generate"),
 				L10N.label("elementgui.plugindatalist.generate_datalists")));
+		generateDataList.setSelected(true);
 		generateDataList.setOpaque(false);
 		generateConfig.add(generateDataList);
 
@@ -204,9 +215,9 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		});
 		datalistName.addKeyListener(new KeyAdapter() {
 			@Override public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER){
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					reloadDataLists();
-					SwingUtilities.invokeLater(()->{
+					SwingUtilities.invokeLater(() -> {
 						jTable.repaint();
 						jTable.revalidate();
 					});
@@ -231,7 +242,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 			}
 			jTable.setBorder(BorderFactory.createEmptyBorder());
 			return new AggregatedValidationResult.PASS();
-		});
+		}).validate(datalistName);
 	}
 
 	@Override protected void openInEditingMode(DataListModElement generatableElement) {

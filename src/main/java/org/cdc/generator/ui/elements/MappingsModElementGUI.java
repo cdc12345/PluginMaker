@@ -70,7 +70,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			}
 			return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
 		});
-		for (String supportedGenerator : GeneratorUtils.getAllSupportedGenerators(mcreator)) {
+		for (String supportedGenerator : GeneratorUtils.getAllSupportedGenerators()) {
 			generator.addItem(supportedGenerator);
 		}
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/generator"),
@@ -121,7 +121,6 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 						});
 					}
 				}
-
 			}
 		});
 
@@ -227,9 +226,9 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 							throw new RuntimeException(e);
 						}
 						row.setEdited(MappingsModElement.MappingEntry.isEdited(generator.getSelectedItem(),
-								GeneratorUtils.getDataListName(mcreator,datalistName.getSelectedItem()), row));
-						return null;
+								GeneratorUtils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()), row));
 					}
+					return null;
 				}
 				return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
 			}
@@ -291,11 +290,9 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		mapping.add("Center", scrollPane);
 		mapping.add("North", bar);
 
-		addPage("edit", PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, mapping))).
-
-				validate(generator).
-
-				validate(datalistName);
+		addPage("edit",
+				PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, mapping))).validate(
+				generator).validate(datalistName);
 	}
 
 	@Override protected void openInEditingMode(MappingsModElement generatableElement) {
