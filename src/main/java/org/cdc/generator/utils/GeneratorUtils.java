@@ -2,8 +2,11 @@ package org.cdc.generator.utils;
 
 import net.mcreator.generator.Generator;
 import net.mcreator.ui.MCreator;
+import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.PluginMain;
+import org.cdc.generator.elements.DataListModElement;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -37,5 +40,17 @@ public class GeneratorUtils {
 			}
 		}
 		return null;
+	}
+
+	public static String getDataListName(MCreator mCreator,String name){
+		var datalist = mCreator.getWorkspace().getModElementByName(name);
+		return getDataListName(datalist);
+	}
+
+	public static String getDataListName(@Nonnull ModElement modElement){
+		if (modElement.getGeneratableElement() instanceof DataListModElement dataListModElement){
+			return dataListModElement.datalistName;
+		}
+		return modElement.getRegistryName();
 	}
 }

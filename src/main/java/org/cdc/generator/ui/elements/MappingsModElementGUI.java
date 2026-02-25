@@ -77,7 +77,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				L10N.label("elementgui.pluginmappings.generator")));
 		configuration.add(generator);
 
-		datalistName.setEditable(true);
+		datalistName.setEditable(false);
 		datalistName.setValidator(() -> {
 			if (datalistName.getSelectedItem() != null && !datalistName.getSelectedItem().isBlank()) {
 				return ValidationResult.PASSED;
@@ -99,30 +99,27 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
 				String mappingName;
 				if (datalist != null) {
-					mappingName = datalist.getRegistryName();
-				} else {
-					mappingName = Objects.requireNonNullElse(datalistName.getSelectedItem(), "")
-							.toLowerCase(Locale.ROOT);
-				}
-				var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
-						.getMapping(mappingName);
-				if (memoryMapping != null) {
-					if (memoryMapping.containsKey("_default")) {
-						defaultMapping.setSelectedItem(memoryMapping.get("_default"));
-					}
-					for (Map.Entry<?, ?> entry : memoryMapping.entrySet()) {
-						if (entry.getValue() instanceof List<?> list) {
-							for (Object o : list) {
-								defaultMapping.addItem(o.toString());
-							}
-						} else {
-							defaultMapping.addItem(entry.getValue().toString());
+					mappingName = GeneratorUtils.getDataListName(datalist);
+					var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
+							.getMapping(mappingName);
+					if (memoryMapping != null) {
+						if (memoryMapping.containsKey("_default")) {
+							defaultMapping.setSelectedItem(memoryMapping.get("_default"));
 						}
+						for (Map.Entry<?, ?> entry : memoryMapping.entrySet()) {
+							if (entry.getValue() instanceof List<?> list) {
+								for (Object o : list) {
+									defaultMapping.addItem(o.toString());
+								}
+							} else {
+								defaultMapping.addItem(entry.getValue().toString());
+							}
+						}
+						SwingUtilities.invokeLater(() -> {
+							defaultMapping.repaint();
+							defaultMapping.revalidate();
+						});
 					}
-					SwingUtilities.invokeLater(()->{
-						defaultMapping.repaint();
-						defaultMapping.revalidate();
-					});
 				}
 
 			}
@@ -139,18 +136,15 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
 				String mappingName;
 				if (datalist != null) {
-					mappingName = datalist.getRegistryName();
-				} else {
-					mappingName = Objects.requireNonNullElse(datalistName.getSelectedItem(), "").toLowerCase();
-				}
-				var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
-						.getMapping(mappingName);
-				if (memoryMapping != null) {
-					if (memoryMapping.containsKey("_mcreator_map_template")) {
-						mcreatorMapTemplate.setSelectedItem(memoryMapping.get("_mcreator_map_template"));
+					mappingName = GeneratorUtils.getDataListName(datalist);
+					var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
+							.getMapping(mappingName);
+					if (memoryMapping != null) {
+						if (memoryMapping.containsKey("_mcreator_map_template")) {
+							mcreatorMapTemplate.setSelectedItem(memoryMapping.get("_mcreator_map_template"));
+						}
 					}
 				}
-
 			}
 		});
 
@@ -193,7 +187,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			}
 
 			@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-				super.setValueAt(aValue,rowIndex,columnIndex);
+				super.setValueAt(aValue, rowIndex, columnIndex);
 			}
 		});
 		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
@@ -232,8 +226,10 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
+						row.setEdited(MappingsModElement.MappingEntry.isEdited(generator.getSelectedItem(),
+								GeneratorUtils.getDataListName(mcreator,datalistName.getSelectedItem()), row));
+						return null;
 					}
-					return null;
 				}
 				return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
 			}
@@ -247,54 +243,39 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 
 		impfile.addActionListener(e -> {
 			var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
+			//
 			impfile.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			//
 			mappingEntries.clear();
-			String mappingname;
 			if (datalist != null) {
-				mappingname = datalist.getRegistryName();
-			} else {
-				mappingname = Objects.requireNonNullElse(datalistName.getSelectedItem(), "").toLowerCase(Locale.ROOT);
-			}
-			var memory = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
-					.getMapping(mappingname);
-			if (memory == null) {
-				if (datalist != null) {
-					for (DataListModElement.DataListEntry entry : ((DataListModElement) Objects.requireNonNull(
-							datalist.getGeneratableElement())).entries) {
-						mappingEntries.add(new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
-						SwingUtilities.invokeLater(() -> {
-							defaultMapping.invalidate();
-							defaultMapping.revalidate();
-						});
-					}
-				}
-			} else {
+				String dataListName = GeneratorUtils.getDataListName(datalist);
+				var memory = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
+						.getMapping(dataListName);
 				var set = new HashSet<String>();
-				for (Map.Entry<?, ?> entry : memory.entrySet()) {
-					var key = entry.getKey().toString();
-					// exclude
-					if (!GeneratorUtils.MAPPING_INNER_KEY.matcher(key).matches()) {
-						set.add(key);
-						if (entry.getValue() instanceof List<?> list) {
-							var ar = new ArrayList<String>();
-							for (Object o : list) {
-								ar.add(o.toString());
+				if (memory != null) {
+					for (Map.Entry<?, ?> entry : memory.entrySet()) {
+						var key = entry.getKey().toString();
+						// exclude
+						if (!GeneratorUtils.MAPPING_INNER_KEY.matcher(key).matches()) {
+							set.add(key);
+							if (entry.getValue() instanceof List<?> list) {
+								var ar = new ArrayList<String>();
+								for (Object o : list) {
+									ar.add(o.toString());
+								}
+								mappingEntries.add(new MappingsModElement.MappingEntry(key, ar).setEdited(false));
+							} else {
+								mappingEntries.add(new MappingsModElement.MappingEntry(key,
+										new ArrayList<>(List.of(entry.getValue().toString()))).setEdited(false));
 							}
-							mappingEntries.add(new MappingsModElement.MappingEntry(key, ar));
-						} else {
-							mappingEntries.add(new MappingsModElement.MappingEntry(key,
-									new ArrayList<>(List.of(entry.getValue().toString()))));
 						}
 					}
 				}
-				if (datalist != null) {
-					// add custom
-					for (DataListModElement.DataListEntry entry : ((DataListModElement) Objects.requireNonNull(
-							datalist.getGeneratableElement())).entries) {
-						if (!set.contains(entry.getName()))
-							mappingEntries.add(
-									new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
-					}
+				// add custom
+				for (DataListModElement.DataListEntry entry : ((DataListModElement) Objects.requireNonNull(
+						datalist.getGeneratableElement())).entries) {
+					if (!set.contains(entry.getName()))
+						mappingEntries.add(new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
 				}
 			}
 
@@ -310,9 +291,11 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		mapping.add("Center", scrollPane);
 		mapping.add("North", bar);
 
-		addPage("edit",
-				PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, mapping))).validate(
-				generator).validate(datalistName);
+		addPage("edit", PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, mapping))).
+
+				validate(generator).
+
+				validate(datalistName);
 	}
 
 	@Override protected void openInEditingMode(MappingsModElement generatableElement) {
@@ -349,6 +332,6 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				.getElementsOfType(ModElementTypes.DATA_LIST.getRegistryName())) {
 			stringArrayList.add(element.getName());
 		}
-		ComboBoxUtil.updateComboBoxContents(datalistName,stringArrayList);
+		ComboBoxUtil.updateComboBoxContents(datalistName, stringArrayList);
 	}
 }

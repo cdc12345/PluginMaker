@@ -5,7 +5,7 @@ _default: ${data.getDefaultMapping()}
 _mcreator_map_template: "${data.getMcreatorMapTemplate()}"
 </#if>
 <#list data.mappingsContent as entry>
-<#if entry.isEdited(data)>
+<#if entry.isEdited()>
 <#if entry.getMappingContent().size() == 1>
 ${entry.getName()}: ${entry.getFirst()}
 </#if>

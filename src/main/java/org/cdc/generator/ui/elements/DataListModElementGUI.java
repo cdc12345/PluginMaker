@@ -20,6 +20,8 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -66,7 +68,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		generateConfig.add(generateDataList);
 
 		JPanel listPanel = new JPanel(new BorderLayout());
-		listPanel.setBorder(BorderFactory.createTitledBorder("List"));
+		listPanel.setBorder(BorderFactory.createTitledBorder("Edit"));
 		listPanel.setOpaque(false);
 
 		JTable jTable = new JTable(new AbstractTableModel() {
@@ -199,6 +201,17 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				jTable.repaint();
 				jTable.revalidate();
 			});
+		});
+		datalistName.addKeyListener(new KeyAdapter() {
+			@Override public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER){
+					reloadDataLists();
+					SwingUtilities.invokeLater(()->{
+						jTable.repaint();
+						jTable.revalidate();
+					});
+				}
+			}
 		});
 
 		listPanel.add("North", bar);

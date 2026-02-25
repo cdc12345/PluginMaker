@@ -1,5 +1,6 @@
 package org.cdc.generator.elements;
 
+import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.minecraft.RegistryNameFixer;
 import net.mcreator.workspace.elements.ModElement;
@@ -7,78 +8,95 @@ import org.cdc.generator.utils.GeneratorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-@SuppressWarnings("unused")
+
 public class MappingsModElement extends GeneratableElement {
 
-    public String generatorName;
-    public String datalistName;
-    // map _default
-    public String defaultMapping;
-    // map _mcreator_map_template
-    public String mcreatorMapTemplate;
-    public List<MappingEntry> mappingsContent;
+	public String generatorName;
+	public String datalistName;
+	// map _default
+	public String defaultMapping;
+	// map _mcreator_map_template
+	public String mcreatorMapTemplate;
+	public List<MappingEntry> mappingsContent;
 
-    public MappingsModElement(ModElement element) {
-        super(element);
-    }
+	public MappingsModElement(ModElement element) {
+		super(element);
+	}
 
-    public String getGeneratorName() {
-        return generatorName;
-    }
+	public String getGeneratorName() {
+		return generatorName;
+	}
 
-    public String getDatalistName() {
-        if (datalistName == null) {
-            return null;
-        }
-        return RegistryNameFixer.fromCamelCase(datalistName);
-    }
+	public String getDatalistName() {
+		if (datalistName == null) {
+			return null;
+		}
+		return RegistryNameFixer.fromCamelCase(datalistName);
+	}
 
-    public String getDefaultMapping() {
-        if (defaultMapping != null && defaultMapping.isBlank()){
-            return null;
-        }
-        return defaultMapping;
-    }
+	@UsedByReflection public String getDefaultMapping() {
+		if (defaultMapping != null && defaultMapping.isBlank()) {
+			return null;
+		}
+		return defaultMapping;
+	}
 
-    public String getMcreatorMapTemplate() {
-        if (mcreatorMapTemplate != null && mcreatorMapTemplate.isBlank()){
-            return null;
-        }
-        return mcreatorMapTemplate;
-    }
+	@UsedByReflection public String getMcreatorMapTemplate() {
+		if (mcreatorMapTemplate != null && mcreatorMapTemplate.isBlank()) {
+			return null;
+		}
+		return mcreatorMapTemplate;
+	}
 
-    public static class MappingEntry implements Cloneable{
-        private String name;
-        private ArrayList<String> mappingContent;
+	public static class MappingEntry implements Cloneable {
+		private String name;
+		private ArrayList<String> mappingContent;
 
-        public MappingEntry(String name, ArrayList<String> mappingContent) {
-            this.name = name;
-            this.mappingContent = mappingContent;
-        }
+		private boolean edited;
 
-        public String getName() {
-            return name;
-        }
+		public MappingEntry(String name, ArrayList<String> mappingContent) {
+			this.name = name;
+			this.mappingContent = mappingContent;
+			this.edited = true;
+		}
 
-        public ArrayList<String> getMappingContent() {
-            if (mappingContent == null) mappingContent = new ArrayList<>();
-            return mappingContent;
-        }
+		public String getName() {
+			return name;
+		}
 
-        public boolean isEdited(MappingsModElement mappingsModElement) {
-            var list = GeneratorUtils.getMappingResult(mappingsModElement.getGeneratorName(),
-                    mappingsModElement.getDatalistName(), name);
-            if (list != null){
-                return !list.equals(this.getMappingContent());
-            }
-            return true;
-        }
+		public ArrayList<String> getMappingContent() {
+			if (mappingContent == null)
+				mappingContent = new ArrayList<>();
+			return mappingContent;
+		}
 
-        @Override public MappingEntry clone() throws CloneNotSupportedException {
-            MappingEntry mappingEntry = (MappingEntry) super.clone();
-            mappingEntry.name = name;
-            mappingEntry.mappingContent = new ArrayList<>(mappingContent);
-            return mappingEntry;
-        }
-    }
+		@UsedByReflection public String getFirst() {
+			return mappingContent.getFirst();
+		}
+
+		public MappingEntry setEdited(boolean edited) {
+			this.edited = edited;
+			return this;
+		}
+
+		@UsedByReflection
+		public static boolean isEdited(String generatorName, String datalistName, MappingEntry entry) {
+			var list = GeneratorUtils.getMappingResult(generatorName, datalistName, entry.name);
+			if (list != null) {
+				return !list.equals(entry.getMappingContent());
+			}
+			return true;
+		}
+
+		public boolean isEdited() {
+			return edited;
+		}
+
+		@Override public MappingEntry clone() throws CloneNotSupportedException {
+			MappingEntry mappingEntry = (MappingEntry) super.clone();
+			mappingEntry.name = name;
+			mappingEntry.mappingContent = new ArrayList<>(mappingContent);
+			return mappingEntry;
+		}
+	}
 }
