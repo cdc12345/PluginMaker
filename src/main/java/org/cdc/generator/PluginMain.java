@@ -10,8 +10,9 @@ import net.mcreator.plugin.events.workspace.WorkspaceBuildStartedEvent;
 import net.mcreator.ui.MCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdc.generator.init.Menus;
 import org.cdc.generator.init.ResourcePanels;
-import org.cdc.generator.utils.GeneratorUtils;
+import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
 
 import java.io.File;
@@ -27,7 +28,7 @@ public class PluginMain extends JavaPlugin {
         addListener(MCreatorLoadedEvent.class, event -> {
             var mcreator = event.getMCreator();
 
-            if (GeneratorUtils.isNotPluginGenerator(mcreator.getGenerator())) {
+            if (Utils.isNotPluginGenerator(mcreator.getGenerator())) {
                 LOG.debug("{} is not plugin maker", mcreator.getGenerator().getGeneratorName());
                 return;
             }
@@ -91,5 +92,6 @@ public class PluginMain extends JavaPlugin {
 
     public void registerAll(MCreator mcreator) {
         ResourcePanels.register(mcreator);
+        Menus.registerAllMenus(mcreator);
     }
 }

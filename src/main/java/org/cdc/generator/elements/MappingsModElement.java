@@ -3,7 +3,7 @@ package org.cdc.generator.elements;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.utils.GeneratorUtils;
+import org.cdc.generator.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ public class MappingsModElement extends GeneratableElement {
 		if (datalistName == null) {
 			return null;
 		}
-		return GeneratorUtils.getDataListName(getModElement().getWorkspace(),datalistName);
+		return Utils.getDataListName(getModElement().getWorkspace(),datalistName);
 	}
 
 	@UsedByReflection public String getDefaultMapping() {
@@ -51,11 +51,11 @@ public class MappingsModElement extends GeneratableElement {
 
 	public static class MappingEntry implements Cloneable {
 		private String name;
-		private ArrayList<String> mappingContent;
+		private List<String> mappingContent;
 
 		private boolean edited;
 
-		public MappingEntry(String name, ArrayList<String> mappingContent) {
+		public MappingEntry(String name, List<String> mappingContent) {
 			this.name = name;
 			this.mappingContent = mappingContent;
 			this.edited = true;
@@ -65,7 +65,7 @@ public class MappingsModElement extends GeneratableElement {
 			return name;
 		}
 
-		public ArrayList<String> getMappingContent() {
+		public List<String> getMappingContent() {
 			if (mappingContent == null)
 				mappingContent = new ArrayList<>();
 			return mappingContent;
@@ -82,7 +82,7 @@ public class MappingsModElement extends GeneratableElement {
 
 		@UsedByReflection
 		public static boolean isEdited(String generatorName, String datalistName, MappingEntry entry) {
-			var list = GeneratorUtils.getMappingResult(generatorName, datalistName, entry.name);
+			var list = Utils.getMappingResult(generatorName, datalistName, entry.name);
 			if (list != null) {
 				return !list.equals(entry.getMappingContent());
 			}

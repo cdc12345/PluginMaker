@@ -10,16 +10,15 @@ import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.AggregatedValidationResult;
-import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
+import org.cdc.generator.utils.Rules;
+import org.cdc.generator.utils.Utils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
@@ -31,12 +30,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
-	private static final Pattern nameMatcher = Pattern.compile("[a-zA-Z_1-9]+");
 	private final String[] columns = new String[] { "Name", "Readable name", "Type", "Texture", "Description",
 			"Others" };
 
@@ -70,14 +67,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/datalistname"),
 				L10N.label("elementgui.plugindatalist.datalistname")));
 
-		datalistName.setValidator(() -> {
-			if (nameMatcher.matcher(datalistName.getText()).matches() && datalistName.getText()
-					.equals(datalistName.getText().toLowerCase(Locale.ROOT))) {
-				return ValidationResult.PASSED;
-			}
-			return new ValidationResult(ValidationResult.Type.ERROR,
-					"You must use whole english and whole lower letters");
-		});
+		datalistName.setValidator(Rules.getDataListValidator(datalistName));
 		datalistName.setCustomDefaultMessage("Enter to load");
 		datalistName.setText(modElement.getRegistryName());
 		generateConfig.add(datalistName);
@@ -92,56 +82,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		listPanel.setBorder(BorderFactory.createTitledBorder("Edit"));
 		listPanel.setOpaque(false);
 
-		JTable jTable = new JTable(new AbstractTableModel() {
-
-			@Override public int getRowCount() {
-				return entries.size();
-			}
-
-			@Override public int getColumnCount() {
-				return columns.length;
-			}
-
-			@Override public Object getValueAt(int rowIndex, int columnIndex) {
-				var row = entries.get(rowIndex);
-				var columns = new String[] { row.getName(), row.getReadableName(), row.getType(), row.getTexture(),
-						row.getDescription(), row.getOther().toString() };
-				return columns[columnIndex];
-			}
-
-			@Override public String getColumnName(int column) {
-				return columns[column];
-			}
-
-			@Override public Class<?> getColumnClass(int columnIndex) {
-				return String.class;
-			}
-
-			@Override public boolean isCellEditable(int rowIndex, int columnIndex) {
-				return true;
-			}
-
-			@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-				var row = entries.get(rowIndex);
-				if (aValue == null) {
-					return;
-				}
-				switch (getColumnName(columnIndex)) {
-				case "Name" -> {
-					if (nameMatcher.matcher(aValue.toString()).matches()) {
-						row.setName(aValue.toString());
-					} else {
-						JOptionPane.showMessageDialog(listPanel, "It doesn't match the rule!", "Warning",
-								JOptionPane.WARNING_MESSAGE);
-					}
-				}
-				case "Readable name" -> row.setReadableName(aValue.toString());
-				case "Type" -> row.setType(aValue.toString());
-				case "Texture" -> row.setTexture(aValue.toString());
-				case "Description" -> row.setDescription(aValue.toString());
-				}
-			}
-		});
+		JTable jTable = new JTable(new DataListTableModel());
 		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -212,23 +153,9 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
 		bar.add(remrow);
 
-		JPanel buttons = new JPanel(new GridLayout(1, 2));
-		buttons.setOpaque(false);
 		VTextField searchbar = new VTextField();
-		searchbar.setCustomDefaultMessage("click to search");
-		searchbar.setValidator(() -> {
-			if (lastSearchResult.size() == 1) {
-				return new ValidationResult(ValidationResult.Type.ERROR, "No results");
-			}
-			return ValidationResult.PASSED;
-		});
-		JButton upSearch = new JButton(UIRES.get("18px.up"));
-		upSearch.setOpaque(false);
-		JButton downSearch = new JButton(UIRES.get("18px.down"));
-		downSearch.setOpaque(false);
-		buttons.add(upSearch);
-		buttons.add(downSearch);
-		bar.add(PanelUtils.centerAndEastElement(searchbar, buttons));
+		bar.add(Utils.initSearchComponent(searchbar, lastSearchResult, a -> jTable.changeSelection(a, 0, false, false),
+				this::doSearch));
 
 		addrow.addActionListener(e -> {
 			entries.add(new DataListModElement.DataListEntry("name", "", "", "", ""));
@@ -255,40 +182,6 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 					});
 				}
 			}
-		});
-		searchbar.getDocument().addDocumentListener(new DocumentListener() {
-			@Override public void insertUpdate(DocumentEvent e) {
-				doSearch(searchbar);
-			}
-
-			@Override public void removeUpdate(DocumentEvent e) {
-				doSearch(searchbar);
-			}
-
-			@Override public void changedUpdate(DocumentEvent e) {
-				doSearch(searchbar);
-			}
-		});
-		searchbar.registerKeyboardAction(a -> {
-			downSearch.doClick();
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_FOCUSED);
-		downSearch.addActionListener(a -> {
-			var index = lastSearchResult.getFirst() + 1;
-			if (index >= lastSearchResult.size()) {
-				index = 1;
-			}
-			jTable.changeSelection(lastSearchResult.get(index), 0, false, false);
-			lastSearchResult.set(0, index);
-			downSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
-		});
-		upSearch.addActionListener(a -> {
-			var index = lastSearchResult.getFirst() - 1;
-			if (index < 1) {
-				index = lastSearchResult.size() - 1;
-			}
-			jTable.changeSelection(lastSearchResult.get(index), 0, false, false);
-			lastSearchResult.set(0, index);
-			upSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
 		});
 
 		listPanel.add("North", bar);
@@ -356,6 +249,57 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				var dataListEntry1 = DataListModElement.DataListEntry.copyValueOf(dataListEntry);
 				dataListEntry1.setBuiltIn(true);
 				entries.add(dataListEntry1);
+			}
+		}
+	}
+
+	private class DataListTableModel extends AbstractTableModel {
+
+		@Override public int getRowCount() {
+			return entries.size();
+		}
+
+		@Override public int getColumnCount() {
+			return columns.length;
+		}
+
+		@Override public Object getValueAt(int rowIndex, int columnIndex) {
+			var row = entries.get(rowIndex);
+			var columns = new String[] { row.getName(), row.getReadableName(), row.getType(), row.getTexture(),
+					row.getDescription(), row.getOther().toString() };
+			return columns[columnIndex];
+		}
+
+		@Override public String getColumnName(int column) {
+			return columns[column];
+		}
+
+		@Override public Class<?> getColumnClass(int columnIndex) {
+			return String.class;
+		}
+
+		@Override public boolean isCellEditable(int rowIndex, int columnIndex) {
+			return true;
+		}
+
+		@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			var row = entries.get(rowIndex);
+			if (aValue == null) {
+				return;
+			}
+			switch (getColumnName(columnIndex)) {
+			case "Name" -> {
+				if (Rules.DATALIST_ENTRY_NAME.matcher(aValue.toString()).matches()) {
+					row.setName(aValue.toString());
+				} else {
+					JOptionPane.showMessageDialog(mcreator, "It doesn't match the rule!", "Warning",
+							JOptionPane.WARNING_MESSAGE);
+				}
+			}
+			case "Readable name" -> row.setReadableName(aValue.toString());
+			case "Type" -> row.setType(aValue.toString());
+			case "Texture" -> row.setTexture(aValue.toString());
+			case "Description" -> row.setDescription(aValue.toString());
 			}
 		}
 	}

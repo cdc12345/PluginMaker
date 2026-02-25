@@ -16,17 +16,15 @@ import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.elements.MappingsModElement;
 import org.cdc.generator.init.ModElementTypes;
-import org.cdc.generator.utils.GeneratorUtils;
+import org.cdc.generator.utils.Rules;
+import org.cdc.generator.utils.Utils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
@@ -79,7 +77,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			}
 			return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
 		});
-		for (String supportedGenerator : GeneratorUtils.getAllSupportedGenerators()) {
+		for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
 			generator.addItem(supportedGenerator);
 		}
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/generator"),
@@ -108,7 +106,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
 				String mappingName;
 				if (datalist != null) {
-					mappingName = GeneratorUtils.getDataListName(datalist);
+					mappingName = Utils.getDataListName(datalist);
 					var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
 							.getMapping(mappingName);
 					if (memoryMapping != null) {
@@ -144,7 +142,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
 				String mappingName;
 				if (datalist != null) {
-					mappingName = GeneratorUtils.getDataListName(datalist);
+					mappingName = Utils.getDataListName(datalist);
 					var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
 							.getMapping(mappingName);
 					if (memoryMapping != null) {
@@ -163,58 +161,13 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		bar.setOpaque(false);
 		bar.setOpaque(false);
 
-		JPanel buttons = new JPanel(new GridLayout(1, 2));
-		buttons.setOpaque(false);
 		VTextField searchbar = new VTextField();
-		searchbar.setCustomDefaultMessage("click to search");
-		searchbar.setValidator(() -> {
-			if (lastSearchResult.size() == 1) {
-				return new ValidationResult(ValidationResult.Type.ERROR, "No results");
-			}
-			return ValidationResult.PASSED;
-		});
-		JButton upSearch = new JButton(UIRES.get("18px.up"));
-		upSearch.setOpaque(false);
-		JButton downSearch = new JButton(UIRES.get("18px.down"));
-		downSearch.setOpaque(false);
-		buttons.add(upSearch);
-		buttons.add(downSearch);
 
-		var impfile = new JButton(UIRES.get("impfile"));
-		impfile.setToolTipText("Import from element or memory");
-		impfile.setOpaque(false);
+		var syncWithDatalist = new JButton(UIRES.get("impfile"));
+		syncWithDatalist.setToolTipText("Import from element or memory");
+		syncWithDatalist.setOpaque(false);
 
-		JTable jTable = new JTable(new AbstractTableModel() {
-			@Override public int getRowCount() {
-				return mappingEntries.size();
-			}
-
-			@Override public int getColumnCount() {
-				return 2;
-			}
-
-			@Override public Object getValueAt(int rowIndex, int columnIndex) {
-				var row = mappingEntries.get(rowIndex);
-				var columns = new String[] { row.getName(), row.getMappingContent().toString() };
-				return columns[columnIndex];
-			}
-
-			@Override public String getColumnName(int column) {
-				return columns[column];
-			}
-
-			@Override public Class<?> getColumnClass(int columnIndex) {
-				return String.class;
-			}
-
-			@Override public boolean isCellEditable(int rowIndex, int columnIndex) {
-				return columnIndex != 0;
-			}
-
-			@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-				super.setValueAt(aValue, rowIndex, columnIndex);
-			}
-		});
+		JTable jTable = new JTable(new MappingTableModel());
 		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -252,8 +205,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 							throw new RuntimeException(e);
 						}
 						row.setEdited(MappingsModElement.MappingEntry.isEdited(generator.getSelectedItem(),
-								GeneratorUtils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()),
-								row));
+								Utils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()), row));
 					}
 					return null;
 				}
@@ -268,14 +220,14 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.setOpaque(false);
 
-		impfile.addActionListener(e -> {
+		syncWithDatalist.addActionListener(e -> {
 			var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
 			//
-			impfile.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			MappingsModElementGUI.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			//
 			mappingEntries.clear();
 			if (datalist != null) {
-				String dataListName = GeneratorUtils.getDataListName(datalist);
+				String dataListName = Utils.getDataListName(datalist);
 				var memory = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
 						.getMapping(dataListName);
 				var set = new HashSet<String>();
@@ -283,72 +235,31 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 					for (Map.Entry<?, ?> entry : memory.entrySet()) {
 						var key = entry.getKey().toString();
 						// exclude
-						if (!GeneratorUtils.MAPPING_INNER_KEY.matcher(key).matches()) {
+						if (!Rules.MAPPING_INNER_KEY.matcher(key).matches()) {
 							set.add(key);
-							if (entry.getValue() instanceof List<?> list) {
-								var ar = new ArrayList<String>();
-								for (Object o : list) {
-									ar.add(o.toString());
-								}
-								mappingEntries.add(new MappingsModElement.MappingEntry(key, ar).setEdited(false));
-							} else {
-								mappingEntries.add(new MappingsModElement.MappingEntry(key,
-										new ArrayList<>(List.of(entry.getValue().toString()))).setEdited(false));
-							}
+							mappingEntries.add(new MappingsModElement.MappingEntry(key,
+									Utils.convertYamlMappingToList(entry.getValue())));
 						}
 					}
 				}
 				// add custom
 				for (DataListModElement.DataListEntry entry : ((DataListModElement) Objects.requireNonNull(
 						datalist.getGeneratableElement())).entries) {
-					if (!set.contains(entry.getName()))
+					if (set.isEmpty() || !set.contains(entry.getName()))
 						mappingEntries.add(new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
 				}
 			}
 
-			impfile.setCursor(Cursor.getDefaultCursor());
+			MappingsModElementGUI.this.setCursor(Cursor.getDefaultCursor());
 			SwingUtilities.invokeLater(() -> {
 				jTable.repaint();
 				jTable.revalidate();
 			});
 		});
-		searchbar.getDocument().addDocumentListener(new DocumentListener() {
-			@Override public void insertUpdate(DocumentEvent e) {
-				doSearch(searchbar);
-			}
 
-			@Override public void removeUpdate(DocumentEvent e) {
-				doSearch(searchbar);
-			}
-
-			@Override public void changedUpdate(DocumentEvent e) {
-				doSearch(searchbar);
-			}
-		});
-		searchbar.registerKeyboardAction(a -> {
-			downSearch.doClick();
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_FOCUSED);
-		downSearch.addActionListener(a -> {
-			var index = lastSearchResult.getFirst() + 1;
-			if (index >= lastSearchResult.size()) {
-				index = 1;
-			}
-			jTable.changeSelection(lastSearchResult.get(index), 0, false, false);
-			lastSearchResult.set(0, index);
-			downSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
-		});
-		upSearch.addActionListener(a -> {
-			var index = lastSearchResult.getFirst() - 1;
-			if (index < 1) {
-				index = lastSearchResult.size() - 1;
-			}
-			jTable.changeSelection(lastSearchResult.get(index), 0, false, false);
-			lastSearchResult.set(0, index);
-			upSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
-		});
-
-		bar.add(impfile);
-		bar.add(PanelUtils.centerAndEastElement(searchbar, buttons));
+		bar.add(syncWithDatalist);
+		bar.add(Utils.initSearchComponent(searchbar, lastSearchResult, a -> jTable.changeSelection(a, 0, false, false),
+				this::doSearch));
 
 		mapping.add("Center", scrollPane);
 		mapping.add("North", bar);
@@ -407,5 +318,37 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			}
 		}
 		searchbar.getValidationStatus();
+	}
+
+	private class MappingTableModel extends AbstractTableModel {
+		@Override public int getRowCount() {
+			return mappingEntries.size();
+		}
+
+		@Override public int getColumnCount() {
+			return columns.length;
+		}
+
+		@Override public Object getValueAt(int rowIndex, int columnIndex) {
+			var row = mappingEntries.get(rowIndex);
+			var columns = new String[] { row.getName(), row.getMappingContent().toString() };
+			return columns[columnIndex];
+		}
+
+		@Override public String getColumnName(int column) {
+			return columns[column];
+		}
+
+		@Override public Class<?> getColumnClass(int columnIndex) {
+			return String.class;
+		}
+
+		@Override public boolean isCellEditable(int rowIndex, int columnIndex) {
+			return true;
+		}
+
+		@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			super.setValueAt(aValue, rowIndex, columnIndex);
+		}
 	}
 }
