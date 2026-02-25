@@ -65,8 +65,9 @@ public class Utils {
 		return modElement.getRegistryName();
 	}
 
-	public static JPanel initSearchComponent(VTextField searchbar, ArrayList<Integer> lastSearchResult,
-			Consumer<Integer> showSearch, Consumer<VTextField> doSearch) {
+	public static JPanel initSearchComponent(ArrayList<Integer> lastSearchResult,
+			Consumer<Integer> showSearch, Consumer<String> doSearch) {
+		VTextField searchbar = new VTextField();
 		JPanel buttons = new JPanel(new GridLayout(1, 2));
 		buttons.setOpaque(false);
 		searchbar.setCustomDefaultMessage("enter to search");
@@ -85,15 +86,18 @@ public class Utils {
 
 		searchbar.getDocument().addDocumentListener(new DocumentListener() {
 			@Override public void insertUpdate(DocumentEvent e) {
-				doSearch.accept(searchbar);
+				doSearch.accept(searchbar.getText());
+				searchbar.getValidationStatus();
 			}
 
 			@Override public void removeUpdate(DocumentEvent e) {
-				doSearch.accept(searchbar);
+				doSearch.accept(searchbar.getText());
+				searchbar.getValidationStatus();
 			}
 
 			@Override public void changedUpdate(DocumentEvent e) {
-				doSearch.accept(searchbar);
+				doSearch.accept(searchbar.getText());
+				searchbar.getValidationStatus();
 			}
 		});
 		searchbar.registerKeyboardAction(a -> {
@@ -101,7 +105,7 @@ public class Utils {
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_FOCUSED);
 		downSearch.addActionListener(a -> {
 			var index = lastSearchResult.getFirst() + 1;
-			if (index >= lastSearchResult.size()) {
+			if (index >= lastSearchResult.size() && lastSearchResult.size() > 1) {
 				index = 1;
 			}
 			showSearch.accept(lastSearchResult.get(index));
@@ -110,7 +114,7 @@ public class Utils {
 		});
 		upSearch.addActionListener(a -> {
 			var index = lastSearchResult.getFirst() - 1;
-			if (index < 1) {
+			if (index < 1 && lastSearchResult.size() > 1) {
 				index = lastSearchResult.size() - 1;
 			}
 			showSearch.accept(lastSearchResult.get(index));

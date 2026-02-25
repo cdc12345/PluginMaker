@@ -3,6 +3,7 @@ package org.cdc.generator.ui.elements;
 import net.mcreator.minecraft.DataListEntry;
 import net.mcreator.minecraft.DataListLoader;
 import net.mcreator.ui.MCreator;
+import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
@@ -10,7 +11,7 @@ import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.AggregatedValidationResult;
-import net.mcreator.ui.validation.component.VTextField;
+import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.utils.Rules;
@@ -22,8 +23,6 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -38,12 +37,12 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 			"Others" };
 
 	private final JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
-	private final VTextField datalistName = new VTextField();
+	private final VComboBox<String> datalistName = new VComboBox<>();
 
 	public List<DataListModElement.DataListEntry> entries;
 
 	// the 0 is the last search index
-	private ArrayList<Integer> lastSearchResult;
+	private final ArrayList<Integer> lastSearchResult;
 
 	public DataListModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
@@ -68,8 +67,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				L10N.label("elementgui.plugindatalist.datalistname")));
 
 		datalistName.setValidator(Rules.getDataListNameValidator(datalistName));
-		datalistName.setCustomDefaultMessage("Enter to load");
-		datalistName.setText(modElement.getRegistryName());
+		datalistName.setEditable(true);
+		datalistName.setSelectedItem(modElement.getRegistryName());
+		var list = DataListLoader.getCache().keySet().stream().sorted().toList();
+		ComboBoxUtil.updateComboBoxContents(datalistName, list);
 		generateConfig.add(datalistName);
 
 		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/generate"),
@@ -152,13 +153,17 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		ComponentUtils.deriveFont(remrow, 11);
 		remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
 		bar.add(remrow);
-
-		VTextField searchbar = new VTextField();
-		bar.add(Utils.initSearchComponent(searchbar, lastSearchResult, a -> jTable.changeSelection(a, 0, false, false),
+		bar.add(Utils.initSearchComponent(lastSearchResult, a -> jTable.changeSelection(a, 0, false, false),
 				this::doSearch));
 
 		addrow.addActionListener(e -> {
-			entries.add(new DataListModElement.DataListEntry("name", "", "", "", ""));
+			entries.add(entries.isEmpty() ?
+					new DataListModElement.DataListEntry("name", "", "", "", "") :
+					entries.getLast());
+			if (!isEditingMode()) {
+				JOptionPane.showMessageDialog(mcreator, "If you edit datalist name, you will lose your work", "Warning",
+						JOptionPane.WARNING_MESSAGE);
+			}
 			SwingUtilities.invokeLater(() -> {
 				jTable.repaint();
 				jTable.revalidate();
@@ -172,16 +177,12 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				jTable.revalidate();
 			});
 		});
-		datalistName.addKeyListener(new KeyAdapter() {
-			@Override public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					reloadDataLists();
-					SwingUtilities.invokeLater(() -> {
-						jTable.repaint();
-						jTable.revalidate();
-					});
-				}
-			}
+		datalistName.addItemListener(e -> {
+			reloadDataLists();
+			SwingUtilities.invokeLater(() -> {
+				jTable.repaint();
+				jTable.revalidate();
+			});
 		});
 
 		listPanel.add("North", bar);
@@ -204,30 +205,28 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		}).validate(datalistName);
 	}
 
-	private void doSearch(VTextField searchbar) {
+	private void doSearch(String text) {
 		lastSearchResult.clear();
 		// cache
 		lastSearchResult.add(0);
 		for (int i = 0; i < entries.size(); i++) {
 			var entry = entries.get(i);
 			if (Stream.of(entry.getName(), entry.getReadableName(), entry.getDescription(), entry.getTexture(),
-							entry.getType(), entry.getOther().toString())
-					.anyMatch(a -> a != null && a.contains(searchbar.getText()))) {
+					entry.getType(), entry.getOther().toString()).anyMatch(a -> a != null && a.contains(text))) {
 				lastSearchResult.add(i);
 			}
 		}
-		searchbar.getValidationStatus();
 	}
 
 	@Override protected void openInEditingMode(DataListModElement generatableElement) {
 		this.entries = new ArrayList<>(generatableElement.entries);
 		this.generateDataList.setSelected(generatableElement.generateDataList);
-		this.datalistName.setText(generatableElement.datalistName);
+		this.datalistName.setSelectedItem(generatableElement.datalistName);
 	}
 
 	@Override public DataListModElement getElementFromGUI() {
 		DataListModElement dataListModElement = new DataListModElement(modElement);
-		dataListModElement.datalistName = datalistName.getText();
+		dataListModElement.datalistName = datalistName.getSelectedItem();
 		dataListModElement.generateDataList = generateDataList.isSelected();
 		dataListModElement.entries = entries.stream().map(a -> {
 			try {
@@ -244,8 +243,9 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 	}
 
 	@Override public void reloadDataLists() {
-		if (DataListLoader.getCache().containsKey(datalistName.getText()) && entries.isEmpty()) {
-			for (DataListEntry dataListEntry : DataListLoader.loadDataList(datalistName.getText())) {
+		if (DataListLoader.getCache().containsKey(datalistName.getSelectedItem())) {
+			entries.clear();
+			for (DataListEntry dataListEntry : DataListLoader.loadDataList(datalistName.getSelectedItem())) {
 				var dataListEntry1 = DataListModElement.DataListEntry.copyValueOf(dataListEntry);
 				dataListEntry1.setBuiltIn(true);
 				entries.add(dataListEntry1);

@@ -11,7 +11,6 @@ import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
-import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.elements.MappingsModElement;
@@ -155,16 +154,16 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		});
 
 		JPanel mapping = new JPanel(new BorderLayout());
+		mapping.setOpaque(false);
+		mapping.setBorder(BorderFactory.createTitledBorder("Edit"));
 		JToolBar bar = new JToolBar();
 		bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
 		bar.setFloatable(false);
 		bar.setOpaque(false);
 		bar.setOpaque(false);
 
-		VTextField searchbar = new VTextField();
-
 		var syncWithDatalist = new JButton(UIRES.get("impfile"));
-		syncWithDatalist.setToolTipText("Import from element or memory");
+		syncWithDatalist.setToolTipText("Import from element and memory");
 		syncWithDatalist.setOpaque(false);
 
 		JTable jTable = new JTable(new MappingTableModel());
@@ -258,7 +257,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		});
 
 		bar.add(syncWithDatalist);
-		bar.add(Utils.initSearchComponent(searchbar, lastSearchResult, a -> jTable.changeSelection(a, 0, false, false),
+		bar.add(Utils.initSearchComponent(lastSearchResult, a -> jTable.changeSelection(a, 0, false, false),
 				this::doSearch));
 
 		mapping.add("Center", scrollPane);
@@ -306,18 +305,17 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		ComboBoxUtil.updateComboBoxContents(datalistName, stringArrayList);
 	}
 
-	private void doSearch(VTextField searchbar) {
+	private void doSearch(String text) {
 		lastSearchResult.clear();
 		// cache
 		lastSearchResult.add(0);
 		for (int i = 0; i < mappingEntries.size(); i++) {
 			var entry = mappingEntries.get(i);
 			if (Stream.of(entry.getName(), entry.getMappingContent().toString())
-					.anyMatch(a -> a != null && a.contains(searchbar.getText()))) {
+					.anyMatch(a -> a != null && a.contains(text))) {
 				lastSearchResult.add(i);
 			}
 		}
-		searchbar.getValidationStatus();
 	}
 
 	private class MappingTableModel extends AbstractTableModel {
