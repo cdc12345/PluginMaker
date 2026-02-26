@@ -157,9 +157,9 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				this::doSearch));
 
 		addrow.addActionListener(e -> {
-				entries.add(entries.isEmpty() ?
-						new DataListModElement.DataListEntry("name", "", "", "", "") :
-						DataListModElement.DataListEntry.copyCommonValueOf(entries.getLast()));
+			entries.add(entries.isEmpty() ?
+					new DataListModElement.DataListEntry("name", "", "", "", "") :
+					DataListModElement.DataListEntry.copyCommonValueOf(entries.getLast()));
 			if (!isEditingMode()) {
 				JOptionPane.showMessageDialog(mcreator, "If you edit datalist name, you will lose your work", "Warning",
 						JOptionPane.WARNING_MESSAGE);
@@ -214,7 +214,8 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		for (int i = 0; i < entries.size(); i++) {
 			var entry = entries.get(i);
 			if (Stream.of(entry.getName(), entry.getReadableName(), entry.getDescription(), entry.getTexture(),
-					entry.getType(), entry.getOther().toString()).anyMatch(a -> a != null && a.contains(text))) {
+							entry.getType(), entry.getOther().toString())
+					.anyMatch(a -> a != null && Rules.applyIgnoreCaseRule(a).contains(text))) {
 				lastSearchResult.add(i);
 			}
 		}

@@ -322,7 +322,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		for (int i = 0; i < mappingEntries.size(); i++) {
 			var entry = mappingEntries.get(i);
 			if (Stream.of(entry.getName(), entry.getMappingContent().toString())
-					.anyMatch(a -> a != null && a.contains(text))) {
+					.anyMatch(a -> a != null && Rules.applyIgnoreCaseRule(a).contains(text))) {
 				lastSearchResult.add(i);
 			}
 		}

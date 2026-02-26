@@ -5,6 +5,7 @@ import net.mcreator.io.FileIO;
 import net.mcreator.plugin.JavaPlugin;
 import net.mcreator.plugin.Plugin;
 import net.mcreator.plugin.events.PreGeneratorsLoadingEvent;
+import net.mcreator.plugin.events.ui.TabEvent;
 import net.mcreator.plugin.events.workspace.MCreatorLoadedEvent;
 import net.mcreator.plugin.events.workspace.WorkspaceBuildStartedEvent;
 import net.mcreator.ui.MCreator;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdc.generator.init.Menus;
 import org.cdc.generator.init.ResourcePanels;
+import org.cdc.generator.ui.elements.DataListModElementGUI;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
 
@@ -22,9 +24,16 @@ import java.nio.file.Files;
 public class PluginMain extends JavaPlugin {
 	public static final Logger LOG = LogManager.getLogger("PluginMaker");
 
+	private static PluginMain INSTANCE = null;
+
+	public static PluginMain getINSTANCE() {
+		return INSTANCE;
+	}
+
 	public PluginMain(Plugin plugin) {
 		super(plugin);
 
+		INSTANCE = this;
 		addListener(MCreatorLoadedEvent.class, event -> {
 			var mcreator = event.getMCreator();
 
@@ -87,6 +96,10 @@ public class PluginMain extends JavaPlugin {
 
 		addListener(WorkspaceBuildStartedEvent.class, event -> {
 			FileIO.removeEmptyDirs(event.getMCreator().getGenerator().getModAssetsRoot());
+		});
+
+		addListener(TabEvent.Shown.class, event -> {
+			Menus.DATALIST_UTILS.setVisible(event.getTab().getContent() instanceof DataListModElementGUI);
 		});
 	}
 

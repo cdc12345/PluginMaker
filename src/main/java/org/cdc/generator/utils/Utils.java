@@ -65,10 +65,10 @@ public class Utils {
 		return modElement.getRegistryName();
 	}
 
-	public static JPanel initSearchComponent(ArrayList<Integer> lastSearchResult,
-			Consumer<Integer> showSearch, Consumer<String> doSearch) {
+	public static JPanel initSearchComponent(ArrayList<Integer> lastSearchResult, Consumer<Integer> showSearch,
+			Consumer<String> doSearch) {
 		VTextField searchbar = new VTextField();
-		JPanel buttons = new JPanel(new GridLayout(1, 2));
+		JPanel buttons = new JPanel(new FlowLayout());
 		buttons.setOpaque(false);
 		searchbar.setCustomDefaultMessage("enter to search");
 		searchbar.setValidator(() -> {
@@ -77,26 +77,32 @@ public class Utils {
 			}
 			return ValidationResult.PASSED;
 		});
+		JCheckBox ignoreCase = new JCheckBox("Ignore case");
+		ignoreCase.setSelected(Rules.isIgnoreCase());
+		ignoreCase.addActionListener(e -> {
+			Rules.setIgnoreCase(ignoreCase.isSelected());
+			doSearch.accept(Rules.applyIgnoreCaseRule(searchbar.getText()));
+		});
 		JButton upSearch = new JButton(UIRES.get("18px.up"));
 		upSearch.setOpaque(false);
 		JButton downSearch = new JButton(UIRES.get("18px.down"));
 		downSearch.setOpaque(false);
+		buttons.add(ignoreCase);
 		buttons.add(upSearch);
 		buttons.add(downSearch);
-
 		searchbar.getDocument().addDocumentListener(new DocumentListener() {
 			@Override public void insertUpdate(DocumentEvent e) {
-				doSearch.accept(searchbar.getText());
+				doSearch.accept(Rules.applyIgnoreCaseRule(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 
 			@Override public void removeUpdate(DocumentEvent e) {
-				doSearch.accept(searchbar.getText());
+				doSearch.accept(Rules.applyIgnoreCaseRule(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 
 			@Override public void changedUpdate(DocumentEvent e) {
-				doSearch.accept(searchbar.getText());
+				doSearch.accept(Rules.applyIgnoreCaseRule(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 		});
