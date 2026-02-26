@@ -15,6 +15,7 @@ import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.elements.MappingsModElement;
 import org.cdc.generator.init.ModElementTypes;
+import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.jspecify.annotations.NonNull;
@@ -79,6 +80,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
 			generator.addItem(supportedGenerator);
 		}
+		generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/generator"),
 				L10N.label("elementgui.pluginmappings.generator")));
 		configuration.add(generator);
@@ -322,7 +324,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		for (int i = 0; i < mappingEntries.size(); i++) {
 			var entry = mappingEntries.get(i);
 			if (Stream.of(entry.getName(), entry.getMappingContent().toString())
-					.anyMatch(a -> a != null && Rules.applyIgnoreCaseRule(a).contains(text))) {
+					.anyMatch(a -> a != null && Rules.SearchRules.applyIgnoreCaseRule(a).contains(text))) {
 				lastSearchResult.add(i);
 			}
 		}

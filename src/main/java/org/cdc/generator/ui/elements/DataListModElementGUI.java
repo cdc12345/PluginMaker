@@ -215,7 +215,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 			var entry = entries.get(i);
 			if (Stream.of(entry.getName(), entry.getReadableName(), entry.getDescription(), entry.getTexture(),
 							entry.getType(), entry.getOther().toString())
-					.anyMatch(a -> a != null && Rules.applyIgnoreCaseRule(a).contains(text))) {
+					.anyMatch(a -> a != null && Rules.SearchRules.applyIgnoreCaseRule(a).contains(text))) {
 				lastSearchResult.add(i);
 			}
 		}

@@ -23,26 +23,30 @@ public class Rules {
 					"You must use whole english and whole lower letters");
 		};
 	}
-	/*
-	 * searchbar_rules
-	 */
-	private static boolean ignoreCase = true;
-	/**
-	 * Used by searchbar
-	 */
-	public static String applyIgnoreCaseRule(String origin) {
-		if (ignoreCase) {
-			return origin.toLowerCase(Locale.ROOT);
+	public static class SearchRules{
+		private SearchRules(){
+
 		}
-		return origin;
+		private static boolean ignoreCase = true;
+
+		/**
+		 * Used by searchbar
+		 */
+		public static String applyIgnoreCaseRule(String origin) {
+			if (ignoreCase) {
+				return origin.toLowerCase(Locale.ROOT);
+			}
+			return origin;
+		}
+
+		public static void setIgnoreCase(boolean ignoreCase1) {
+			PluginMain.LOG.debug("Notify rule changed: {}->{}", ignoreCase, ignoreCase1);
+			ignoreCase = ignoreCase1;
+		}
+
+		public static boolean isIgnoreCase() {
+			return ignoreCase;
+		}
 	}
 
-	public static void setIgnoreCase(boolean ignoreCase1) {
-		PluginMain.LOG.debug("Notify rule changed: {}->{}", ignoreCase, ignoreCase1);
-		Rules.ignoreCase = ignoreCase1;
-	}
-
-	public static boolean isIgnoreCase() {
-		return ignoreCase;
-	}
 }

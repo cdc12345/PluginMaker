@@ -4,6 +4,7 @@ import net.mcreator.Launcher;
 import net.mcreator.io.FileIO;
 import net.mcreator.plugin.JavaPlugin;
 import net.mcreator.plugin.Plugin;
+import net.mcreator.plugin.events.ApplicationLoadedEvent;
 import net.mcreator.plugin.events.PreGeneratorsLoadingEvent;
 import net.mcreator.plugin.events.ui.TabEvent;
 import net.mcreator.plugin.events.workspace.MCreatorLoadedEvent;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.cdc.generator.init.Menus;
 import org.cdc.generator.init.ResourcePanels;
 import org.cdc.generator.ui.elements.DataListModElementGUI;
+import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
 
@@ -100,6 +102,10 @@ public class PluginMain extends JavaPlugin {
 
 		addListener(TabEvent.Shown.class, event -> {
 			Menus.DATALIST_UTILS.setVisible(event.getTab().getContent() instanceof DataListModElementGUI);
+		});
+
+		addListener(ApplicationLoadedEvent.class,event -> {
+			PluginMakerPreference.INSTANCE = new PluginMakerPreference("plugin_generator");
 		});
 	}
 
