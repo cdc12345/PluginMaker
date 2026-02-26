@@ -8,6 +8,7 @@ import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.Workspace;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
+import org.cdc.generator.ui.elements.ISearchable;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -17,7 +18,6 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class Utils {
 
@@ -65,8 +65,7 @@ public class Utils {
 		return modElement.getRegistryName();
 	}
 
-	public static JPanel initSearchComponent(ArrayList<Integer> lastSearchResult, Consumer<Integer> showSearch,
-			Consumer<String> doSearch) {
+	public static JPanel initSearchComponent(ArrayList<Integer> lastSearchResult, ISearchable searchable) {
 		VTextField searchbar = new VTextField();
 		searchbar.setOpaque(false);
 		searchbar.setBorder(BorderFactory.createEmptyBorder());
@@ -83,7 +82,7 @@ public class Utils {
 		ignoreCase.setSelected(Rules.SearchRules.isIgnoreCase());
 		ignoreCase.addActionListener(e -> {
 			Rules.SearchRules.setIgnoreCase(ignoreCase.isSelected());
-			doSearch.accept(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
+			searchable.doSearch(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
 		});
 		JButton upSearch = new JButton(UIRES.get("18px.up"));
 		upSearch.setToolTipText("0/0");
@@ -96,17 +95,17 @@ public class Utils {
 		buttons.add(downSearch);
 		searchbar.getDocument().addDocumentListener(new DocumentListener() {
 			@Override public void insertUpdate(DocumentEvent e) {
-				doSearch.accept(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
+				searchable.doSearch(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 
 			@Override public void removeUpdate(DocumentEvent e) {
-				doSearch.accept(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
+				searchable.doSearch(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 
 			@Override public void changedUpdate(DocumentEvent e) {
-				doSearch.accept(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
+				searchable.doSearch(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 		});
@@ -118,7 +117,7 @@ public class Utils {
 			if (index >= lastSearchResult.size() && lastSearchResult.size() > 1) {
 				index = 1;
 			}
-			showSearch.accept(lastSearchResult.get(index));
+			searchable.showSearch(lastSearchResult.get(index));
 			lastSearchResult.set(0, index);
 			downSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
 		});
@@ -127,12 +126,17 @@ public class Utils {
 			if (index < 1 && lastSearchResult.size() > 1) {
 				index = lastSearchResult.size() - 1;
 			}
-			showSearch.accept(lastSearchResult.get(index));
+			searchable.showSearch(lastSearchResult.get(index));
 			lastSearchResult.set(0, index);
 			upSearch.setToolTipText(index + "/" + (lastSearchResult.size() - 1));
 		});
 		var panel = PanelUtils.centerAndEastElement(searchbar, buttons);
 		panel.setOpaque(true);
 		return panel;
+	}
+
+	public static Dimension tryToGetTextFieldSize() {
+		var dimen = Toolkit.getDefaultToolkit().getScreenSize();
+		return new Dimension(dimen.width / 10, dimen.height / 30);
 	}
 }

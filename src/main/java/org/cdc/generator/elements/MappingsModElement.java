@@ -12,10 +12,6 @@ public class MappingsModElement extends GeneratableElement {
 
 	public String generatorName;
 	public String datalistName;
-	// map _default
-	public String defaultMapping;
-	// map _mcreator_map_template
-	public String mcreatorMapTemplate;
 	public List<MappingEntry> mappingsContent;
 
 	public MappingsModElement(ModElement element) {
@@ -33,20 +29,6 @@ public class MappingsModElement extends GeneratableElement {
 			return null;
 		}
 		return Utils.getDataListName(getModElement().getWorkspace(),datalistName);
-	}
-
-	@UsedByReflection public String getDefaultMapping() {
-		if (defaultMapping != null && defaultMapping.isBlank()) {
-			return null;
-		}
-		return defaultMapping;
-	}
-
-	@UsedByReflection public String getMcreatorMapTemplate() {
-		if (mcreatorMapTemplate != null && mcreatorMapTemplate.isBlank()) {
-			return null;
-		}
-		return mcreatorMapTemplate;
 	}
 
 	public static class MappingEntry implements Cloneable {
@@ -91,11 +73,15 @@ public class MappingsModElement extends GeneratableElement {
 			return edited;
 		}
 
-		@Override public MappingEntry clone() throws CloneNotSupportedException {
-			MappingEntry mappingEntry = (MappingEntry) super.clone();
-			mappingEntry.name = name;
-			mappingEntry.mappingContent = new ArrayList<>(mappingContent);
-			return mappingEntry;
+		@Override public MappingEntry clone() {
+			try {
+				var mappingEntry = (MappingEntry) super.clone();
+				mappingEntry.name = name;
+				mappingEntry.mappingContent = new ArrayList<>(mappingContent);
+				return mappingEntry;
+			} catch (CloneNotSupportedException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 }

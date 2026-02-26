@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
+public class DataListModElementGUI extends ModElementGUI<DataListModElement> implements ISearchable {
 
 	private final String[] columns = new String[] { "Name", "Readable name", "Type", "Texture", "Description",
 			"Others" };
@@ -43,6 +43,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 
 	// the 0 is the last search index
 	private final ArrayList<Integer> lastSearchResult;
+	private JTable jTable;
 
 	public DataListModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
@@ -64,7 +65,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		generateConfig.setOpaque(false);
 
 		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/datalistname"),
-				L10N.label("elementgui.plugindatalist.datalistname")));
+				L10N.label("elementgui.common.name")));
 
 		datalistName.setValidator(Rules.getDataListNameValidator(datalistName));
 		datalistName.setEditable(true);
@@ -83,7 +84,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		listPanel.setBorder(BorderFactory.createTitledBorder("Edit"));
 		listPanel.setOpaque(false);
 
-		JTable jTable = new JTable(new DataListTableModel());
+		jTable = new JTable(new DataListTableModel());
 		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -153,8 +154,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		ComponentUtils.deriveFont(remrow, 11);
 		remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
 		bar.add(remrow);
-		bar.add(Utils.initSearchComponent(lastSearchResult, a -> jTable.changeSelection(a, 0, false, false),
-				this::doSearch));
+		bar.add(Utils.initSearchComponent(lastSearchResult, this));
 
 		addrow.addActionListener(e -> {
 			entries.add(entries.isEmpty() ?
@@ -164,27 +164,18 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				JOptionPane.showMessageDialog(mcreator, "If you edit datalist name, you will lose your work", "Warning",
 						JOptionPane.WARNING_MESSAGE);
 			}
-			SwingUtilities.invokeLater(() -> {
-				jTable.repaint();
-				jTable.revalidate();
-			});
+			refreshTable();
 		});
 		remrow.addActionListener(e -> {
 			var rowIndex = jTable.getSelectedRows();
 			for (int index : rowIndex) {
 				entries.remove(index);
 			}
-			SwingUtilities.invokeLater(() -> {
-				jTable.repaint();
-				jTable.revalidate();
-			});
+			refreshTable();
 		});
 		datalistName.addItemListener(e -> {
 			reloadDataLists();
-			SwingUtilities.invokeLater(() -> {
-				jTable.repaint();
-				jTable.revalidate();
-			});
+			refreshTable();
 		});
 
 		listPanel.add("North", bar);
@@ -207,7 +198,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		}).validate(datalistName);
 	}
 
-	private void doSearch(String text) {
+	public void doSearch(String text) {
 		lastSearchResult.clear();
 		// cache
 		lastSearchResult.add(0);
@@ -231,13 +222,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		DataListModElement dataListModElement = new DataListModElement(modElement);
 		dataListModElement.datalistName = datalistName.getSelectedItem();
 		dataListModElement.generateDataList = generateDataList.isSelected();
-		dataListModElement.entries = entries.stream().map(a -> {
-			try {
-				return a.clone();
-			} catch (CloneNotSupportedException e) {
-				throw new RuntimeException(e);
-			}
-		}).toList();
+		dataListModElement.entries = entries.stream().map(DataListModElement.DataListEntry::clone).toList();
 		return dataListModElement;
 	}
 
@@ -254,6 +239,17 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				entries.add(dataListEntry1);
 			}
 		}
+	}
+
+	public void refreshTable() {
+		SwingUtilities.invokeLater(() -> {
+			jTable.repaint();
+			jTable.revalidate();
+		});
+	}
+
+	@Override public void showSearch(int index) {
+		jTable.changeSelection(index, 0, false, false);
 	}
 
 	private class DataListTableModel extends AbstractTableModel {
@@ -282,7 +278,8 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 		}
 
 		@Override public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return true;
+			var row = entries.get(rowIndex);
+			return columnIndex == 0 || row.getName().charAt(0) != '_';
 		}
 
 		@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {

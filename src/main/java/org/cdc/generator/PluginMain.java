@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.cdc.generator.init.Menus;
 import org.cdc.generator.init.ResourcePanels;
 import org.cdc.generator.ui.elements.DataListModElementGUI;
+import org.cdc.generator.ui.elements.MappingsModElementGUI;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
@@ -102,6 +103,7 @@ public class PluginMain extends JavaPlugin {
 
 		addListener(TabEvent.Shown.class, event -> {
 			Menus.DATALIST_UTILS.setVisible(event.getTab().getContent() instanceof DataListModElementGUI);
+			Menus.MAPPING_UTILS.setVisible(event.getTab().getContent() instanceof MappingsModElementGUI);
 		});
 
 		addListener(ApplicationLoadedEvent.class,event -> {

@@ -2,7 +2,6 @@ package org.cdc.generator.ui.elements;
 
 import net.mcreator.generator.Generator;
 import net.mcreator.ui.MCreator;
-import net.mcreator.ui.component.SearchableComboBox;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
@@ -25,8 +24,6 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -36,19 +33,18 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
+public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> implements ISearchable {
 
 	private final String[] columns = new String[] { "Name", "Mapping" };
 
 	private final VComboBox<String> generator = new VComboBox<>();
 	private final VComboBox<String> datalistName = new VComboBox<>();
-	private final SearchableComboBox<String> defaultMapping = new SearchableComboBox<>();
-	private final VComboBox<String> mcreatorMapTemplate = new VComboBox<>();
 
 	public List<MappingsModElement.MappingEntry> mappingEntries;
 
 	// the 0 is the last search index
 	private final ArrayList<Integer> lastSearchResult;
+	private JTable jTable;
 
 	public MappingsModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
@@ -66,11 +62,12 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 	}
 
 	@Override protected void initGUI() {
-		JPanel configuration = new JPanel(new GridLayout(4, 2));
+		JPanel configuration = new JPanel(new GridLayout(2, 2));
 		configuration.setBorder(BorderFactory.createTitledBorder("Config"));
 		configuration.setOpaque(false);
 
 		generator.setEditable(true);
+		generator.setPreferredSize(Utils.tryToGetTextFieldSize());
 		generator.setValidator(() -> {
 			if (generator.getSelectedItem() != null && !generator.getSelectedItem().isBlank()) {
 				return ValidationResult.PASSED;
@@ -96,20 +93,6 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				L10N.label("elementgui.pluginmappings.datalist_name")));
 		configuration.add(datalistName);
 
-		JLabel importM1 = new JLabel(UIRES.get("18px.add"));
-		importM1.setToolTipText("import from current generator");
-		defaultMapping.setEditable(true);
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/datalistname"),
-				L10N.label("elementgui.pluginmappings.default_mapping")));
-		configuration.add(PanelUtils.centerAndEastElement(defaultMapping, importM1));
-
-		JLabel importM2 = new JLabel(UIRES.get("18px.add"));
-		importM2.setToolTipText("import from current generator");
-		mcreatorMapTemplate.setEditable(true);
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/mcreatormaptemplate"),
-				L10N.label("elementgui.pluginmappings.mcreator_map_template")));
-		configuration.add(PanelUtils.centerAndEastElement(mcreatorMapTemplate, importM2));
-
 		JPanel mapping = new JPanel(new BorderLayout());
 		mapping.setOpaque(false);
 		mapping.setBorder(BorderFactory.createTitledBorder("Edit"));
@@ -123,7 +106,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		syncWithDatalist.setToolTipText("Import from element and memory");
 		syncWithDatalist.setOpaque(false);
 
-		JTable jTable = new JTable(new MappingTableModel());
+		jTable = new JTable(new MappingTableModel());
 		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jTable.setFillsViewportHeight(true);
 		jTable.setOpaque(false);
@@ -132,51 +115,6 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.setOpaque(false);
 
-		importM2.addMouseListener(new MouseAdapter() {
-			@Override public void mousePressed(MouseEvent e) {
-				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
-				String mappingName;
-				if (datalist != null) {
-					mappingName = Utils.getDataListName(datalist);
-					var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
-							.getMapping(mappingName);
-					if (memoryMapping != null) {
-						if (memoryMapping.containsKey("_mcreator_map_template")) {
-							mcreatorMapTemplate.setSelectedItem(memoryMapping.get("_mcreator_map_template"));
-						}
-					}
-				}
-			}
-		});
-		importM1.addMouseListener(new MouseAdapter() {
-			@Override public void mousePressed(MouseEvent e) {
-				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
-				String mappingName;
-				if (datalist != null) {
-					mappingName = Utils.getDataListName(datalist);
-					var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
-							.getMapping(mappingName);
-					if (memoryMapping != null) {
-						if (memoryMapping.containsKey("_default")) {
-							defaultMapping.setSelectedItem(memoryMapping.get("_default"));
-						}
-						for (Map.Entry<?, ?> entry : memoryMapping.entrySet()) {
-							if (entry.getValue() instanceof List<?> list) {
-								for (Object o : list) {
-									defaultMapping.addItem(o.toString());
-								}
-							} else {
-								defaultMapping.addItem(entry.getValue().toString());
-							}
-						}
-						SwingUtilities.invokeLater(() -> {
-							defaultMapping.repaint();
-							defaultMapping.revalidate();
-						});
-					}
-				}
-			}
-		});
 		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -194,12 +132,33 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 					int column) {
 				var row = mappingEntries.get(rowIndex);
 				if (columns[column].equals("Mapping")) {
+					JToolBar placeholder = new JToolBar();
+					placeholder.setFloatable(false);
+					placeholder.setLayout(new GridLayout(2, 3));
+					placeholder.setBorder(BorderFactory.createTitledBorder("Placeholders"));
 					JTextArea jTextArea = new JTextArea();
-					for (String entry : row.getMappingContent()) {
-						jTextArea.append(entry);
-					}
-					int op = JOptionPane.showConfirmDialog(mcreator, jTextArea, "Edit Mapping (one line one item)",
-							JOptionPane.YES_NO_OPTION);
+					jTextArea.setOpaque(false);
+					jTextArea.setBorder(BorderFactory.createTitledBorder("Lines"));
+
+					Stream.of("@NAME", "@UPPERNAME", "@name", "@SnakeCaseName", "@registryname", "@REGISTRYNAME")
+							.forEach(a -> {
+								JButton appendName = new JButton(a);
+								appendName.setContentAreaFilled(false);
+								appendName.setOpaque(false);
+								appendName.setHorizontalTextPosition(SwingConstants.LEFT);
+								appendName.addActionListener(event -> {
+									jTextArea.append(a);
+								});
+								placeholder.add(appendName);
+							});
+					jTextArea.append(row.getMappingContent().getFirst());
+					row.getMappingContent().stream().skip(1).forEach(a -> {
+						jTextArea.append("\n");
+						jTextArea.append(a);
+					});
+					int op = JOptionPane.showConfirmDialog(mcreator,
+							PanelUtils.northAndCenterElement(placeholder, jTextArea),
+							"Edit Mapping (one line one item)", JOptionPane.YES_NO_OPTION);
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
 						BufferedReader bufferedReader = new BufferedReader(new StringReader(str));
@@ -243,7 +202,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 					for (Map.Entry<?, ?> entry : memory.entrySet()) {
 						var key = entry.getKey().toString();
 						// exclude
-						if (!set.contains(key) && !Rules.MAPPING_INNER_KEY.matcher(key).matches()) {
+						if (!set.contains(key)) {
 							set.add(key);
 							mappingEntries.add(new MappingsModElement.MappingEntry(key,
 									Utils.convertYamlMappingToList(entry.getValue())));
@@ -262,15 +221,11 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 			}
 
 			MappingsModElementGUI.this.setCursor(Cursor.getDefaultCursor());
-			SwingUtilities.invokeLater(() -> {
-				jTable.repaint();
-				jTable.revalidate();
-			});
+			refreshTable();
 		});
 
 		bar.add(syncWithDatalist);
-		bar.add(Utils.initSearchComponent(lastSearchResult, a -> jTable.changeSelection(a, 0, false, false),
-				this::doSearch));
+		bar.add(Utils.initSearchComponent(lastSearchResult, this));
 
 		mapping.add("Center", scrollPane);
 		mapping.add("North", bar);
@@ -283,8 +238,6 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 	@Override protected void openInEditingMode(MappingsModElement generatableElement) {
 		datalistName.setSelectedItem(generatableElement.datalistName);
 		generator.setSelectedItem(generatableElement.generatorName);
-		defaultMapping.setSelectedItem(generatableElement.defaultMapping);
-		mcreatorMapTemplate.setSelectedItem(generatableElement.mcreatorMapTemplate);
 		mappingEntries = new ArrayList<>(generatableElement.mappingsContent);
 	}
 
@@ -292,15 +245,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		var element = new MappingsModElement(modElement);
 		element.datalistName = datalistName.getSelectedItem();
 		element.generatorName = generator.getSelectedItem();
-		element.defaultMapping = defaultMapping.getSelectedItem();
-		element.mcreatorMapTemplate = mcreatorMapTemplate.getSelectedItem();
-		element.mappingsContent = mappingEntries.stream().map(a -> {
-			try {
-				return a.clone();
-			} catch (CloneNotSupportedException e) {
-				throw new RuntimeException(e);
-			}
-		}).toList();
+		element.mappingsContent = mappingEntries.stream().map(MappingsModElement.MappingEntry::clone).toList();
 		return element;
 	}
 
@@ -317,7 +262,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		ComboBoxUtil.updateComboBoxContents(datalistName, stringArrayList);
 	}
 
-	private void doSearch(String text) {
+	public void doSearch(String text) {
 		lastSearchResult.clear();
 		// cache
 		lastSearchResult.add(0);
@@ -328,6 +273,17 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				lastSearchResult.add(i);
 			}
 		}
+	}
+
+	public void refreshTable() {
+		SwingUtilities.invokeLater(() -> {
+			jTable.repaint();
+			jTable.revalidate();
+		});
+	}
+
+	@Override public void showSearch(int index) {
+		jTable.changeSelection(index, 0, false, false);
 	}
 
 	private class MappingTableModel extends AbstractTableModel {

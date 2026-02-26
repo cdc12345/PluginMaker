@@ -10,21 +10,23 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.datatransfer.StringSelection;
 import java.util.HashSet;
+import java.util.stream.Stream;
 
 public class Menus {
 	public static final JMenu PLUGIN_MAKER = L10N.menu("menus.plugin_maker");
 	public static final JMenu DATALIST_UTILS = L10N.menu("menus.datalist_utils");
+	public static final JMenu MAPPING_UTILS = L10N.menu("menus.mapping_utils");
 
 	public static void registerAllMenus(MCreator mCreator) {
 		mCreator.getMainMenuBar().add(PLUGIN_MAKER);
 
 		mCreator.getMainMenuBar().add(DATALIST_UTILS);
-		JMenu calculate_types = L10N.menu("menus.datalist_utils.calculate_types");
-		calculate_types.addMenuListener(new MenuListener() {
+		JMenu calculateTypes = L10N.menu("menus.datalist_utils.calculate_types");
+		calculateTypes.addMenuListener(new MenuListener() {
 			@Override public void menuSelected(MenuEvent e) {
 				if (mCreator.getTabs().getCurrentTab()
 						.getContent() instanceof DataListModElementGUI dataListModElementGUI) {
-					calculate_types.removeAll();
+					calculateTypes.removeAll();
 					var types = new HashSet<String>();
 					for (DataListModElement.DataListEntry entry : dataListModElementGUI.entries) {
 						types.add(entry.getType());
@@ -36,7 +38,7 @@ public class Menus {
 							mCreator.getToolkit().getSystemClipboard().setContents(content, content);
 							JOptionPane.showMessageDialog(mCreator, "Copied");
 						});
-						calculate_types.add(menuItem);
+						calculateTypes.add(menuItem);
 					});
 				}
 			}
@@ -49,6 +51,19 @@ public class Menus {
 
 			}
 		});
-		DATALIST_UTILS.add(calculate_types);
+		JMenu builtInEntries = L10N.menu("menus.datalist_utils.builtin_entries");
+		Stream.of("_default","_mcreator_map_template","_bypass_prefix").forEach(a->{
+			JMenuItem menuItem = new JMenuItem(a);
+			menuItem.addActionListener(even->{
+				if (mCreator.getTabs().getCurrentTab()
+						.getContent() instanceof DataListModElementGUI dataListModElementGUI) {
+					dataListModElementGUI.entries.add(new DataListModElement.DataListEntry(a,null,null,null,null));
+					dataListModElementGUI.refreshTable();
+				}
+			});
+			builtInEntries.add(menuItem);
+		});
+		DATALIST_UTILS.add(builtInEntries);
+		DATALIST_UTILS.add(calculateTypes);
 	}
 }
