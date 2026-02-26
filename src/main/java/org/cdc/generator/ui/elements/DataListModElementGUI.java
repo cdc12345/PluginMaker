@@ -128,7 +128,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
 			}
 		});
-		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		jTable.setFillsViewportHeight(true);
 		jTable.setOpaque(false);
 
@@ -170,8 +170,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 			});
 		});
 		remrow.addActionListener(e -> {
-			var rowIndex = jTable.getSelectedRow();
-			entries.remove(rowIndex);
+			var rowIndex = jTable.getSelectedRows();
+			for (int index : rowIndex) {
+				entries.remove(index);
+			}
 			SwingUtilities.invokeLater(() -> {
 				jTable.repaint();
 				jTable.revalidate();
@@ -243,7 +245,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 	}
 
 	@Override public void reloadDataLists() {
-		if (DataListLoader.getCache().containsKey(datalistName.getSelectedItem())) {
+		if (DataListLoader.getCache().containsKey(datalistName.getSelectedItem()) && !isEditingMode()) {
 			entries.clear();
 			for (DataListEntry dataListEntry : DataListLoader.loadDataList(datalistName.getSelectedItem())) {
 				var dataListEntry1 = DataListModElement.DataListEntry.copyValueOf(dataListEntry);
