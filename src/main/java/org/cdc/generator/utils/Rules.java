@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 
 public class Rules {
 	public static final Pattern MAPPING_INNER_KEY = Pattern.compile("(_default|_mcreator_map_template)");
-	public static final Pattern DATALIST_ENTRY_NAME = Pattern.compile("[a-zA-Z_1-9]+");
-	public static final Pattern DATALIST_NAME = Pattern.compile("[a-z]+");
+	public static final Pattern DATALIST_ENTRY_NAME = Pattern.compile("[a-zA-Z_1-9.]+");
+	public static final Pattern DATALIST_NAME = Pattern.compile("[a-z_]+");
 
 	public static Validator getDataListNameValidator(VComboBox<String> datalistName){
 		return () -> {

@@ -92,7 +92,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				JLabel label = (JLabel) super.getTableCellRendererComponent(jTable, value, isSelected, hasFocus,
 						rowIndex, column);
 				if (value != null)
-					label.setToolTipText(value.toString());
+					label.setToolTipText(value + ", index=" + rowIndex);
 				if (row.isBuiltIn())
 					label.setToolTipText("BuiltIn: " + label.getToolTipText());
 				return label;
@@ -157,9 +157,9 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> {
 				this::doSearch));
 
 		addrow.addActionListener(e -> {
-			entries.add(entries.isEmpty() ?
-					new DataListModElement.DataListEntry("name", "", "", "", "") :
-					entries.getLast());
+				entries.add(entries.isEmpty() ?
+						new DataListModElement.DataListEntry("name", "", "", "", "") :
+						DataListModElement.DataListEntry.copyCommonValueOf(entries.getLast()));
 			if (!isEditingMode()) {
 				JOptionPane.showMessageDialog(mcreator, "If you edit datalist name, you will lose your work", "Warning",
 						JOptionPane.WARNING_MESSAGE);

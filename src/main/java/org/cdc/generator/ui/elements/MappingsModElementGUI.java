@@ -100,6 +100,52 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/datalistname"),
 				L10N.label("elementgui.pluginmappings.default_mapping")));
 		configuration.add(PanelUtils.centerAndEastElement(defaultMapping, importM1));
+
+		JLabel importM2 = new JLabel(UIRES.get("18px.add"));
+		importM2.setToolTipText("import from current generator");
+		mcreatorMapTemplate.setEditable(true);
+		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/mcreatormaptemplate"),
+				L10N.label("elementgui.pluginmappings.mcreator_map_template")));
+		configuration.add(PanelUtils.centerAndEastElement(mcreatorMapTemplate, importM2));
+
+		JPanel mapping = new JPanel(new BorderLayout());
+		mapping.setOpaque(false);
+		mapping.setBorder(BorderFactory.createTitledBorder("Edit"));
+		JToolBar bar = new JToolBar();
+		bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
+		bar.setFloatable(false);
+		bar.setOpaque(false);
+		bar.setOpaque(false);
+
+		var syncWithDatalist = new JButton(UIRES.get("impfile"));
+		syncWithDatalist.setToolTipText("Import from element and memory");
+		syncWithDatalist.setOpaque(false);
+
+		JTable jTable = new JTable(new MappingTableModel());
+		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		jTable.setFillsViewportHeight(true);
+		jTable.setOpaque(false);
+
+		JScrollPane scrollPane = new JScrollPane(jTable);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setOpaque(false);
+
+		importM2.addMouseListener(new MouseAdapter() {
+			@Override public void mousePressed(MouseEvent e) {
+				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
+				String mappingName;
+				if (datalist != null) {
+					mappingName = Utils.getDataListName(datalist);
+					var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
+							.getMapping(mappingName);
+					if (memoryMapping != null) {
+						if (memoryMapping.containsKey("_mcreator_map_template")) {
+							mcreatorMapTemplate.setSelectedItem(memoryMapping.get("_mcreator_map_template"));
+						}
+					}
+				}
+			}
+		});
 		importM1.addMouseListener(new MouseAdapter() {
 			@Override public void mousePressed(MouseEvent e) {
 				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
@@ -129,44 +175,6 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				}
 			}
 		});
-
-		JLabel importM2 = new JLabel(UIRES.get("18px.add"));
-		importM2.setToolTipText("import from current generator");
-		mcreatorMapTemplate.setEditable(true);
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/mcreatormaptemplate"),
-				L10N.label("elementgui.pluginmappings.mcreator_map_template")));
-		configuration.add(PanelUtils.centerAndEastElement(mcreatorMapTemplate, importM2));
-		importM2.addMouseListener(new MouseAdapter() {
-			@Override public void mousePressed(MouseEvent e) {
-				var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
-				String mappingName;
-				if (datalist != null) {
-					mappingName = Utils.getDataListName(datalist);
-					var memoryMapping = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
-							.getMapping(mappingName);
-					if (memoryMapping != null) {
-						if (memoryMapping.containsKey("_mcreator_map_template")) {
-							mcreatorMapTemplate.setSelectedItem(memoryMapping.get("_mcreator_map_template"));
-						}
-					}
-				}
-			}
-		});
-
-		JPanel mapping = new JPanel(new BorderLayout());
-		mapping.setOpaque(false);
-		mapping.setBorder(BorderFactory.createTitledBorder("Edit"));
-		JToolBar bar = new JToolBar();
-		bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
-		bar.setFloatable(false);
-		bar.setOpaque(false);
-		bar.setOpaque(false);
-
-		var syncWithDatalist = new JButton(UIRES.get("impfile"));
-		syncWithDatalist.setToolTipText("Import from element and memory");
-		syncWithDatalist.setOpaque(false);
-
-		JTable jTable = new JTable(new MappingTableModel());
 		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -174,7 +182,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				JLabel label = (JLabel) super.getTableCellRendererComponent(jTable, value, isSelected, hasFocus,
 						rowIndex, column);
 				if (value != null)
-					label.setToolTipText(value.toString());
+					label.setToolTipText(value + ", index=" + rowIndex);
 				return label;
 			}
 		});
@@ -211,30 +219,29 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 				return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
 			}
 		});
-		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		jTable.setFillsViewportHeight(true);
-		jTable.setOpaque(false);
-
-		JScrollPane scrollPane = new JScrollPane(jTable);
-		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane.setOpaque(false);
-
 		syncWithDatalist.addActionListener(e -> {
 			var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
 			//
 			MappingsModElementGUI.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			//
-			mappingEntries.clear();
 			if (datalist != null) {
 				String dataListName = Utils.getDataListName(datalist);
 				var memory = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
 						.getMapping(dataListName);
+				var cacheSet = new HashSet<MappingsModElement.MappingEntry>();
 				var set = new HashSet<String>();
+				mappingEntries.forEach(a -> {
+					if (a.isEdited()) {
+						cacheSet.add(a);
+						set.add(a.getName());
+					}
+				});
+				mappingEntries.clear();
 				if (memory != null) {
 					for (Map.Entry<?, ?> entry : memory.entrySet()) {
 						var key = entry.getKey().toString();
 						// exclude
-						if (!Rules.MAPPING_INNER_KEY.matcher(key).matches()) {
+						if (!set.contains(key) && !Rules.MAPPING_INNER_KEY.matcher(key).matches()) {
 							set.add(key);
 							mappingEntries.add(new MappingsModElement.MappingEntry(key,
 									Utils.convertYamlMappingToList(entry.getValue())));
@@ -247,6 +254,9 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> {
 					if (set.isEmpty() || !set.contains(entry.getName()))
 						mappingEntries.add(new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
 				}
+				mappingEntries.addAll(cacheSet);
+				JOptionPane.showMessageDialog(mcreator,
+						"Total: " + mappingEntries.size() + ", Edited: " + cacheSet.size());
 			}
 
 			MappingsModElementGUI.this.setCursor(Cursor.getDefaultCursor());

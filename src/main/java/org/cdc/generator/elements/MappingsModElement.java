@@ -58,7 +58,7 @@ public class MappingsModElement extends GeneratableElement {
 		public MappingEntry(String name, List<String> mappingContent) {
 			this.name = name;
 			this.mappingContent = mappingContent;
-			this.edited = true;
+			this.edited = false;
 		}
 
 		public String getName() {
@@ -79,7 +79,6 @@ public class MappingsModElement extends GeneratableElement {
 			this.edited = edited;
 		}
 
-		@UsedByReflection
 		public static boolean isEdited(String generatorName, String datalistName, MappingEntry entry) {
 			var list = Utils.getMappingResult(generatorName, datalistName, entry.name);
 			if (list != null) {

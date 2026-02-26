@@ -37,6 +37,12 @@ public class DataListModElement extends GeneratableElement {
             return dataListEntry1;
         }
 
+        public static DataListEntry copyCommonValueOf(DataListEntry dataListEntry){
+            var datalistEntry1 = new DataListEntry(dataListEntry.name, dataListEntry.readableName, dataListEntry.type,dataListEntry.texture,dataListEntry.description);
+            datalistEntry1.setOthers(dataListEntry.others);
+            return datalistEntry1;
+        }
+
         private String name;
         // map readable_name
         private String readableName;
