@@ -11,9 +11,12 @@ import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.Validator;
+import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.ui.validation.validators.RegistryNameValidator;
 import net.mcreator.workspace.elements.ModElement;
+import net.mcreator.workspace.elements.VariableType;
+import net.mcreator.workspace.elements.VariableTypeLoader;
 import org.cdc.generator.elements.TriggerModElement;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
@@ -117,8 +120,29 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		edit.setOpaque(false);
 		edit.setBorder(BorderFactory.createTitledBorder("Parameters"));
 
+		var typeComboBox = new VComboBox<String>();
+		for (VariableType allVariableType : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
+			typeComboBox.addItem(allVariableType.getName());
+		}
+		typeComboBox.setEditable(true);
+
 		jTable = new JTable(new TriggerModElementGUITableModul());
+		jTable.setDefaultEditor(String.class, new DefaultCellEditor(new JTextField()) {
+			@Override
+			public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
+					int columnIndex) {
+				var row = dependencies.get(rowIndex);
+				var columnName = columns[columnIndex];
+				if (columnName.equals("Type")) {
+					typeComboBox.setSelectedItem(row.getType());
+					typeComboBox.addItemListener(e -> row.setType(typeComboBox.getSelectedItem()));
+					return typeComboBox;
+				}
+				return super.getTableCellEditorComponent(table, value, isSelected, rowIndex, columnIndex);
+			}
+		});
 		jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		jTable.setFillsViewportHeight(true);
 		JScrollPane jScrollPane = new JScrollPane(jTable);
 		edit.add("Center", jScrollPane);
 
@@ -234,9 +258,8 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 
 		@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			var row = dependencies.get(rowIndex);
-			switch (columns[columnIndex]) {
-			case "Name" -> row.setName(aValue.toString());
-			case "Type" -> row.setType(aValue.toString());
+			if (columns[columnIndex].equals("Name")) {
+				row.setName(aValue.toString());
 			}
 		}
 	}

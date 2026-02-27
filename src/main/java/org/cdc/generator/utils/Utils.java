@@ -69,6 +69,7 @@ public class Utils {
 		VTextField searchbar = new VTextField();
 		searchbar.setOpaque(false);
 		searchbar.setBorder(BorderFactory.createEmptyBorder());
+
 		JPanel buttons = new JPanel(new FlowLayout());
 		buttons.setOpaque(false);
 		searchbar.setCustomDefaultMessage("enter to search");

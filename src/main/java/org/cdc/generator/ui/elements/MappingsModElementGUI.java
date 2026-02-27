@@ -147,7 +147,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 								appendName.setOpaque(false);
 								appendName.setHorizontalTextPosition(SwingConstants.LEFT);
 								appendName.addActionListener(event -> {
-									jTextArea.append(a);
+									jTextArea.insert(a, jTextArea.getCaretPosition());
 								});
 								placeholder.add(appendName);
 							});
