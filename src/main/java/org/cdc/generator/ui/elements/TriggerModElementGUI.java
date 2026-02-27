@@ -116,7 +116,9 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		JPanel edit = new JPanel(new BorderLayout());
 		edit.setOpaque(false);
 		edit.setBorder(BorderFactory.createTitledBorder("Parameters"));
+
 		jTable = new JTable(new TriggerModElementGUITableModul());
+		jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		JScrollPane jScrollPane = new JScrollPane(jTable);
 		edit.add("Center", jScrollPane);
 
@@ -124,14 +126,12 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
 		bar.setFloatable(false);
 		bar.setOpaque(false);
-
 		JButton addrow = new JButton(UIRES.get("16px.add"));
 		addrow.setContentAreaFilled(false);
 		addrow.setOpaque(false);
 		ComponentUtils.deriveFont(addrow, 11);
 		addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
 		bar.add(addrow);
-
 		JButton remrow = new JButton(UIRES.get("16px.delete"));
 		remrow.setContentAreaFilled(false);
 		remrow.setOpaque(false);
