@@ -1,0 +1,4 @@
+templates:
+  - template: variable.json.ftl
+    writer: json
+    name: "@RESROOT/variables/@[getName()].json"

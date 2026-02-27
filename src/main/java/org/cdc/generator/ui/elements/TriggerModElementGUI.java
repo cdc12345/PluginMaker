@@ -84,14 +84,14 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 	}
 
 	@Override protected void initGUI() {
-		JPanel configuration = new JPanel(new GridLayout(5, 2));
+		JPanel configuration = new JPanel(new GridLayout(5, 2, 5, 5));
 		configuration.setOpaque(false);
 		configuration.setBorder(BorderFactory.createTitledBorder("Configuration"));
 
 		this.triggerName.setOpaque(false);
 		this.triggerName.setPreferredSize(Utils.tryToGetTextFieldSize());
 		this.triggerName.setText(modElement.getRegistryName());
-		this.triggerName.setValidator(Rules.getTriggerNameValidator(this.triggerName));
+		this.triggerName.setValidator(Rules.getTextfieldValidator(this.triggerName));
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/name"),
 				L10N.label("elementgui.common.name")));
 		configuration.add(triggerName);
@@ -113,7 +113,7 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		configuration.add(side);
 
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/required_apis"),
-				L10N.label("elementgui.plugintrigger.required_apis")));
+				L10N.label("elementgui.common.required_apis")));
 		configuration.add(requiredApis);
 
 		JPanel edit = new JPanel(new BorderLayout());

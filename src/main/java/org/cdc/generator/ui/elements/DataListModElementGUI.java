@@ -12,8 +12,10 @@ import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.AggregatedValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
+import net.mcreator.ui.workspace.WorkspacePanel;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
+import org.cdc.generator.ui.ResourcePanelIcons;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.jspecify.annotations.NonNull;
@@ -36,8 +38,8 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 	private final String[] columns = new String[] { "Name", "Readable name", "Type", "Texture", "Description",
 			"Others" };
 
-	private final JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
 	private final VComboBox<String> datalistName = new VComboBox<>();
+	private final JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
 
 	public List<DataListModElement.DataListEntry> entries;
 
@@ -67,7 +69,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/datalistname"),
 				L10N.label("elementgui.common.name")));
 
-		datalistName.setValidator(Rules.getDataListNameValidator(datalistName));
+		datalistName.setValidator(Rules.getComboBoxValidator(datalistName));
 		datalistName.setEditable(true);
 		datalistName.setSelectedItem(modElement.getRegistryName());
 		var list = DataListLoader.getCache().keySet().stream().sorted().toList();
@@ -181,7 +183,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		listPanel.add("North", bar);
 		listPanel.add("Center", scrollPane);
 
-		addPage("datalist", PanelUtils.totalCenterInPanel(
+		addPage("Configuration", PanelUtils.totalCenterInPanel(
 				PanelUtils.northAndCenterElement(generateConfig, listPanel))).lazyValidate(() -> {
 			Set<String> names = new HashSet<>();
 			for (int i = 0; i < entries.size(); i++) {
@@ -196,6 +198,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 			}
 			return new AggregatedValidationResult.PASS();
 		}).validate(datalistName);
+
+		ResourcePanelIcons resourcePanelIcons = new ResourcePanelIcons((WorkspacePanel) mcreator.getWorkspacePanel(),this);
+		resourcePanelIcons.reloadElements();
+		addPage("Icons",resourcePanelIcons);
 	}
 
 	public void doSearch(String text) {

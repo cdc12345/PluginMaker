@@ -1,6 +1,7 @@
 package org.cdc.generator.utils;
 
 import net.mcreator.generator.Generator;
+import net.mcreator.plugin.PluginLoader;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.validation.ValidationResult;
@@ -15,6 +16,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -139,5 +141,21 @@ public class Utils {
 	public static Dimension tryToGetTextFieldSize() {
 		var dimen = Toolkit.getDefaultToolkit().getScreenSize();
 		return new Dimension(dimen.width / 10, dimen.height / 30);
+	}
+
+	public static String formatColor(Color color) {
+		return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+	}
+
+	public static String nullToNoneOrNoneToNull(String none) {
+		if (none == null) {
+			return "None";
+		}
+		return none.equals("None") ? null : none;
+	}
+
+	public static File tryToFindCorePlugin(){
+		return PluginLoader.INSTANCE.getPlugins().stream().filter(a -> a.getID().equals("core")).findFirst().get()
+				.getFile();
 	}
 }

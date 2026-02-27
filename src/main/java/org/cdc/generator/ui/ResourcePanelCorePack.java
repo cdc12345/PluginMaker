@@ -2,7 +2,6 @@ package org.cdc.generator.ui;
 
 import net.mcreator.io.tree.FileNode;
 import net.mcreator.io.tree.FileTree;
-import net.mcreator.plugin.PluginLoader;
 import net.mcreator.ui.component.tree.FilterTreeNode;
 import net.mcreator.ui.component.tree.FilteredTreeModel;
 import net.mcreator.ui.component.tree.JFileTree;
@@ -11,6 +10,7 @@ import net.mcreator.ui.minecraft.recourcepack.ResourcePackTreeCellRenderer;
 import net.mcreator.ui.workspace.IReloadableFilterable;
 import net.mcreator.ui.workspace.WorkspacePanel;
 import net.mcreator.util.DesktopUtils;
+import org.cdc.generator.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -73,8 +73,7 @@ public class ResourcePanelCorePack extends JPanel implements IReloadableFilterab
 		FilterTreeNode root = new FilterTreeNode("");
 
 		FileTree<String> fileTree = new FileTree<>(new FileNode<>("", ""));
-		File file = PluginLoader.INSTANCE.getPlugins().stream().filter(a -> a.getID().equals("core")).findFirst().get()
-				.getFile();
+		File file = Utils.tryToFindCorePlugin();
 		if (file.isFile() && file.getName().endsWith(".zip")) {
 			try (ZipFile zipFile = new ZipFile(file)) {
 				zipFile.stream().forEach(a -> {
