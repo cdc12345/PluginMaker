@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> implements ISearchable {
@@ -187,17 +188,28 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		addPage("trigger", PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, edit)));
 	}
 
-	public void doSearch(String text) {
+	@Override public void doSearch(Map.Entry<String, String> search) {
 		lastSearchResult.clear();
 		// cache
 		lastSearchResult.add(0);
 		for (int i = 0; i < dependencies.size(); i++) {
 			var entry = dependencies.get(i);
+			var index = new AtomicInteger();
 			if (Stream.of(entry.getName(), entry.getType())
-					.anyMatch(a -> a != null && Rules.SearchRules.applyIgnoreCaseRule(a).contains(text))) {
+					.map(a -> Map.entry(columns[index.getAndIncrement()], Rules.SearchRules.applyIgnoreCaseRule(a)))
+					.anyMatch(a -> {
+						if (!search.getKey().isBlank()) {
+							if (a.getKey().equalsIgnoreCase(search.getKey())) {
+								return a.getValue().contains(search.getValue());
+							}
+							return false;
+						}
+						return a.getValue().contains(search.getValue());
+					})) {
 				lastSearchResult.add(i);
 			}
 		}
+
 	}
 
 	@Override public void refreshTable() {

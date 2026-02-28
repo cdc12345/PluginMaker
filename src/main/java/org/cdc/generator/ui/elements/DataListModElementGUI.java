@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class DataListModElementGUI extends ModElementGUI<DataListModElement> implements ISearchable {
@@ -213,15 +214,25 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		addPage("Icons", resourcePanelIcons);
 	}
 
-	public void doSearch(String text) {
+	@Override public void doSearch(Map.Entry<String, String> search) {
 		lastSearchResult.clear();
 		// cache
 		lastSearchResult.add(0);
 		for (int i = 0; i < entries.size(); i++) {
 			var entry = entries.get(i);
-			if (Stream.of(entry.getName(), entry.getReadableName(), entry.getDescription(), entry.getTexture(),
-							entry.getType(), entry.getOther().toString())
-					.anyMatch(a -> a != null && Rules.SearchRules.applyIgnoreCaseRule(a).contains(text))) {
+			AtomicInteger atomicInteger = new AtomicInteger();
+			if (Stream.of(entry.getName(), entry.getReadableName(), entry.getType(), entry.getTexture(),
+							entry.getDescription(), entry.getOther().toString())
+					.map(a -> Map.entry(columns[atomicInteger.getAndIncrement()],
+							Rules.SearchRules.applyIgnoreCaseRule(a))).anyMatch(a -> {
+						if (!search.getKey().isBlank()) {
+							if (a.getKey().equalsIgnoreCase(search.getKey())) {
+								return a.getValue().contains(search.getValue());
+							}
+							return false;
+						}
+						return a.getValue().contains(search.getValue());
+					})) {
 				lastSearchResult.add(i);
 			}
 		}

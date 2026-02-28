@@ -2,6 +2,7 @@ package org.cdc.generator.utils;
 
 import net.mcreator.generator.Generator;
 import net.mcreator.plugin.PluginLoader;
+import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.validation.ValidationResult;
@@ -19,6 +20,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Utils {
@@ -69,6 +71,7 @@ public class Utils {
 
 	public static JPanel initSearchComponent(ArrayList<Integer> lastSearchResult, ISearchable searchable) {
 		VTextField searchbar = new VTextField();
+		ComponentUtils.deriveFont(searchbar, 16);
 		searchbar.setOpaque(false);
 		searchbar.setBorder(BorderFactory.createEmptyBorder());
 
@@ -85,7 +88,7 @@ public class Utils {
 		ignoreCase.setSelected(Rules.SearchRules.isIgnoreCase());
 		ignoreCase.addActionListener(e -> {
 			Rules.SearchRules.setIgnoreCase(ignoreCase.isSelected());
-			searchable.doSearch(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
+			searchable.doSearch(splitSearch(searchbar.getText()));
 		});
 		JButton upSearch = new JButton(UIRES.get("18px.up"));
 		upSearch.setToolTipText("0/0");
@@ -98,17 +101,17 @@ public class Utils {
 		buttons.add(downSearch);
 		searchbar.getDocument().addDocumentListener(new DocumentListener() {
 			@Override public void insertUpdate(DocumentEvent e) {
-				searchable.doSearch(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
+				searchable.doSearch(splitSearch(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 
 			@Override public void removeUpdate(DocumentEvent e) {
-				searchable.doSearch(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
+				searchable.doSearch(splitSearch(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 
 			@Override public void changedUpdate(DocumentEvent e) {
-				searchable.doSearch(Rules.SearchRules.applyIgnoreCaseRule(searchbar.getText()));
+				searchable.doSearch(splitSearch(searchbar.getText()));
 				searchbar.getValidationStatus();
 			}
 		});
@@ -117,8 +120,11 @@ public class Utils {
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_FOCUSED);
 		downSearch.addActionListener(a -> {
 			var index = lastSearchResult.getFirst() + 1;
-			if (index >= lastSearchResult.size() && lastSearchResult.size() > 1) {
+			if (index >= lastSearchResult.size()) {
 				index = 1;
+			}
+			if (index >= lastSearchResult.size()) {
+				return;
 			}
 			searchable.showSearch(lastSearchResult.get(index));
 			lastSearchResult.set(0, index);
@@ -126,7 +132,7 @@ public class Utils {
 		});
 		upSearch.addActionListener(a -> {
 			var index = lastSearchResult.getFirst() - 1;
-			if (index < 1 && lastSearchResult.size() > 1) {
+			if (index < 1) {
 				index = lastSearchResult.size() - 1;
 			}
 			searchable.showSearch(lastSearchResult.get(index));
@@ -154,8 +160,18 @@ public class Utils {
 		return none.equals("None") ? null : none;
 	}
 
-	public static File tryToFindCorePlugin(){
+	public static File tryToFindCorePlugin() {
 		return PluginLoader.INSTANCE.getPlugins().stream().filter(a -> a.getID().equals("core")).findFirst().get()
 				.getFile();
+	}
+
+	public static Map.Entry<String, String> splitSearch(String text) {
+		if (text.contains("=")) {
+			var sp = text.split("=");
+			return sp.length == 2 ?
+					Map.entry(sp[0], Rules.SearchRules.applyIgnoreCaseRule(sp[1])) :
+					Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(sp[0]));
+		}
+		return Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(text));
 	}
 }

@@ -31,6 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> implements ISearchable {
@@ -262,14 +263,24 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 		ComboBoxUtil.updateComboBoxContents(datalistName, stringArrayList);
 	}
 
-	public void doSearch(String text) {
+	public void doSearch(Map.Entry<String, String> search) {
 		lastSearchResult.clear();
 		// cache
 		lastSearchResult.add(0);
 		for (int i = 0; i < mappingEntries.size(); i++) {
 			var entry = mappingEntries.get(i);
+			AtomicInteger index = new AtomicInteger();
 			if (Stream.of(entry.getName(), entry.getMappingContent().toString())
-					.anyMatch(a -> a != null && Rules.SearchRules.applyIgnoreCaseRule(a).contains(text))) {
+					.map(a -> Map.entry(columns[index.getAndIncrement()], Rules.SearchRules.applyIgnoreCaseRule(a)))
+					.anyMatch(a -> {
+						if (!search.getKey().isBlank()) {
+							if (a.getKey().equalsIgnoreCase(search.getKey())) {
+								return a.getValue().contains(search.getValue());
+							}
+							return false;
+						}
+						return a.getValue().contains(search.getValue());
+					})) {
 				lastSearchResult.add(i);
 			}
 		}

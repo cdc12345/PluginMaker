@@ -26,13 +26,13 @@ public class TriggerModElement extends GeneratableElement {
 		return name;
 	}
 
-	@UsedByReflection
-	public String getLowerLetterSide() {
+	@UsedByReflection public String getLowerLetterSide() {
 		return side.toLowerCase(Locale.ROOT);
 	}
 
-	@UsedByReflection
-	public String getSuggestedName() {return getModElement().getName();}
+	@UsedByReflection public String getSuggestedName() {
+		return getModElement().getRegistryName().replace('_',' ');
+	}
 
 	public static class Dependency implements Cloneable {
 		private String name;
