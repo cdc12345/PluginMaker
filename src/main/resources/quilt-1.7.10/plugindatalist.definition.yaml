@@ -6,5 +6,4 @@ templates:
 
 localizationkeys:
   - key: dialog.selector.@registryname.message
-    condition: isNotEmptyDialogMessage()
     mapto: dialogMessage

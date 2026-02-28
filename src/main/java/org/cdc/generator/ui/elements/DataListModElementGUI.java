@@ -84,7 +84,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		generateDataList.setOpaque(false);
 		generateConfig.add(generateDataList);
 
-		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/datalistname"),
+		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/dialogmessage"),
 				L10N.label("elementgui.plugindatalist.dialog_message")));
 		dialogMessage.setOpaque(false);
 		generateConfig.add(dialogMessage);

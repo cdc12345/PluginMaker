@@ -25,17 +25,6 @@ public class DataListModElement extends GeneratableElement {
 		return datalistName;
 	}
 
-	public String getDialogMessage() {
-		if (dialogMessage != null && dialogMessage.isBlank()) {
-			return null;
-		}
-		return dialogMessage;
-	}
-
-	public boolean isNotEmptyDialogMessage() {
-		return getDialogMessage() != null;
-	}
-
 	public static class DataListEntry implements Cloneable {
 		public static DataListEntry copyValueOf(net.mcreator.minecraft.DataListEntry dataListEntry) {
 			var dataListEntry1 = new DataListModElement.DataListEntry(dataListEntry.getName(),
