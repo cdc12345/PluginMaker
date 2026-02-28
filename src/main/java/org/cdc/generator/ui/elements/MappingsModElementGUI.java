@@ -139,6 +139,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 					placeholder.setBorder(BorderFactory.createTitledBorder("Placeholders"));
 					JTextArea jTextArea = new JTextArea();
 					jTextArea.setOpaque(false);
+					jTextArea.setPreferredSize(Utils.tryToGetTextFieldSize());
 					JScrollPane jScrollPane = new JScrollPane(jTextArea);
 					jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 

@@ -118,6 +118,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 				if (columns[column].equals("Others")) {
 					JTextArea jTextArea = new JTextArea();
 					jTextArea.setOpaque(false);
+					jTextArea.setPreferredSize(Utils.tryToGetTextFieldSize());
 					JScrollPane jScrollPane = new JScrollPane(jTextArea);
 					jScrollPane.setBorder(BorderFactory.createTitledBorder("Properties"));
 					for (Map.Entry<String, String> other : row.getOthers()) {

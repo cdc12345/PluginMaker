@@ -74,6 +74,7 @@ public class Utils {
 		ComponentUtils.deriveFont(searchbar, 16);
 		searchbar.setOpaque(false);
 		searchbar.setBorder(BorderFactory.createEmptyBorder());
+		searchbar.setToolTipText("You can use \"=\" to filter type like name=name");
 
 		JPanel buttons = new JPanel(new FlowLayout());
 		buttons.setOpaque(false);

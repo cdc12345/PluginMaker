@@ -100,6 +100,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 				if (column1.equals("Gradle")) {
 					JTextArea jTextArea = new JTextArea();
 					jTextArea.setOpaque(false);
+					jTextArea.setPreferredSize(Utils.tryToGetTextFieldSize());
 					JScrollPane jScrollPane = new JScrollPane(jTextArea);
 					jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 					jTextArea.setText(row.getGradle());
@@ -115,9 +116,15 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 						isSelected, rowIndex, column);
 				if (column1.equals("Generator")) {
 					var selected = vComboBox.getSelectedItem();
+					vComboBox.removeAllItems();
 					for (String allSupportedGenerator : Utils.getAllSupportedGenerators()) {
-						generatorCom.addItem(allSupportedGenerator);
+						vComboBox.addItem(allSupportedGenerator);
 					}
+					vComboBox.setSelectedItem(selected);
+				} else if ("Version range".equals(column1)) {
+					var selected = vComboBox.getSelectedItem();
+					vComboBox.removeAllItems();
+					vComboBox.addItem("[0,)");
 					vComboBox.setSelectedItem(selected);
 				} else {
 					vComboBox.removeAllItems();
@@ -132,6 +139,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 				var row = configurations.get(rowIndex);
 				JTextArea jTextArea = new JTextArea();
 				jTextArea.setOpaque(false);
+				jTextArea.setPreferredSize(Utils.tryToGetTextFieldSize());
 				JScrollPane jScrollPane = new JScrollPane(jTextArea);
 				jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 				if (!row.getUpdateFiles().isEmpty()) {
