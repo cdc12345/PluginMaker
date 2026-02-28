@@ -13,7 +13,7 @@ repositories {
     }
 }
 
-group = 'net.mcreator.demojavaplugin'
+group = 'org.cdc.pluginmaker'
 version = new JsonSlurper().parse(file('src/main/resources/plugin.json'))['info']['version']
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -32,9 +32,6 @@ dependencies {
             }
     )
 
-    // Use "export" configuration for dependencies that should be included in the plugin (if MCreator does not provide them)
-    // export group: 'org.example', name: 'example-library', version: '1.2.3'
-    implementation 'com.github.OVNSAME:Modding:1.5.0'
 }
 
 tasks.jar {
