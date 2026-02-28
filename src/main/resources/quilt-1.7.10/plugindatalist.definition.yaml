@@ -3,3 +3,8 @@ templates:
     writer: file
     condition: generateDataList
     name: "@RESROOT/datalists/@[getDatalistName()].yaml"
+
+localizationkeys:
+  - key: dialog.selector.@registryname.message
+    condition: isNotEmptyDialogMessage()
+    mapto: dialogMessage

@@ -26,6 +26,8 @@ import org.jspecify.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -92,6 +94,11 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		this.triggerName.setPreferredSize(Utils.tryToGetTextFieldSize());
 		this.triggerName.setText(modElement.getRegistryName());
 		this.triggerName.setValidator(Rules.getTextfieldValidator(this.triggerName));
+		this.triggerName.addFocusListener(new FocusAdapter() {
+			@Override public void focusLost(FocusEvent e) {
+				modElement.setRegistryName(triggerName.getText());
+			}
+		});
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/name"),
 				L10N.label("elementgui.common.name")));
 		configuration.add(triggerName);

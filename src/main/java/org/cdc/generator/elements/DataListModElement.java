@@ -13,6 +13,7 @@ public class DataListModElement extends GeneratableElement {
 
 	public boolean generateDataList;
 	public String datalistName;
+	public String dialogMessage;
 
 	public List<DataListEntry> entries;
 
@@ -22,6 +23,17 @@ public class DataListModElement extends GeneratableElement {
 
 	public String getDatalistName() {
 		return datalistName;
+	}
+
+	public String getDialogMessage() {
+		if (dialogMessage != null && dialogMessage.isBlank()) {
+			return null;
+		}
+		return dialogMessage;
+	}
+
+	public boolean isNotEmptyDialogMessage() {
+		return getDialogMessage() != null;
 	}
 
 	public static class DataListEntry implements Cloneable {

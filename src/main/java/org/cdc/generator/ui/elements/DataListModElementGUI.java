@@ -12,6 +12,7 @@ import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.AggregatedValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
+import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.ui.workspace.WorkspacePanel;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
@@ -40,6 +41,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 
 	private final VComboBox<String> datalistName = new VComboBox<>();
 	private final JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
+	private final VTextField dialogMessage = new VTextField();
 
 	public List<DataListModElement.DataListEntry> entries;
 
@@ -62,7 +64,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 	}
 
 	@Override protected void initGUI() {
-		JPanel generateConfig = new JPanel(new GridLayout(2, 2));
+		JPanel generateConfig = new JPanel(new GridLayout(3, 2));
 		generateConfig.setBorder(BorderFactory.createTitledBorder("Config"));
 		generateConfig.setOpaque(false);
 
@@ -81,6 +83,11 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		generateDataList.setSelected(true);
 		generateDataList.setOpaque(false);
 		generateConfig.add(generateDataList);
+
+		generateConfig.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/datalistname"),
+				L10N.label("elementgui.plugindatalist.dialog_message")));
+		dialogMessage.setOpaque(false);
+		generateConfig.add(dialogMessage);
 
 		JPanel listPanel = new JPanel(new BorderLayout());
 		listPanel.setBorder(BorderFactory.createTitledBorder("Edit"));
@@ -176,6 +183,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 			refreshTable();
 		});
 		datalistName.addItemListener(e -> {
+			modElement.setRegistryName(datalistName.getSelectedItem());
 			reloadDataLists();
 			refreshTable();
 		});
@@ -199,9 +207,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 			return new AggregatedValidationResult.PASS();
 		}).validate(datalistName);
 
-		ResourcePanelIcons resourcePanelIcons = new ResourcePanelIcons((WorkspacePanel) mcreator.getWorkspacePanel(),this);
+		ResourcePanelIcons resourcePanelIcons = new ResourcePanelIcons((WorkspacePanel) mcreator.getWorkspacePanel(),
+				this);
 		resourcePanelIcons.reloadElements();
-		addPage("Icons",resourcePanelIcons);
+		addPage("Icons", resourcePanelIcons);
 	}
 
 	public void doSearch(String text) {
@@ -222,6 +231,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		this.entries = new ArrayList<>(generatableElement.entries);
 		this.generateDataList.setSelected(generatableElement.generateDataList);
 		this.datalistName.setSelectedItem(generatableElement.datalistName);
+		this.dialogMessage.setText(generatableElement.dialogMessage);
 	}
 
 	@Override public DataListModElement getElementFromGUI() {
@@ -229,6 +239,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		dataListModElement.datalistName = datalistName.getSelectedItem();
 		dataListModElement.generateDataList = generateDataList.isSelected();
 		dataListModElement.entries = entries.stream().map(DataListModElement.DataListEntry::clone).toList();
+		dataListModElement.dialogMessage = dialogMessage.getText();
 		return dataListModElement;
 	}
 
