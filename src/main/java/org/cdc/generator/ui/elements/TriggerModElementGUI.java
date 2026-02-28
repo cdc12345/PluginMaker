@@ -185,7 +185,9 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 			refreshTable();
 		});
 
-		addPage("trigger", PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, edit)));
+		addPage("trigger",
+				PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, edit))).validate(
+				triggerName);
 	}
 
 	@Override public void doSearch(Map.Entry<String, String> search) {

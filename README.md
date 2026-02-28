@@ -1,4 +1,4 @@
-# Demo MCreator Java plugin
+# PluginGenerator
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/MCreatpr/org.cdc.generator.DemoJavaPlugin/blob/master/LICENSE)
 

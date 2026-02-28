@@ -167,7 +167,7 @@ public class Utils {
 
 	public static Map.Entry<String, String> splitSearch(String text) {
 		if (text.contains("=")) {
-			var sp = text.split("=");
+			var sp = text.split("=",2);
 			return sp.length == 2 ?
 					Map.entry(sp[0], Rules.SearchRules.applyIgnoreCaseRule(sp[1])) :
 					Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(sp[0]));

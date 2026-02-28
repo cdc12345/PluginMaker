@@ -117,10 +117,13 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 				var row = entries.get(rowIndex);
 				if (columns[column].equals("Others")) {
 					JTextArea jTextArea = new JTextArea();
+					jTextArea.setOpaque(false);
+					JScrollPane jScrollPane = new JScrollPane(jTextArea);
+					jScrollPane.setBorder(BorderFactory.createTitledBorder("Properties"));
 					for (Map.Entry<String, String> other : row.getOthers()) {
 						jTextArea.append(other.getKey() + "=" + other.getValue());
 					}
-					int op = JOptionPane.showConfirmDialog(mcreator, jTextArea, "Edit others (Format: properties)",
+					int op = JOptionPane.showConfirmDialog(mcreator, jScrollPane, "Edit others (Format: properties)",
 							JOptionPane.YES_NO_OPTION);
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
@@ -184,7 +187,6 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 			refreshTable();
 		});
 		datalistName.addItemListener(e -> {
-			modElement.setRegistryName(datalistName.getSelectedItem());
 			reloadDataLists();
 			refreshTable();
 		});
@@ -246,6 +248,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 	}
 
 	@Override public DataListModElement getElementFromGUI() {
+		modElement.setRegistryName(datalistName.getSelectedItem());
 		DataListModElement dataListModElement = new DataListModElement(modElement);
 		dataListModElement.datalistName = datalistName.getSelectedItem();
 		dataListModElement.generateDataList = generateDataList.isSelected();

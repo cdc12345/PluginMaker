@@ -3,14 +3,8 @@ package org.cdc.generator.init;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.element.ModElementType;
 import net.mcreator.element.ModElementTypeLoader;
-import org.cdc.generator.elements.DataListModElement;
-import org.cdc.generator.elements.MappingsModElement;
-import org.cdc.generator.elements.TriggerModElement;
-import org.cdc.generator.elements.VariableModElement;
-import org.cdc.generator.ui.elements.DataListModElementGUI;
-import org.cdc.generator.ui.elements.MappingsModElementGUI;
-import org.cdc.generator.ui.elements.TriggerModElementGUI;
-import org.cdc.generator.ui.elements.VariableModElementGUI;
+import org.cdc.generator.elements.*;
+import org.cdc.generator.ui.elements.*;
 
 import javax.annotation.Nullable;
 
@@ -23,6 +17,8 @@ import javax.annotation.Nullable;
 			TriggerModElementGUI::new, TriggerModElement.class);
 	public static final ModElementType<VariableModElement> VARIABLE = register("pluginvariable", null,
 			VariableModElementGUI::new, VariableModElement.class);
+	public static final ModElementType<APIModElement> APIS = register("pluginapis", null, APIModElementGUI::new,
+			APIModElement.class);
 
 	private static <E extends GeneratableElement> ModElementType<E> register(String registryName,
 			@Nullable Character shortcut, ModElementType.ModElementGUIProvider<E> modElementGUIProvider,

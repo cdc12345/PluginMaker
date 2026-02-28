@@ -69,7 +69,7 @@ public class VariableModElementGUI extends ModElementGUI<VariableModElement> {
 		name.setText(modElement.getRegistryName());
 		name.setValidator(Rules.getTextfieldValidator(name));
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/name"),
-				L10N.label("elementgui.pluginvariable.name")));
+				L10N.label("elementgui.common.name")));
 		configuration.add(name);
 
 		blocklyVariableType.setOpaque(false);

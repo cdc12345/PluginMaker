@@ -139,7 +139,8 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 					placeholder.setBorder(BorderFactory.createTitledBorder("Placeholders"));
 					JTextArea jTextArea = new JTextArea();
 					jTextArea.setOpaque(false);
-					jTextArea.setBorder(BorderFactory.createTitledBorder("Lines"));
+					JScrollPane jScrollPane = new JScrollPane(jTextArea);
+					jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 
 					Stream.of("@NAME", "@UPPERNAME", "@name", "@SnakeCaseName", "@registryname", "@REGISTRYNAME")
 							.forEach(a -> {
@@ -152,13 +153,15 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 								});
 								placeholder.add(appendName);
 							});
-					jTextArea.append(row.getMappingContent().getFirst());
-					row.getMappingContent().stream().skip(1).forEach(a -> {
-						jTextArea.append("\n");
-						jTextArea.append(a);
-					});
+					if (!row.getMappingContent().isEmpty()) {
+						jTextArea.append(row.getMappingContent().getFirst());
+						row.getMappingContent().stream().skip(1).forEach(a -> {
+							jTextArea.append("\n");
+							jTextArea.append(a);
+						});
+					}
 					int op = JOptionPane.showConfirmDialog(mcreator,
-							PanelUtils.northAndCenterElement(placeholder, jTextArea),
+							PanelUtils.northAndCenterElement(placeholder, jScrollPane),
 							"Edit Mapping (one line one item)", JOptionPane.YES_NO_OPTION);
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
@@ -247,6 +250,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 		element.datalistName = datalistName.getSelectedItem();
 		element.generatorName = generator.getSelectedItem();
 		element.mappingsContent = mappingEntries.stream().map(MappingsModElement.MappingEntry::clone).toList();
+		modElement.setRegistryName(element.getDatalistName());
 		return element;
 	}
 
