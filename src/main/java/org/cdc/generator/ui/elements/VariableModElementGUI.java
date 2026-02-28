@@ -31,8 +31,8 @@ public class VariableModElementGUI extends ModElementGUI<VariableModElement> {
 	private final VTextField blocklyVariableType = new VTextField();
 	private final JCheckBox ignoredByCoverage = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox nullable = L10N.checkbox("elementgui.common.enable");
-	private JStringListField requiredApis;
-	private JColor color;
+	private final JStringListField requiredApis;
+	private final JColor color;
 	private final VComboBox<String> builtInColor;
 
 	public VariableModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
