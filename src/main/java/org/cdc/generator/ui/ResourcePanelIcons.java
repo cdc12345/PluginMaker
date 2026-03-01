@@ -38,7 +38,8 @@ public class ResourcePanelIcons extends AbstractResourcePanel<File> {
 					"*.png", new ExtensionFilter("PNG", "png"));
 			if (files.length > 0) {
 				var file = files[0];
-				FileIO.copyFile(file, new File(dataListIcon, file.getName().toUpperCase()));
+				var name = file.getName();
+				FileIO.copyFile(file, new File(dataListIcon, name.replace(Files.getNameWithoutExtension(name),Files.getNameWithoutExtension(name).toUpperCase())));
 				reloadElements();
 			}
 		});
