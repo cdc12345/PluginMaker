@@ -28,7 +28,6 @@ public class ZipUtils {
         return result;
     }
 
-    @Deprecated
     public static List<String> tryToGetTexturesFromZip(File coreZip){
 		try {
             var list = new ArrayList<String>();

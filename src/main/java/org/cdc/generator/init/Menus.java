@@ -12,7 +12,6 @@ import javax.swing.event.MenuListener;
 import java.awt.datatransfer.StringSelection;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -48,11 +47,7 @@ public class Menus {
 				if (mCreator.getTabs().getCurrentTab()
 						.getContent() instanceof DataListModElementGUI dataListModElementGUI) {
 					calculateTypes.removeAll();
-					var types = new HashSet<String>();
-					for (DataListModElement.DataListEntry entry : dataListModElementGUI.entries) {
-						types.add(entry.getType());
-					}
-					types.forEach(a -> {
+					dataListModElementGUI.getTypes().forEach(a -> {
 						var menuItem = new JMenuItem(a);
 						menuItem.addActionListener(e1 -> {
 							var content = new StringSelection(a);

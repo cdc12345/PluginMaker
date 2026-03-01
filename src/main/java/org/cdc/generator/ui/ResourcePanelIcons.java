@@ -18,22 +18,27 @@ import org.cdc.generator.ui.elements.DataListModElementGUI;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ResourcePanelIcons extends AbstractResourcePanel<File> {
 
 	private File dataListIcon;
+	private List<File> files;
 
 	public ResourcePanelIcons(WorkspacePanel workspacePanel, DataListModElementGUI dataListModElementGUI) {
 		super(workspacePanel, new ResourceFilterModel<>(workspacePanel, File::getName), new Render(),
 				JList.HORIZONTAL_WRAP);
+
+		this.files = new ArrayList<>();
 
 		addToolBarButton("workspace.textures.import", UIRES.get("16px.open"), event -> {
 			var files = FileDialogs.getFileChooserDialog(workspacePanel.getMCreator(), FileChooserType.OPEN, false,
 					"*.png", new ExtensionFilter("PNG", "png"));
 			if (files.length > 0) {
 				var file = files[0];
-				FileIO.copyFile(file, new File(dataListIcon, file.getName()));
+				FileIO.copyFile(file, new File(dataListIcon, file.getName().toUpperCase()));
 				reloadElements();
 			}
 		});
@@ -60,15 +65,22 @@ public class ResourcePanelIcons extends AbstractResourcePanel<File> {
 	}
 
 	@Override public void reloadElements() {
+		files.clear();
 		List<File> selected = elementList.getSelectedValuesList();
 
 		filterModel.removeAllElements();
 		File[] mod_images = dataListIcon.listFiles();
 
-		if (mod_images != null)
+		if (mod_images != null) {
+			files.addAll(List.of(mod_images));
 			filterModel.addAll(List.of(mod_images));
+		}
 
 		ListUtil.setSelectedValues(elementList, selected);
+	}
+
+	public List<File> getAllElements() {
+		return Collections.unmodifiableList(files);
 	}
 
 	static class Render extends JLabel implements ListCellRenderer<File> {

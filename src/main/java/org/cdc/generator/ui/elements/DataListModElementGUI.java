@@ -1,5 +1,6 @@
 package org.cdc.generator.ui.elements;
 
+import com.google.common.io.Files;
 import net.mcreator.minecraft.DataListEntry;
 import net.mcreator.minecraft.DataListLoader;
 import net.mcreator.ui.MCreator;
@@ -15,10 +16,12 @@ import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.ui.workspace.WorkspacePanel;
 import net.mcreator.workspace.elements.ModElement;
+import org.cdc.generator.PluginMain;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.ui.ResourcePanelIcons;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
+import org.cdc.generator.utils.ZipUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -26,6 +29,7 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -49,6 +53,8 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 	// the 0 is the last search index
 	private final ArrayList<Integer> lastSearchResult;
 	private JTable jTable;
+	private ResourcePanelIcons resourcePanelIcons;
+	private HashSet<String> types;
 
 	public DataListModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
@@ -109,11 +115,15 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 				return label;
 			}
 		});
-		jTable.setDefaultEditor(String.class, new DefaultCellEditor(new JTextField()) {
+		var comboBox = new VComboBox<>();
+		comboBox.setEditable(true);
+		types = new HashSet<String>();
+		jTable.setDefaultEditor(String.class, new DefaultCellEditor(comboBox) {
 
 			@Override
 			public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
 					int column) {
+				comboBox.removeAllItems();
 				var row = entries.get(rowIndex);
 				if (columns[column].equals("Others")) {
 					JTextArea jTextArea = new JTextArea();
@@ -139,6 +149,26 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 						}
 					}
 					return null;
+				} else if ("Texture".equals(columns[column])) {
+					for (File element : resourcePanelIcons.getAllElements()) {
+						comboBox.addItem(Files.getNameWithoutExtension(element.getName()));
+					}
+					var file = Utils.tryToFindCorePlugin();
+					PluginMain.LOG.info(file);
+					if (file.isDirectory()) {
+						var file1 = new File(file, "datalists/icons");
+						for (File listFile : Objects.requireNonNullElse(file1.listFiles(),new File[0])) {
+							comboBox.addItem(Files.getNameWithoutExtension(listFile.getName()));
+						}
+					} else {
+						for (String s : ZipUtils.tryToGetTexturesFromZip(file)) {
+							comboBox.addItem(s);
+						}
+					}
+				} else if ("Type".equals(columns[column])) {
+					for (String type : types) {
+						comboBox.addItem(type);
+					}
 				}
 				return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
 			}
@@ -211,8 +241,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 			return new AggregatedValidationResult.PASS();
 		}).validate(datalistName);
 
-		ResourcePanelIcons resourcePanelIcons = new ResourcePanelIcons((WorkspacePanel) mcreator.getWorkspacePanel(),
-				this);
+		resourcePanelIcons = new ResourcePanelIcons((WorkspacePanel) mcreator.getWorkspacePanel(), this);
 		resourcePanelIcons.reloadElements();
 		addPage("Icons", resourcePanelIcons);
 	}
@@ -246,6 +275,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		this.generateDataList.setSelected(generatableElement.generateDataList);
 		this.datalistName.setSelectedItem(generatableElement.datalistName);
 		this.dialogMessage.setText(generatableElement.dialogMessage);
+
+		for (DataListModElement.DataListEntry entry : entries) {
+			types.add(entry.getType());
+		}
 	}
 
 	@Override public DataListModElement getElementFromGUI() {
@@ -271,6 +304,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 				entries.add(dataListEntry1);
 			}
 		}
+	}
+
+	public HashSet<String> getTypes() {
+		return types;
 	}
 
 	public void refreshTable() {

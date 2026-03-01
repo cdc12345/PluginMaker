@@ -98,13 +98,57 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 				var row = configurations.get(rowIndex);
 				var column1 = columns[column];
 				if (column1.equals("Gradle")) {
+					JToolBar toolBar = new JToolBar();
+					toolBar.setOpaque(false);
+					toolBar.setBorder(BorderFactory.createTitledBorder("Gradles"));
+					JButton forge = new JButton(UIRES.get("16px.forge"));
+					forge.setToolTipText("ForgeGradle");
+					toolBar.add(forge);
+					JButton neo = new JButton(UIRES.get("16px.neoforge"));
+					neo.setToolTipText("ModDevGradle");
+					toolBar.add(neo);
+					JButton legacyNeo = new JButton(UIRES.get("16px.neoforge"));
+					legacyNeo.setToolTipText("NeoLegacyGradle");
+					toolBar.add(legacyNeo);
+
 					JTextArea jTextArea = new JTextArea();
 					jTextArea.setOpaque(false);
-					jTextArea.setPreferredSize(Utils.tryToGetTextFieldSize());
 					JScrollPane jScrollPane = new JScrollPane(jTextArea);
+					jScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 					jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 					jTextArea.setText(row.getGradle());
-					int op = JOptionPane.showConfirmDialog(mcreator, jScrollPane, "Edit Gradle (one line one item)",
+					forge.addActionListener(a -> {
+						try (var stream = APIModElement.class.getResourceAsStream(
+								"/quilt-1.7.10/templates/apis/forgegradle.ftl")) {
+							if (stream != null) {
+								jTextArea.setText(new String(stream.readAllBytes()));
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					});
+					neo.addActionListener(a -> {
+						try (var stream = APIModElement.class.getResourceAsStream(
+								"/quilt-1.7.10/templates/apis/moddevgradle.ftl")) {
+							if (stream != null) {
+								jTextArea.setText(new String(stream.readAllBytes()));
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					});
+					legacyNeo.addActionListener(a -> {
+						try (var stream = APIModElement.class.getResourceAsStream(
+								"/quilt-1.7.10/templates/apis/legacymoddevgradle.ftl")) {
+							if (stream != null) {
+								jTextArea.setText(new String(stream.readAllBytes()));
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					});
+					int op = JOptionPane.showConfirmDialog(mcreator,
+							PanelUtils.northAndCenterElement(toolBar, jScrollPane), "Edit Gradle (one line one item)",
 							JOptionPane.YES_NO_OPTION);
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
@@ -137,9 +181,9 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 			public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
 					int column) {
 				var row = configurations.get(rowIndex);
+
 				JTextArea jTextArea = new JTextArea();
 				jTextArea.setOpaque(false);
-				jTextArea.setPreferredSize(Utils.tryToGetTextFieldSize());
 				JScrollPane jScrollPane = new JScrollPane(jTextArea);
 				jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 				if (!row.getUpdateFiles().isEmpty()) {
