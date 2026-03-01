@@ -129,22 +129,22 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		edit.setBorder(BorderFactory.createTitledBorder("Parameters"));
 
 		var typeComboBox = new VComboBox<String>();
-		for (VariableType allVariableType : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
-			typeComboBox.addItem(allVariableType.getName());
-		}
+		typeComboBox.setOpaque(false);
 		typeComboBox.setEditable(true);
 
 		jTable = new JTable(new TriggerModElementGUITableModul());
-		jTable.setDefaultEditor(String.class, new DefaultCellEditor(new JTextField()) {
+		jTable.setDefaultEditor(String.class, new DefaultCellEditor(typeComboBox) {
 			@Override
 			public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
 					int columnIndex) {
 				var row = dependencies.get(rowIndex);
 				var columnName = columns[columnIndex];
+				typeComboBox.removeAllItems();
 				if (columnName.equals("Type")) {
-					typeComboBox.setSelectedItem(row.getType());
+					for (VariableType allVariableType : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
+						typeComboBox.addItem(allVariableType.getName());
+					}
 					typeComboBox.addItemListener(e -> row.setType(typeComboBox.getSelectedItem()));
-					return typeComboBox;
 				}
 				return super.getTableCellEditorComponent(table, value, isSelected, rowIndex, columnIndex);
 			}

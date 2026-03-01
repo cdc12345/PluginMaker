@@ -27,7 +27,6 @@ public class ResourcePanelCorePack extends JPanel implements IReloadableFilterab
 
 	private final JFileTree tree;
 	private final FilteredTreeModel model;
-	private String selected;
 
 	public ResourcePanelCorePack(WorkspacePanel workspacePanel) {
 		super(new BorderLayout());

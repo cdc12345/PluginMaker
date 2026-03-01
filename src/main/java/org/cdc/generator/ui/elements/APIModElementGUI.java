@@ -12,6 +12,7 @@ import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.APIModElement;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
+import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.jspecify.annotations.NonNull;
@@ -77,6 +78,30 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 		generators = new JTable(new APIModElementGUITableRenderer());
 		generators.setOpaque(false);
 		generators.setFillsViewportHeight(true);
+		VComboBox<String> generatorCom = new VComboBox<>();
+		generatorCom.setEditable(true);
+		JScrollPane jScrollPane = new JScrollPane(generators);
+
+		JToolBar bar = new JToolBar();
+		bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
+		bar.setFloatable(false);
+		bar.setOpaque(false);
+
+		JButton addrow = new JButton(UIRES.get("16px.add"));
+		addrow.setContentAreaFilled(false);
+		addrow.setOpaque(false);
+		ComponentUtils.deriveFont(addrow, 11);
+		addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
+		bar.add(addrow);
+
+		JButton remrow = new JButton(UIRES.get("16px.delete"));
+		remrow.setContentAreaFilled(false);
+		remrow.setOpaque(false);
+		ComponentUtils.deriveFont(remrow, 11);
+		remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
+		bar.add(remrow);
+		bar.add(Utils.initSearchComponent(lastSearchResult, this));
+
 		generators.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -89,14 +114,12 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 				return label;
 			}
 		});
-		VComboBox<String> generatorCom = new VComboBox<>();
-		generatorCom.setEditable(true);
 		generators.setDefaultEditor(String.class, new DefaultCellEditor(generatorCom) {
 			@Override
 			public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
-					int column) {
+					int columnIndex) {
 				var row = configurations.get(rowIndex);
-				var column1 = columns[column];
+				var column1 = columns[columnIndex];
 				if (column1.equals("Gradle")) {
 					JToolBar toolBar = new JToolBar();
 					toolBar.setOpaque(false);
@@ -112,11 +135,6 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 					toolBar.add(legacyNeo);
 
 					JTextArea jTextArea = new JTextArea();
-					jTextArea.setOpaque(false);
-					JScrollPane jScrollPane = new JScrollPane(jTextArea);
-					jScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-					jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
-					jTextArea.setText(row.getGradle());
 					forge.addActionListener(a -> {
 						try (var stream = APIModElement.class.getResourceAsStream(
 								"/quilt-1.7.10/templates/apis/forgegradle.ftl")) {
@@ -147,33 +165,27 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 							throw new RuntimeException(e);
 						}
 					});
-					int op = JOptionPane.showConfirmDialog(mcreator,
-							PanelUtils.northAndCenterElement(toolBar, jScrollPane), "Edit Gradle (one line one item)",
-							JOptionPane.YES_NO_OPTION);
+					int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, toolBar, mcreator,
+							"Edit Gradle (one line one item)", row.getYamlGradle());
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
 						row.setGradle(str);
 					}
 					return null;
 				}
-				VComboBox<String> vComboBox = (VComboBox<String>) super.getTableCellEditorComponent(table, value,
-						isSelected, rowIndex, column);
+				generatorCom.removeAllItems();
 				if (column1.equals("Generator")) {
-					var selected = vComboBox.getSelectedItem();
-					vComboBox.removeAllItems();
+					var selected = generatorCom.getSelectedItem();
 					for (String allSupportedGenerator : Utils.getAllSupportedGenerators()) {
-						vComboBox.addItem(allSupportedGenerator);
+						generatorCom.addItem(allSupportedGenerator);
 					}
-					vComboBox.setSelectedItem(selected);
+					generatorCom.setSelectedItem(selected);
 				} else if ("Version range".equals(column1)) {
-					var selected = vComboBox.getSelectedItem();
-					vComboBox.removeAllItems();
-					vComboBox.addItem("[0,)");
-					vComboBox.setSelectedItem(selected);
-				} else {
-					vComboBox.removeAllItems();
+					var selected = generatorCom.getSelectedItem();
+					generatorCom.addItem("[0,)");
+					generatorCom.setSelectedItem(selected);
 				}
-				return vComboBox;
+				return super.getTableCellEditorComponent(table, value, isSelected, rowIndex, columnIndex);
 			}
 		});
 		generators.setDefaultEditor(List.class, new DefaultCellEditor(new JTextField()) {
@@ -183,18 +195,8 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 				var row = configurations.get(rowIndex);
 
 				JTextArea jTextArea = new JTextArea();
-				jTextArea.setOpaque(false);
-				JScrollPane jScrollPane = new JScrollPane(jTextArea);
-				jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
-				if (!row.getUpdateFiles().isEmpty()) {
-					jTextArea.append(row.getUpdateFiles().getFirst());
-					row.getUpdateFiles().stream().skip(1).forEach(a -> {
-						jTextArea.append("\n");
-						jTextArea.append(a);
-					});
-				}
-				int op = JOptionPane.showConfirmDialog(mcreator, jScrollPane, "Edit Update files (one line one item)",
-						JOptionPane.YES_NO_OPTION);
+				int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
+						"Edit Update files (one line one item)", row.getUpdateFiles());
 				if (op == JOptionPane.YES_OPTION) {
 					String str = jTextArea.getText();
 					BufferedReader bufferedReader = new BufferedReader(new StringReader(str));
@@ -212,28 +214,6 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 				return null;
 			}
 		});
-		JScrollPane jScrollPane = new JScrollPane(generators);
-
-		JToolBar bar = new JToolBar();
-		bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
-		bar.setFloatable(false);
-		bar.setOpaque(false);
-
-		JButton addrow = new JButton(UIRES.get("16px.add"));
-		addrow.setContentAreaFilled(false);
-		addrow.setOpaque(false);
-		ComponentUtils.deriveFont(addrow, 11);
-		addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
-		bar.add(addrow);
-
-		JButton remrow = new JButton(UIRES.get("16px.delete"));
-		remrow.setContentAreaFilled(false);
-		remrow.setOpaque(false);
-		ComponentUtils.deriveFont(remrow, 11);
-		remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
-		bar.add(remrow);
-		bar.add(Utils.initSearchComponent(lastSearchResult, this));
-
 		addrow.addActionListener(e -> {
 			var config = new APIModElement.Configuration();
 			config.setGenerator(PluginMakerPreference.INSTANCE.preferGenerator.get());

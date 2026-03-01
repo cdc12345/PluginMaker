@@ -15,6 +15,7 @@ import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.elements.MappingsModElement;
 import org.cdc.generator.init.ModElementTypes;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
+import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.jspecify.annotations.NonNull;
@@ -138,10 +139,6 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 					placeholder.setLayout(new GridLayout(2, 3));
 					placeholder.setBorder(BorderFactory.createTitledBorder("Placeholders"));
 					JTextArea jTextArea = new JTextArea();
-					jTextArea.setOpaque(false);
-					jTextArea.setPreferredSize(Utils.tryToGetTextFieldSize());
-					JScrollPane jScrollPane = new JScrollPane(jTextArea);
-					jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 
 					Stream.of("@NAME", "@UPPERNAME", "@name", "@SnakeCaseName", "@registryname", "@REGISTRYNAME")
 							.forEach(a -> {
@@ -154,16 +151,8 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 								});
 								placeholder.add(appendName);
 							});
-					if (!row.getMappingContent().isEmpty()) {
-						jTextArea.append(row.getMappingContent().getFirst());
-						row.getMappingContent().stream().skip(1).forEach(a -> {
-							jTextArea.append("\n");
-							jTextArea.append(a);
-						});
-					}
-					int op = JOptionPane.showConfirmDialog(mcreator,
-							PanelUtils.northAndCenterElement(placeholder, jScrollPane),
-							"Edit Mapping (one line one item)", JOptionPane.YES_NO_OPTION);
+					int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, placeholder, mcreator,
+							"Edit Mapping (one line one item)", row.getMappingContent());
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
 						BufferedReader bufferedReader = new BufferedReader(new StringReader(str));

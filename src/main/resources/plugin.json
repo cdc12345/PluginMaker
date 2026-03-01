@@ -2,8 +2,7 @@
   "id": "plugin_generator",
   "supportedversions": [
     202600199999,
-    2026001,
-    2025003
+    2026001
   ],
   "weight": 0,
   "javaplugin": "org.cdc.generator.PluginMain",

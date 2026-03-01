@@ -19,6 +19,7 @@ import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.PluginMain;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.ui.ResourcePanelIcons;
+import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
@@ -36,6 +37,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -55,6 +59,9 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 	private JTable jTable;
 	private ResourcePanelIcons resourcePanelIcons;
 	private HashSet<String> types;
+
+	private ThreadPoolExecutor searchThread = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS,
+			new ArrayBlockingQueue<>(1));
 
 	public DataListModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
@@ -127,15 +134,8 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 				var row = entries.get(rowIndex);
 				if (columns[column].equals("Others")) {
 					JTextArea jTextArea = new JTextArea();
-					jTextArea.setOpaque(false);
-					jTextArea.setPreferredSize(Utils.tryToGetTextFieldSize());
-					JScrollPane jScrollPane = new JScrollPane(jTextArea);
-					jScrollPane.setBorder(BorderFactory.createTitledBorder("Properties"));
-					for (Map.Entry<String, String> other : row.getOthers()) {
-						jTextArea.append(other.getKey() + "=" + other.getValue());
-					}
-					int op = JOptionPane.showConfirmDialog(mcreator, jScrollPane, "Edit others (Format: properties)",
-							JOptionPane.YES_NO_OPTION);
+					int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
+							"Edit others (Format: properties)", row.getOthers());
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
 						var prop = new Properties();
@@ -157,7 +157,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 					PluginMain.LOG.info(file);
 					if (file.isDirectory()) {
 						var file1 = new File(file, "datalists/icons");
-						for (File listFile : Objects.requireNonNullElse(file1.listFiles(),new File[0])) {
+						for (File listFile : Objects.requireNonNullElse(file1.listFiles(), new File[0])) {
 							comboBox.addItem(Files.getNameWithoutExtension(listFile.getName()));
 						}
 					} else {

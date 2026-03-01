@@ -98,6 +98,9 @@ public class PluginMain extends JavaPlugin {
 		});
 
 		addListener(WorkspaceBuildStartedEvent.class, event -> {
+			if (Utils.isNotPluginGenerator(event.getMCreator().getGenerator())) {
+				return;
+			}
 			FileIO.removeEmptyDirs(event.getMCreator().getGenerator().getModAssetsRoot());
 		});
 
@@ -106,7 +109,7 @@ public class PluginMain extends JavaPlugin {
 			Menus.MAPPING_UTILS.setVisible(event.getTab().getContent() instanceof MappingsModElementGUI);
 		});
 
-		addListener(ApplicationLoadedEvent.class,event -> {
+		addListener(ApplicationLoadedEvent.class, event -> {
 			PluginMakerPreference.INSTANCE = new PluginMakerPreference("plugin_generator");
 		});
 	}
