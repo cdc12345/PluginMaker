@@ -149,7 +149,7 @@ public class Utils {
 
 	public static Dimension tryToGetTextFieldSize() {
 		var dimen = Toolkit.getDefaultToolkit().getScreenSize();
-		return new Dimension(dimen.width / 10, dimen.height / 30);
+		return new Dimension(dimen.width / 8, dimen.height / 30);
 	}
 
 	public static String formatColor(Color color) {
@@ -178,7 +178,7 @@ public class Utils {
 		return Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(text));
 	}
 
-	public static void initTable(JTable jTable) {
+	public static void initTable(JTable jTable, List<?> list) {
 		jTable.addMouseListener(new MouseAdapter() {
 			@Override public void mouseClicked(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON3 && jTable.rowAtPoint(e.getPoint()) != jTable.getSelectedRow()) {

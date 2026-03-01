@@ -88,6 +88,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		datalistName.setValidator(Rules.getComboBoxValidator(datalistName));
 		datalistName.setEditable(true);
 		datalistName.setSelectedItem(modElement.getRegistryName());
+		datalistName.setPreferredSize(Utils.tryToGetTextFieldSize());
 		var list = DataListLoader.getCache().keySet().stream().sorted().toList();
 		ComboBoxUtil.updateComboBoxContents(datalistName, list);
 		generateConfig.add(datalistName);
@@ -108,7 +109,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		listPanel.setOpaque(false);
 
 		entriesTable = new JTable(new DataListTableModel());
-		Utils.initTable(entriesTable);
+		Utils.initTable(entriesTable, entries);
 		entriesTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,

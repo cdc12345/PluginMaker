@@ -119,6 +119,7 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 
 		this.side.setOpaque(false);
 		this.side.setSelectedItem("BOTH");
+		this.side.setPreferredSize(Utils.tryToGetTextFieldSize());
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/side"),
 				L10N.label("elementgui.plugintrigger.side")));
 		configuration.add(side);
@@ -136,7 +137,7 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		typeComboBox.setEditable(true);
 
 		jTable = new JTable(new TriggerModElementGUITableModul());
-		Utils.initTable(jTable);
+		Utils.initTable(jTable, dependencies);
 		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,

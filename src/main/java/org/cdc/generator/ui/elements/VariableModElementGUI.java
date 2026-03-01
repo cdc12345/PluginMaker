@@ -68,6 +68,7 @@ public class VariableModElementGUI extends ModElementGUI<VariableModElement> {
 		name.setOpaque(false);
 		name.setText(modElement.getRegistryName());
 		name.setValidator(Rules.getTextfieldValidator(name));
+		name.setPreferredSize(Utils.tryToGetTextFieldSize());
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/name"),
 				L10N.label("elementgui.common.name")));
 		configuration.add(name);

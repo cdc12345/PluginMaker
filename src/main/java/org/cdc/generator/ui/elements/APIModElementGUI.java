@@ -63,6 +63,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 		configuration.setBorder(BorderFactory.createTitledBorder("Configuration"));
 
 		name.setOpaque(false);
+		name.setPreferredSize(Utils.tryToGetTextFieldSize());
 		name.setValidator(Rules.getTextfieldValidator(name));
 		name.setText(modElement.getRegistryName());
 		configuration.add(
@@ -70,13 +71,14 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 		configuration.add(name);
 
 		displayName.setOpaque(false);
+		displayName.setPreferredSize(Utils.tryToGetTextFieldSize());
 		displayName.setText(modElement.getName());
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginapi/displayname"),
 				L10N.label("elementgui.pluginapi.display_name")));
 		configuration.add(displayName);
 
 		generators = new JTable(new APIModElementGUITableRenderer());
-		Utils.initTable(generators);
+		Utils.initTable(generators, configurations);
 		JScrollPane jScrollPane = new JScrollPane(generators);
 
 		JToolBar bar = new JToolBar();
