@@ -49,7 +49,7 @@ public class Rules {
 		float[] hsbvals = new float[3];
 		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbvals);
 
-		double hue = Math.ceil(hsbvals[0] * 100);
+		double hue = Math.ceil(hsbvals[0] * 360);
 		double saturation = Math.ceil(hsbvals[1] * 100);
 		double brightness = Math.ceil(hsbvals[2] * 100);
 
