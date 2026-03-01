@@ -109,9 +109,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 		syncWithDatalist.setOpaque(false);
 
 		jTable = new JTable(new MappingTableModel());
-		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		jTable.setFillsViewportHeight(true);
-		jTable.setOpaque(false);
+		Utils.initTable(jTable);
 
 		JScrollPane scrollPane = new JScrollPane(jTable);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);

@@ -56,7 +56,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 
 	// the 0 is the last search index
 	private final ArrayList<Integer> lastSearchResult;
-	private JTable jTable;
+	private JTable entriesTable;
 	private ResourcePanelIcons resourcePanelIcons;
 	private HashSet<String> types;
 
@@ -107,13 +107,14 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		listPanel.setBorder(BorderFactory.createTitledBorder("Edit"));
 		listPanel.setOpaque(false);
 
-		jTable = new JTable(new DataListTableModel());
-		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
+		entriesTable = new JTable(new DataListTableModel());
+		Utils.initTable(entriesTable);
+		entriesTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
 					boolean hasFocus, int rowIndex, int column) {
 				var row = entries.get(rowIndex);
-				JLabel label = (JLabel) super.getTableCellRendererComponent(jTable, value, isSelected, hasFocus,
+				JLabel label = (JLabel) super.getTableCellRendererComponent(entriesTable, value, isSelected, hasFocus,
 						rowIndex, column);
 				if (value != null)
 					label.setToolTipText(value + ", index=" + rowIndex);
@@ -124,8 +125,8 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		});
 		var comboBox = new VComboBox<>();
 		comboBox.setEditable(true);
-		types = new HashSet<String>();
-		jTable.setDefaultEditor(String.class, new DefaultCellEditor(comboBox) {
+		types = new HashSet<>();
+		entriesTable.setDefaultEditor(String.class, new DefaultCellEditor(comboBox) {
 
 			@Override
 			public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
@@ -170,14 +171,11 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 						comboBox.addItem(type);
 					}
 				}
-				return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
+				return super.getTableCellEditorComponent(entriesTable, value1, isSelected, rowIndex, column);
 			}
 		});
-		jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		jTable.setFillsViewportHeight(true);
-		jTable.setOpaque(false);
 
-		JScrollPane scrollPane = new JScrollPane(jTable);
+		JScrollPane scrollPane = new JScrollPane(entriesTable);
 		scrollPane.setOpaque(false);
 
 		JToolBar bar = new JToolBar();
@@ -191,7 +189,6 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		ComponentUtils.deriveFont(addrow, 11);
 		addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
 		bar.add(addrow);
-
 		JButton remrow = new JButton(UIRES.get("16px.delete"));
 		remrow.setContentAreaFilled(false);
 		remrow.setOpaque(false);
@@ -211,10 +208,10 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 			refreshTable();
 		});
 		remrow.addActionListener(e -> {
-			var rowIndex = jTable.getSelectedRows();
-			for (int index : rowIndex) {
-				entries.remove(index);
-			}
+			entriesTable.editCellAt(-1, 0);
+			Arrays.stream(entriesTable.getSelectedRows()).mapToObj(b -> entries.get(b)).forEach(c -> {
+				entries.remove(c);
+			});
 			refreshTable();
 		});
 		datalistName.addItemListener(e -> {
@@ -233,7 +230,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 				if (!names.contains(entry.getName())) {
 					names.add(entry.getName());
 				} else {
-					jTable.changeSelection(i, 0, false, false);
+					entriesTable.changeSelection(i, 0, false, false);
 					return new AggregatedValidationResult.FAIL("Duplicative name in datalist");
 				}
 
@@ -312,13 +309,13 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 
 	public void refreshTable() {
 		SwingUtilities.invokeLater(() -> {
-			jTable.repaint();
-			jTable.revalidate();
+			entriesTable.repaint();
+			entriesTable.revalidate();
 		});
 	}
 
 	@Override public void showSearch(int index) {
-		jTable.changeSelection(index, 0, false, false);
+		entriesTable.changeSelection(index, 0, false, false);
 	}
 
 	private class DataListTableModel extends AbstractTableModel {

@@ -17,6 +17,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,11 +170,25 @@ public class Utils {
 
 	public static Map.Entry<String, String> splitSearch(String text) {
 		if (text.contains("=")) {
-			var sp = text.split("=",2);
+			var sp = text.split("=", 2);
 			return sp.length == 2 ?
 					Map.entry(sp[0], Rules.SearchRules.applyIgnoreCaseRule(sp[1])) :
 					Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(sp[0]));
 		}
 		return Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(text));
+	}
+
+	public static void initTable(JTable jTable) {
+		jTable.addMouseListener(new MouseAdapter() {
+			@Override public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3 && jTable.rowAtPoint(e.getPoint()) != jTable.getSelectedRow()) {
+					jTable.clearSelection();
+					jTable.editCellAt(-1, 0);
+				}
+			}
+		});
+		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		jTable.setFillsViewportHeight(true);
+		jTable.setOpaque(false);
 	}
 }

@@ -8,6 +8,7 @@ import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
+import net.mcreator.ui.laf.themes.Theme;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.Validator;
@@ -25,12 +26,14 @@ import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -133,24 +136,36 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		typeComboBox.setEditable(true);
 
 		jTable = new JTable(new TriggerModElementGUITableModul());
+		Utils.initTable(jTable);
+		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				var label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+						column);
+				label.setForeground(Theme.current().getForegroundColor());
+				if (columns[column].equals("Type")) {
+					if (VariableTypeLoader.INSTANCE.doesVariableTypeExist(label.getText())) {
+						label.setForeground(VariableTypeLoader.INSTANCE.fromName(label.getText()).getBlocklyColor());
+					}
+				}
+				return label;
+			}
+		});
 		jTable.setDefaultEditor(String.class, new DefaultCellEditor(typeComboBox) {
 			@Override
 			public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
 					int columnIndex) {
-				var row = dependencies.get(rowIndex);
 				var columnName = columns[columnIndex];
 				typeComboBox.removeAllItems();
 				if (columnName.equals("Type")) {
 					for (VariableType allVariableType : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
 						typeComboBox.addItem(allVariableType.getName());
 					}
-					typeComboBox.addItemListener(e -> row.setType(typeComboBox.getSelectedItem()));
 				}
 				return super.getTableCellEditorComponent(table, value, isSelected, rowIndex, columnIndex);
 			}
 		});
-		jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		jTable.setFillsViewportHeight(true);
 		JScrollPane jScrollPane = new JScrollPane(jTable);
 		edit.add("Center", jScrollPane);
 
@@ -174,14 +189,14 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		edit.add("North", bar);
 
 		addrow.addActionListener(a -> {
-			dependencies.add(new TriggerModElement.Dependency("name", "type"));
+			dependencies.add(new TriggerModElement.Dependency("name" + dependencies.size(), "type"));
 			refreshTable();
 		});
 		remrow.addActionListener(a -> {
-			var rowIndex = jTable.getSelectedRows();
-			for (int index : rowIndex) {
-				dependencies.remove(index);
-			}
+			jTable.editCellAt(-1, 0);
+			Arrays.stream(jTable.getSelectedRows()).mapToObj(b -> dependencies.get(b)).forEach(c -> {
+				dependencies.remove(c);
+			});
 			refreshTable();
 		});
 
@@ -281,6 +296,8 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 			var row = dependencies.get(rowIndex);
 			if (columns[columnIndex].equals("Name")) {
 				row.setName(aValue.toString());
+			} else if (columns[columnIndex].equals("Type")) {
+				row.setType(aValue.toString());
 			}
 		}
 	}

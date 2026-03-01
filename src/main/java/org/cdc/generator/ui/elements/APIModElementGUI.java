@@ -76,10 +76,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 		configuration.add(displayName);
 
 		generators = new JTable(new APIModElementGUITableRenderer());
-		generators.setOpaque(false);
-		generators.setFillsViewportHeight(true);
-		VComboBox<String> generatorCom = new VComboBox<>();
-		generatorCom.setEditable(true);
+		Utils.initTable(generators);
 		JScrollPane jScrollPane = new JScrollPane(generators);
 
 		JToolBar bar = new JToolBar();
@@ -102,6 +99,8 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 		bar.add(remrow);
 		bar.add(Utils.initSearchComponent(lastSearchResult, this));
 
+		VComboBox<String> generatorCom = new VComboBox<>();
+		generatorCom.setEditable(true);
 		generators.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -221,10 +220,10 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 			refreshTable();
 		});
 		remrow.addActionListener(e -> {
-			var rowIndex = generators.getSelectedRows();
-			for (int index : rowIndex) {
-				generators.remove(index);
-			}
+			generators.editCellAt(-1, 0);
+			Arrays.stream(generators.getSelectedRows()).mapToObj(b -> configurations.get(b)).forEach(c -> {
+				configurations.remove(c);
+			});
 			refreshTable();
 		});
 		var panel = PanelUtils.northAndCenterElement(bar, jScrollPane);
