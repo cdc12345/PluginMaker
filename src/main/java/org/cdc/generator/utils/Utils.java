@@ -164,7 +164,7 @@ public class Utils {
 		return Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(text));
 	}
 
-	public static void initTable(JTable jTable, List<?> list) {
+	public static void initTable(JTable jTable) {
 		jTable.addMouseListener(new MouseAdapter() {
 			@Override public void mouseClicked(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON3 && jTable.rowAtPoint(e.getPoint()) != jTable.getSelectedRow()) {
@@ -173,6 +173,7 @@ public class Utils {
 				}
 			}
 		});
+		jTable.setFillsViewportHeight(true);
 		jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		jTable.setOpaque(false);
 	}

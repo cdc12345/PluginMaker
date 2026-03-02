@@ -9,7 +9,7 @@ import org.cdc.generator.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MappingsModElement extends GeneratableElement {
+public class MappingsModElement extends GeneratableElement implements IGeneratorSpecific{
 
 	public String generatorName;
 	public String datalistElementName;
@@ -20,6 +20,7 @@ public class MappingsModElement extends GeneratableElement {
 	}
 
 	@UsedByReflection
+	@Override
 	public String getGeneratorName() {
 		return generatorName;
 	}

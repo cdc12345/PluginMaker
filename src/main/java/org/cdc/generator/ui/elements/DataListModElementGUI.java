@@ -109,7 +109,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		listPanel.setOpaque(false);
 
 		entriesTable = new JTable(new DataListTableModel());
-		Utils.initTable(entriesTable, entries);
+		Utils.initTable(entriesTable);
 		entriesTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,

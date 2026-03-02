@@ -79,7 +79,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 		configuration.add(displayName);
 
 		generators = new JTable(new APIModElementGUITableRenderer());
-		Utils.initTable(generators, configurations);
+		Utils.initTable(generators);
 		JScrollPane jScrollPane = new JScrollPane(generators);
 
 		JToolBar bar = new JToolBar();

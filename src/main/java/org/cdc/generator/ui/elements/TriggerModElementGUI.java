@@ -137,7 +137,7 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 		typeComboBox.setEditable(true);
 
 		jTable = new JTable(new TriggerModElementGUITableModul());
-		Utils.initTable(jTable, dependencies);
+		Utils.initTable(jTable);
 		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
