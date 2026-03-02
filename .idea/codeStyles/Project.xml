@@ -35,9 +35,6 @@
       <option name="METHOD_ANNOTATION_WRAP" value="5" />
       <option name="CLASS_ANNOTATION_WRAP" value="5" />
       <option name="FIELD_ANNOTATION_WRAP" value="5" />
-      <indentOptions>
-        <option name="USE_TAB_CHARACTER" value="true" />
-      </indentOptions>
     </codeStyleSettings>
   </code_scheme>
 </component>

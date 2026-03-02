@@ -19,6 +19,8 @@ import javax.annotation.Nullable;
 			VariableModElementGUI::new, VariableModElement.class);
 	public static final ModElementType<APIModElement> APIS = register("pluginapis", null, APIModElementGUI::new,
 			APIModElement.class);
+	public static final ModElementType<TriggerImplementationModElement> TRIGGER_IMPL = register("plugintriggerimpl",
+			null, TriggerImplementationModElementGUI::new, TriggerImplementationModElement.class);
 
 	private static <E extends GeneratableElement> ModElementType<E> register(String registryName,
 			@Nullable Character shortcut, ModElementType.ModElementGUIProvider<E> modElementGUIProvider,

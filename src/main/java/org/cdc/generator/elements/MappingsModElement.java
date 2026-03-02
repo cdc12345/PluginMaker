@@ -3,6 +3,7 @@ package org.cdc.generator.elements;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
+import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.Utils;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.List;
 public class MappingsModElement extends GeneratableElement {
 
 	public String generatorName;
-	public String datalistName;
+	public String datalistElementName;
 	public List<MappingEntry> mappingsContent;
 
 	public MappingsModElement(ModElement element) {
@@ -25,10 +26,10 @@ public class MappingsModElement extends GeneratableElement {
 
 	@UsedByReflection
 	public String getDatalistName() {
-		if (datalistName == null) {
+		if (datalistElementName == null) {
 			return null;
 		}
-		return Utils.getDataListName(getModElement().getWorkspace(),datalistName);
+		return ElementsUtils.getDataListName(getModElement().getWorkspace(), datalistElementName);
 	}
 
 	public static class MappingEntry implements Cloneable {

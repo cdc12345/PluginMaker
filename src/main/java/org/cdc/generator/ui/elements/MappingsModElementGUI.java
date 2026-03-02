@@ -16,6 +16,7 @@ import org.cdc.generator.elements.MappingsModElement;
 import org.cdc.generator.init.ModElementTypes;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.DialogUtils;
+import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.jspecify.annotations.NonNull;
@@ -81,7 +82,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 		}
 		generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
 		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/generator"),
-				L10N.label("elementgui.pluginmappings.generator")));
+				L10N.label("elementgui.common.generator")));
 		configuration.add(generator);
 
 		datalistName.setEditable(false);
@@ -165,7 +166,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 							throw new RuntimeException(e);
 						}
 						row.setEdited(MappingsModElement.MappingEntry.isEdited(generator.getSelectedItem(),
-								Utils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()), row));
+								ElementsUtils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()), row));
 					}
 					return null;
 				}
@@ -178,7 +179,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 			MappingsModElementGUI.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			//
 			if (datalist != null) {
-				String dataListName = Utils.getDataListName(datalist);
+				String dataListName = ElementsUtils.getDataListName(datalist);
 				var memory = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
 						.getMapping(dataListName);
 				var cacheSet = new HashSet<MappingsModElement.MappingEntry>();
@@ -227,14 +228,14 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 	}
 
 	@Override protected void openInEditingMode(MappingsModElement generatableElement) {
-		datalistName.setSelectedItem(generatableElement.datalistName);
+		datalistName.setSelectedItem(generatableElement.datalistElementName);
 		generator.setSelectedItem(generatableElement.generatorName);
 		mappingEntries = new ArrayList<>(generatableElement.mappingsContent);
 	}
 
 	@Override public MappingsModElement getElementFromGUI() {
 		var element = new MappingsModElement(modElement);
-		element.datalistName = datalistName.getSelectedItem();
+		element.datalistElementName = datalistName.getSelectedItem();
 		element.generatorName = generator.getSelectedItem();
 		element.mappingsContent = mappingEntries.stream().map(MappingsModElement.MappingEntry::clone).toList();
 		modElement.setRegistryName(element.getDatalistName());
