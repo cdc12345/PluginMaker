@@ -230,8 +230,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 		});
 		var panel = PanelUtils.northAndCenterElement(bar, jScrollPane);
 
-		addPage("edit", PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, panel))).validate(
-				name);
+		addPage("edit", PanelUtils.northAndCenterElement(configuration, panel)).validate(name);
 	}
 
 	@Override protected void openInEditingMode(APIModElement generatableElement) {

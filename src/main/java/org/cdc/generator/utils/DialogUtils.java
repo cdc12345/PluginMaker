@@ -11,7 +11,8 @@ public class DialogUtils {
 	public static int showOptionPaneWithTextArea(JTextArea jTextArea, Component parent, String title,
 			Collection<?> collections) {
 		jTextArea.setOpaque(false);
-		jTextArea.setRows(5);
+		jTextArea.setRows(13);
+		jTextArea.setColumns(40);
 		JScrollPane jScrollPane = new JScrollPane(jTextArea);
 		jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 		if (!collections.isEmpty()) {
@@ -23,7 +24,8 @@ public class DialogUtils {
 	public static int showOptionPaneWithTextAreaAndToolBar(JTextArea jTextArea, JToolBar toolbar, Component parent,
 			String title, Collection<?> collections) {
 		jTextArea.setOpaque(false);
-		jTextArea.setRows(5);
+		jTextArea.setRows(13);
+		jTextArea.setColumns(40);
 		JScrollPane jScrollPane = new JScrollPane(jTextArea);
 		jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
 		if (!collections.isEmpty()) {

@@ -16,7 +16,6 @@ import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.ui.workspace.WorkspacePanel;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.PluginMain;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.ui.ResourcePanelIcons;
 import org.cdc.generator.utils.DialogUtils;
@@ -136,7 +135,15 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 				var row = entries.get(rowIndex);
 				if (columns[column].equals("Others")) {
 					JTextArea jTextArea = new JTextArea();
-					int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
+					JToolBar toolBar = new JToolBar();
+					toolBar.setBorder(BorderFactory.createTitledBorder("Toolbar"));
+					JButton example = new JButton("example");
+					example.addActionListener(actionEvent -> {
+						jTextArea.setText("registry_name=attached");
+					});
+					toolBar.add(example);
+
+					int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, toolBar, mcreator,
 							"Edit others (Format: properties)", row.getOthers());
 					if (op == JOptionPane.YES_OPTION) {
 						String str = jTextArea.getText();
@@ -156,7 +163,6 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 						comboBox.addItem(Files.getNameWithoutExtension(element.getName()));
 					}
 					var file = Utils.tryToFindCorePlugin();
-					PluginMain.LOG.info(file);
 					if (file.isDirectory()) {
 						var file1 = new File(file, "datalists/icons");
 						for (File listFile : Objects.requireNonNullElse(file1.listFiles(), new File[0])) {
@@ -210,9 +216,12 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		});
 		remrow.addActionListener(e -> {
 			entriesTable.editCellAt(-1, 0);
-			Arrays.stream(entriesTable.getSelectedRows()).mapToObj(b -> entries.get(b)).forEach(c -> {
-				entries.remove(c);
-			});
+
+			var stack = new Stack<Integer>();
+			Arrays.stream(entriesTable.getSelectedRows()).forEach(stack::add);
+			while (!stack.empty()) {
+				entries.remove((int) stack.pop());
+			}
 			refreshTable();
 		});
 		datalistName.addItemListener(e -> {
@@ -223,8 +232,7 @@ public class DataListModElementGUI extends ModElementGUI<DataListModElement> imp
 		listPanel.add("North", bar);
 		listPanel.add("Center", scrollPane);
 
-		addPage("Configuration", PanelUtils.totalCenterInPanel(
-				PanelUtils.northAndCenterElement(generateConfig, listPanel))).lazyValidate(() -> {
+		addPage("Configuration", PanelUtils.northAndCenterElement(generateConfig, listPanel)).lazyValidate(() -> {
 			Set<String> names = new HashSet<>();
 			for (int i = 0; i < entries.size(); i++) {
 				var entry = entries.get(i);

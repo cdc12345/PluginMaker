@@ -222,9 +222,8 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 		mapping.add("Center", scrollPane);
 		mapping.add("North", bar);
 
-		addPage("edit",
-				PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, mapping))).validate(
-				generator).validate(datalistName);
+		addPage("edit", PanelUtils.northAndCenterElement(configuration, mapping)).validate(generator)
+				.validate(datalistName);
 	}
 
 	@Override protected void openInEditingMode(MappingsModElement generatableElement) {

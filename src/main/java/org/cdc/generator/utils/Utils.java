@@ -187,8 +187,7 @@ public class Utils {
 				}
 			}
 		});
-		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		jTable.setFillsViewportHeight(true);
+		jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		jTable.setOpaque(false);
 	}
 }

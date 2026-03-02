@@ -5,6 +5,7 @@ import net.mcreator.ui.dialogs.file.FileDialogs;
 import net.mcreator.ui.init.L10N;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.ui.elements.DataListModElementGUI;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -23,21 +24,7 @@ public class Menus {
 
 	public static void registerAllMenus(MCreator mCreator) {
 		mCreator.getMainMenuBar().add(PLUGIN_MAKER);
-		JMenuItem loadLangFromExternal = new JMenuItem("Load properties lang file");
-		loadLangFromExternal.addActionListener(a -> {
-			var file = FileDialogs.getOpenDialog(mCreator, new String[] { "*.properties" });
-			Properties properties = new Properties();
-			try {
-				properties.load(new FileReader(file));
-				var langmap = mCreator.getWorkspace().getLanguageMap();
-				var en = langmap.get("en_us");
-				for (Map.Entry<Object, Object> objectObjectEntry : properties.entrySet()) {
-					en.put(objectObjectEntry.getKey().toString(), objectObjectEntry.getValue().toString());
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
+		JMenuItem loadLangFromExternal = getLoadLangFromExternal(mCreator);
 		PLUGIN_MAKER.add(loadLangFromExternal);
 
 		mCreator.getMainMenuBar().add(DATALIST_UTILS);
@@ -81,5 +68,24 @@ public class Menus {
 		});
 		DATALIST_UTILS.add(builtInEntries);
 		DATALIST_UTILS.add(calculateTypes);
+	}
+
+	private static @NonNull JMenuItem getLoadLangFromExternal(MCreator mCreator) {
+		JMenuItem loadLangFromExternal = new JMenuItem("Load en_us language file");
+		loadLangFromExternal.addActionListener(a -> {
+			var file = FileDialogs.getOpenDialog(mCreator, new String[] { "*.properties" });
+			Properties properties = new Properties();
+			try {
+				properties.load(new FileReader(file));
+				var langmap = mCreator.getWorkspace().getLanguageMap();
+				var en = langmap.get("en_us");
+				for (Map.Entry<Object, Object> objectObjectEntry : properties.entrySet()) {
+					en.put(objectObjectEntry.getKey().toString(), objectObjectEntry.getValue().toString());
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return loadLangFromExternal;
 	}
 }
