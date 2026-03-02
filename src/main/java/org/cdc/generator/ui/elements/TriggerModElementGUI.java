@@ -16,7 +16,6 @@ import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.ui.validation.validators.RegistryNameValidator;
 import net.mcreator.workspace.elements.ModElement;
-import net.mcreator.workspace.elements.VariableType;
 import net.mcreator.workspace.elements.VariableTypeLoader;
 import org.cdc.generator.elements.TriggerModElement;
 import org.cdc.generator.utils.Rules;
@@ -160,8 +159,8 @@ public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> imple
 				var columnName = columns[columnIndex];
 				typeComboBox.removeAllItems();
 				if (columnName.equals("Type")) {
-					for (VariableType allVariableType : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
-						typeComboBox.addItem(allVariableType.getName());
+					for (String supportedType : Utils.getAllSupportedVariableTypes()) {
+						typeComboBox.addItem(supportedType);
 					}
 				}
 				return super.getTableCellEditorComponent(table, value, isSelected, rowIndex, columnIndex);

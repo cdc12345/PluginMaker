@@ -64,6 +64,9 @@ public class APIModElement extends GeneratableElement {
 		}
 
 		public String getVersionRange() {
+			if (versionRange != null && versionRange.isBlank()){
+				return null;
+			}
 			return versionRange;
 		}
 

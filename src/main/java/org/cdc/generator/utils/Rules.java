@@ -28,6 +28,7 @@ public class Rules {
     public static final Map<String, String> defaultDependencies = new HashMap<>() {
         {
             this.put("entity:entity", "event.getEntity()");
+            this.put("world:world", "event.getLevel()");
         }
     };
 
@@ -93,6 +94,9 @@ public class Rules {
          * Used by searchbar
          */
         public static String applyIgnoreCaseRule(String origin) {
+            if (origin == null){
+                return "";
+            }
             if (ignoreCase) {
                 return origin.toLowerCase(Locale.ROOT);
             }
