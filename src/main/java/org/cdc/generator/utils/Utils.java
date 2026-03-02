@@ -138,10 +138,6 @@ public class Utils {
 		return new Dimension(dimen.width / 8, dimen.height / 30);
 	}
 
-	public static String formatColor(Color color) {
-		return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
-	}
-
 	public static String nullToNoneOrNoneToNull(String none) {
 		if (none == null) {
 			return "None";

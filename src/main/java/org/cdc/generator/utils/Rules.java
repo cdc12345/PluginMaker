@@ -4,6 +4,7 @@ import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.Validator;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
+import net.mcreator.util.ColorUtils;
 import org.cdc.generator.PluginMain;
 import org.cdc.generator.elements.TriggerModElement;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
@@ -65,7 +66,7 @@ public class Rules {
         if (saturation == defaultHsvSaturation && brightness == defaultHsvValue) {
             return String.valueOf((int) hue);
         }
-        return "\"" + Utils.formatColor(color) + "\"";
+        return "\"" + ColorUtils.formatColor(color) + "\"";
     }
 
     public static String mapDependency(TriggerModElement.Dependency dependency) {
