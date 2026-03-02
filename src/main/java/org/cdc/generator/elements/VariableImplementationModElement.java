@@ -4,6 +4,7 @@ import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.utils.Constants;
 import org.cdc.generator.utils.ElementsUtils;
+import org.cdc.generator.utils.YamlUtils;
 
 import java.beans.BeanProperty;
 import java.util.List;
@@ -74,16 +75,16 @@ public class VariableImplementationModElement extends GeneratableElement {
             return write;
         }
 
-        public String getRead() {
-            return read;
+        public List<String> getReadLines(){
+            return YamlUtils.splitString(read);
         }
 
-        public String getSet() {
-            return set;
+        public List<String> getSetLines() {
+            return YamlUtils.splitString(set);
         }
 
-        public String getGet() {
-            return get;
+        public List<String> getGet() {
+            return YamlUtils.splitString(get);
         }
 
         public String getInit() {
