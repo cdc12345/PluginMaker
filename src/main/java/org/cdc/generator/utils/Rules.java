@@ -5,85 +5,107 @@ import net.mcreator.ui.validation.Validator;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
 import org.cdc.generator.PluginMain;
+import org.cdc.generator.elements.TriggerModElement;
+import org.cdc.generator.ui.preferences.PluginMakerPreference;
 
 import java.awt.*;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Rules {
-	public static final Pattern DATALIST_ENTRY_NAME = Pattern.compile("[a-zA-Z_1-9.]+");
-	public static final Pattern FILE_NAME = Pattern.compile("[a-z_]+");
-	public static final Pattern VALID_MODID = Pattern.compile("^(?=.{2,64}$)[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$");
+    public static final Pattern DATALIST_ENTRY_NAME = Pattern.compile("[a-zA-Z_1-9.]+");
+    public static final Pattern FILE_NAME = Pattern.compile("[a-z_]+");
+    public static final Pattern VALID_MODID = Pattern.compile("^(?=.{2,64}$)[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$");
 
-	public static final int defaultHsvSaturation = 45;
-	public static final int defaultHsvValue = 65;
+    public static final int defaultHsvSaturation = 45;
+    public static final int defaultHsvValue = 65;
 
-	public static final String NONE = "None";
+    public static final String NONE = "None";
+    public static final Map<String, String> defaultDependencies = new HashMap<>() {
+        {
+            this.put("entity:entity", "event.getEntity()");
+        }
+    };
 
-	public static Validator getComboBoxValidator(VComboBox<String> comboBox) {
-		return () -> {
-			if (Rules.FILE_NAME.matcher(Objects.requireNonNull(comboBox.getSelectedItem())).matches()) {
-				return ValidationResult.PASSED;
-			}
-			return new ValidationResult(ValidationResult.Type.ERROR,
-					"You must use whole english and whole lower letters");
-		};
-	}
+    public static Validator getComboBoxValidator(VComboBox<String> comboBox) {
+        return () -> {
+            if (Rules.FILE_NAME.matcher(Objects.requireNonNull(comboBox.getSelectedItem())).matches()) {
+                return ValidationResult.PASSED;
+            }
+            return new ValidationResult(ValidationResult.Type.ERROR,
+                    "You must use whole english and whole lower letters");
+        };
+    }
 
-	public static Validator getTextfieldValidator(VTextField textField) {
-		return () -> {
-			if (Rules.FILE_NAME.matcher(Objects.requireNonNull(textField.getText())).matches()) {
-				return ValidationResult.PASSED;
-			}
-			return new ValidationResult(ValidationResult.Type.ERROR,
-					"You must use whole english and whole lower letters");
-		};
-	}
+    public static Validator getTextfieldValidator(VTextField textField) {
+        return () -> {
+            if (Rules.FILE_NAME.matcher(Objects.requireNonNull(textField.getText())).matches()) {
+                return ValidationResult.PASSED;
+            }
+            return new ValidationResult(ValidationResult.Type.ERROR,
+                    "You must use whole english and whole lower letters");
+        };
+    }
 
-	public static String convertColor(Color color) {
-		if (color == null) {
-			return "0";
-		}
+    public static String convertColor(Color color) {
+        if (color == null) {
+            return "0";
+        }
 
-		float[] hsbvals = new float[3];
-		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbvals);
+        float[] hsbvals = new float[3];
+        Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbvals);
 
-		double hue = Math.ceil(hsbvals[0] * 360);
-		double saturation = Math.ceil(hsbvals[1] * 100);
-		double brightness = Math.ceil(hsbvals[2] * 100);
+        double hue = Math.ceil(hsbvals[0] * 360);
+        double saturation = Math.ceil(hsbvals[1] * 100);
+        double brightness = Math.ceil(hsbvals[2] * 100);
 
-		if (saturation == defaultHsvSaturation && brightness == defaultHsvValue) {
-			return String.valueOf((int) hue);
-		}
-		return "\"" + Utils.formatColor(color) + "\"";
-	}
+        if (saturation == defaultHsvSaturation && brightness == defaultHsvValue) {
+            return String.valueOf((int) hue);
+        }
+        return "\"" + Utils.formatColor(color) + "\"";
+    }
 
-	public static class SearchRules {
-		private SearchRules() {
+    public static String mapDependency(TriggerModElement.Dependency dependency) {
+        var mapped = dependency.getName() + ":" + dependency.getType();
+        var value = dependency.getName();
+        if (defaultDependencies.containsKey(mapped)) {
+            value = defaultDependencies.get(mapped);
+        }
+        return "\"" + dependency.getName() + "\": " + "\"" + value + "\"";
+    }
 
-		}
+    public static class SearchRules {
+        private static boolean ignoreCase;
 
-		private static boolean ignoreCase = true;
+        static {
+            ignoreCase = PluginMakerPreference.INSTANCE.searchIgnoreCase.get();
+        }
 
-		/**
-		 * Used by searchbar
-		 */
-		public static String applyIgnoreCaseRule(String origin) {
-			if (ignoreCase) {
-				return origin.toLowerCase(Locale.ROOT);
-			}
-			return origin;
-		}
+        private SearchRules() {
 
-		public static void setIgnoreCase(boolean ignoreCase1) {
-			PluginMain.LOG.debug("Notify rule changed: {}->{}", ignoreCase, ignoreCase1);
-			ignoreCase = ignoreCase1;
-		}
+        }
 
-		public static boolean isIgnoreCase() {
-			return ignoreCase;
-		}
-	}
+        /**
+         * Used by searchbar
+         */
+        public static String applyIgnoreCaseRule(String origin) {
+            if (ignoreCase) {
+                return origin.toLowerCase(Locale.ROOT);
+            }
+            return origin;
+        }
+
+        public static void setIgnoreCase(boolean ignoreCase1) {
+            PluginMain.LOG.debug("Notify rule changed: {}->{}", ignoreCase, ignoreCase1);
+            ignoreCase = ignoreCase1;
+        }
+
+        public static boolean isIgnoreCase() {
+            return ignoreCase;
+        }
+    }
 
 }
