@@ -19,6 +19,7 @@ import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -137,7 +138,7 @@ public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> imp
 					placeholder.setFloatable(false);
 					placeholder.setLayout(new GridLayout(2, 3));
 					placeholder.setBorder(BorderFactory.createTitledBorder("Placeholders"));
-					JTextArea jTextArea = new JTextArea();
+					RSyntaxTextArea jTextArea = new RSyntaxTextArea();
 
 					Stream.of("@NAME", "@UPPERNAME", "@name", "@SnakeCaseName", "@registryname", "@REGISTRYNAME")
 							.forEach(a -> {

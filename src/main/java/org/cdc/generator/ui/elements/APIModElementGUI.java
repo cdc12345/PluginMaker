@@ -15,6 +15,7 @@ import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -135,7 +136,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 					legacyNeo.setToolTipText("NeoLegacyGradle(generator-1.20.1)");
 					toolBar.add(legacyNeo);
 
-					JTextArea jTextArea = new JTextArea();
+					RSyntaxTextArea jTextArea = new RSyntaxTextArea();
 					forge.addActionListener(a -> {
 						try (var stream = APIModElement.class.getResourceAsStream(
 								"/quilt-1.7.10/templates/apis/forgegradle.ftl")) {
@@ -195,7 +196,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 					int column) {
 				var row = configurations.get(rowIndex);
 
-				JTextArea jTextArea = new JTextArea();
+				var jTextArea = new RSyntaxTextArea();
 				int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
 						"Edit Update files (one line one item)", row.getUpdateFiles());
 				if (op == JOptionPane.YES_OPTION) {

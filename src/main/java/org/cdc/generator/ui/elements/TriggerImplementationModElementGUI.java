@@ -1,11 +1,9 @@
 package org.cdc.generator.ui.elements;
 
-import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
-import net.mcreator.ui.ide.RSyntaxTextAreaStyler;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
@@ -119,9 +117,7 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
         });
         toolbar.add(generate);
         var scrollpane = new RTextScrollPane(methodBody);
-        RSyntaxTextAreaStyler.style(methodBody, scrollpane, PreferencesManager.PREFERENCES.ide.fontSize.get());
-        scrollpane.getGutter().setFoldBackground(getBackground());
-        scrollpane.getGutter().setBorderColor(getBackground());
+        Utils.initRsyncArea(methodBody,this,scrollpane);
 
         AutoCompletion autoCompletion = new AutoCompletion(createCompletionProvider());
         autoCompletion.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK));
