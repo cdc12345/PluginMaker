@@ -76,7 +76,7 @@ public class Rules {
         if (defaultDependencies.containsKey(mapped)) {
             value = defaultDependencies.get(mapped);
         }
-        return "\"" + dependency.getName() + "\": " + "\"" + value + "\"";
+        return YamlUtils.keyAndValue(YamlUtils.str(dependency.getName()), YamlUtils.str(value));
     }
 
     public static class SearchRules {
@@ -94,7 +94,7 @@ public class Rules {
          * Used by searchbar
          */
         public static String applyIgnoreCaseRule(String origin) {
-            if (origin == null){
+            if (origin == null) {
                 return "";
             }
             if (ignoreCase) {

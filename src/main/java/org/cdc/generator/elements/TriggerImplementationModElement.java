@@ -5,7 +5,9 @@ import net.mcreator.element.GeneratableElement;
 import net.mcreator.generator.Generator;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.utils.ElementsUtils;
+import org.cdc.generator.utils.YamlUtils;
 
+import java.util.List;
 import java.util.Locale;
 
 public class TriggerImplementationModElement extends GeneratableElement implements IGeneratorSpecific {
@@ -48,7 +50,7 @@ public class TriggerImplementationModElement extends GeneratableElement implemen
         return eventName;
     }
 
-    @UsedByReflection public String[] getMethodBodyLines() {
-        return methodBody.split("\n");
+    @UsedByReflection public List<String> getMethodBodyLines() {
+        return YamlUtils.splitString(methodBody);
     }
 }
