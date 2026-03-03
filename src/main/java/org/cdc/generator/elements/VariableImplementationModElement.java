@@ -9,8 +9,9 @@ import org.cdc.generator.utils.YamlUtils;
 import java.beans.BeanProperty;
 import java.util.List;
 
-public class VariableImplementationModElement extends GeneratableElement {
+public class VariableImplementationModElement extends GeneratableElement implements IGeneratorSpecific{
 
+    public String generator;
     public String variableElementName;
     public String defaultValue;
 
@@ -29,6 +30,10 @@ public class VariableImplementationModElement extends GeneratableElement {
 
     public String getDefaultValue() {
         return defaultValue;
+    }
+
+    @Override public String getGeneratorName() {
+        return generator;
     }
 
     public static class VariableScope {
