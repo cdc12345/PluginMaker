@@ -1,6 +1,8 @@
 package org.cdc.generator.utils;
 
 public class Constants {
+    public static final String NONE = "None";
+
     public static class VariableScopes{
         public static final String LOCAL = "local";
         public static final String GLOBAL_SESSION = "global_session";
@@ -20,5 +22,22 @@ public class Constants {
         public static final String DATAPACK1214 = "datapack-1.21.4";
 
         public static final String SPIGOT1214 = "spigot-1.21.4";
+    }
+
+    public static class BuiltInColors{
+        public static final String BKY_MATH_HUE = "%{BKY_MATH_HUE}";
+        public static final String BKY_LOGIC_HUE = "%{BKY_LOGIC_HUE}";
+        public static final String BKY_TEXTS_HUE = "%{BKY_TEXTS_HUE}";
+
+        public static final String ENTITY_COLOR = "195";
+        public static final String ITEMSTACK_COLOR = "250";
+        public static final String BLOCK_COLOR = "60";
+        public static final String ENERGY_FLUID_COLOR = "60";
+        public static final String DAMAGE_SOURCE_COLOR = "320";
+        public static final String DIRECTION_ACTION_COLOR = "20";
+        public static final String GUI_MANAGEMENT_COLOR = "110";
+        public static final String PLAYER_COLOR = "175";
+        public static final String PROJECTILE_COLOR = "300";
+        public static final String WORLD_COLOR = "35";
     }
 }

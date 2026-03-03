@@ -24,7 +24,6 @@ public class Rules {
     public static final int defaultHsvSaturation = 45;
     public static final int defaultHsvValue = 65;
 
-    public static final String NONE = "None";
     public static final Map<String, String> defaultDependencies = new HashMap<>() {
         {
             this.put("entity:entity", "event.getEntity()");
