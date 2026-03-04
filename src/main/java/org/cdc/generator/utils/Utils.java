@@ -53,7 +53,7 @@ public class Utils {
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
-        }).toList();
+        }).toList().reversed();
     }
 
     public static List<String> getMappingResult(String generator, String datalist, String name) {

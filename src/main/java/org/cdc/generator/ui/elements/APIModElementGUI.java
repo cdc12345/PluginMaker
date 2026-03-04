@@ -133,7 +133,7 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 					neo.setToolTipText("ModDevGradle");
 					toolBar.add(neo);
 					JButton legacyNeo = new JButton(UIRES.get("16px.neoforge"));
-					legacyNeo.setToolTipText("NeoLegacyGradle(generator-1.20.1)");
+					legacyNeo.setToolTipText("NeoLegacyGradle (Generator-1.20.1)");
 					toolBar.add(legacyNeo);
 
 					RSyntaxTextArea jTextArea = new RSyntaxTextArea();

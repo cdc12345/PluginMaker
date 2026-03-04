@@ -1,5 +1,6 @@
 package org.cdc.generator.ui.elements;
 
+import net.mcreator.generator.template.base.BaseDataModelProvider;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -18,6 +19,10 @@ import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.YamlUtils;
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.BasicCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -25,6 +30,8 @@ import org.jspecify.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -124,6 +131,9 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
                     int column) {
                 var row = scopeList.get(rowIndex);
                 var jTextArea = new RSyntaxTextArea();
+                AutoCompletion autoCompletion = new AutoCompletion(createCompletionProvider());
+                autoCompletion.install(jTextArea);
+                autoCompletion.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK));
                 var columnName = columns[column];
                 int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
                         "Edit" + columnName + " lines (one line one item)",
@@ -171,7 +181,8 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
         element.generator = generator.getSelectedItem();
         element.variableElementName = variableElementName.getSelectedItem();
         element.defaultValue = defaultValue.getText();
-        element.scopes = scopeList.stream().filter(VariableImplementationModElement.VariableScope::hasNotNull).map(VariableImplementationModElement.VariableScope::clone).toList();
+        element.scopes = scopeList.stream().filter(VariableImplementationModElement.VariableScope::hasNotNull)
+                .map(VariableImplementationModElement.VariableScope::clone).toList();
         return element;
     }
 
@@ -188,7 +199,19 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
         ComboBoxUtil.updateComboBoxContents(variableElementName, stringArrayList);
     }
 
-    //TODO: autocomplete create
+    private CompletionProvider createCompletionProvider() {
+        DefaultCompletionProvider provider = new DefaultCompletionProvider();
+        provider.addCompletion(new BasicCompletion(provider, "${name", "the name of variable"));
+        provider.addCompletion(new BasicCompletion(provider, "${scope", "the scope of variable"));
+        provider.addCompletion(new BasicCompletion(provider, "${type", "the type of variable"));
+        provider.addCompletion(new BasicCompletion(provider, "${value", "the value of variable"));
+        provider.addCompletion(new BasicCompletion(provider, "${entity", "the entity of variable (nullable)"));
+
+        new BaseDataModelProvider(mcreator.getGenerator()).provide().forEach((key, value) -> {
+            provider.addCompletion(new BasicCompletion(provider, "${" + key, value.getClass().getName()));
+        });
+        return provider;
+    }
 
     private class ScopesTableModel extends AbstractTableModel {
 
@@ -217,17 +240,6 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
 
         @Override public boolean isCellEditable(int rowIndex, int columnIndex) {
             return !columns[columnIndex].equals("Scope name");
-        }
-
-        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            var row = scopeList.get(rowIndex);
-            switch (columns[columnIndex]) {
-            case "Init" -> row.setInit(aValue.toString());
-            case "Get" -> row.setGet(aValue.toString());
-            case "Set" -> row.setSet(aValue.toString());
-            case "Read" -> row.setRead(aValue.toString());
-            case "Write" -> row.setWrite(aValue.toString());
-            }
         }
     }
 }

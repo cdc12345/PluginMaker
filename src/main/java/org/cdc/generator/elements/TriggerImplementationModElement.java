@@ -33,7 +33,7 @@ public class TriggerImplementationModElement extends GeneratableElement implemen
         return generatorName;
     }
 
-    // a probable bug: neoforge or forge change their event registration in new version
+    // a probable bug: if neoforge or forge change their event registration in new version, the solution will be invalid
     // so here needs a new solution.
     @UsedByReflection public String getGeneratorFlavor() {
         var generator = Generator.GENERATOR_CACHE.get(generatorName);

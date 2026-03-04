@@ -167,16 +167,7 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
     }
 
     private CompletionProvider createCompletionProvider() {
-
-        // A DefaultCompletionProvider is the simplest concrete implementation
-        // of CompletionProvider. This provider has no understanding of
-        // language semantics. It simply checks the text entered up to the
-        // caret position for a match against known completions. This is all
-        // that is needed in the majority of cases.
         DefaultCompletionProvider provider = new DefaultCompletionProvider();
-
-        // Add completions for all Java keywords. A BasicCompletion is just
-        // a straightforward word completion.
         provider.addCompletion(new BasicCompletion(provider, "dependencies"));
         provider.addCompletion(new BasicCompletion(provider, "${name}"));
         provider.addCompletion(new BasicCompletion(provider,"<#assign"));
