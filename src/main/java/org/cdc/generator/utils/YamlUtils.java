@@ -26,13 +26,4 @@ public class YamlUtils {
         }
         return new ArrayList<>(Arrays.asList(str.split(lineSeparator)));
     }
-
-    public static List<String> splitStringToMultipleLines(String s){
-        var lines = splitString(s);
-        if (lines.size() == 1) {
-            return lines;
-        }
-        lines.addFirst(multipleLines);
-        return lines;
-    }
 }

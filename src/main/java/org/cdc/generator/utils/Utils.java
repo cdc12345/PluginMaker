@@ -1,5 +1,6 @@
 package org.cdc.generator.utils;
 
+import com.google.gson.annotations.SerializedName;
 import net.mcreator.generator.Generator;
 import net.mcreator.plugin.PluginLoader;
 import net.mcreator.preferences.PreferencesManager;
@@ -36,13 +37,23 @@ public class Utils {
         return Generator.GENERATOR_CACHE.keySet();
     }
 
-    public static Set<String> getAllSupportedVariableTypes() {
-        Set<String> set = new HashSet<>();
+    public static List<String> getAllSupportedVariableTypes() {
+        ArrayList<String> set = new ArrayList<>();
         for (VariableType allVariableType : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
             set.add(allVariableType.getName());
         }
         set.add("world");
         return set;
+    }
+
+    public static List<String> getAllVariableScope(){
+        return Arrays.stream(VariableType.Scope.values()).map(a-> {
+            try {
+                return a.getDeclaringClass().getDeclaredField(a.name()).getAnnotation(SerializedName.class).value();
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
     }
 
     public static List<String> getMappingResult(String generator, String datalist, String name) {

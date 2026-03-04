@@ -15,7 +15,6 @@ import org.cdc.generator.elements.VariableImplementationModElement;
 import org.cdc.generator.elements.VariableModElement;
 import org.cdc.generator.init.ModElementTypes;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
-import org.cdc.generator.utils.Constants;
 import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.YamlUtils;
@@ -29,7 +28,6 @@ import java.awt.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -148,12 +146,8 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
                 return null;
             }
         });
-        for (Field field : Constants.VariableScopes.class.getFields()) {
-            try {
-                scopeList.add(new VariableImplementationModElement.VariableScope((String) field.get(null)));
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
+        for (String s : Utils.getAllVariableScope()) {
+            scopeList.add(new VariableImplementationModElement.VariableScope(s));
         }
         jTable.setFillsViewportHeight(true);
 
@@ -177,7 +171,7 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
         element.generator = generator.getSelectedItem();
         element.variableElementName = variableElementName.getSelectedItem();
         element.defaultValue = defaultValue.getText();
-        element.scopes = scopeList.stream().map(VariableImplementationModElement.VariableScope::clone).toList();
+        element.scopes = scopeList.stream().filter(VariableImplementationModElement.VariableScope::hasNotNull).map(VariableImplementationModElement.VariableScope::clone).toList();
         return element;
     }
 

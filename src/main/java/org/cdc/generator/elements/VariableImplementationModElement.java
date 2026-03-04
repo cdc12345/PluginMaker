@@ -94,15 +94,15 @@ public class VariableImplementationModElement extends GeneratableElement impleme
         }
 
         @UsedByReflection public List<String> getReadLines() {
-            return YamlUtils.splitStringToMultipleLines(read);
+            return YamlUtils.splitString(read);
         }
 
         @UsedByReflection public List<String> getSetLines() {
-            return YamlUtils.splitStringToMultipleLines(set);
+            return YamlUtils.splitString(set);
         }
 
         @UsedByReflection public List<String> getWriteLines() {
-            return YamlUtils.splitStringToMultipleLines(write);
+            return YamlUtils.splitString(write);
         }
 
         public String getGet() {
@@ -110,15 +110,16 @@ public class VariableImplementationModElement extends GeneratableElement impleme
         }
 
         @UsedByReflection public List<String> getGetLines() {
-            return YamlUtils.splitStringToMultipleLines(get);
+            return YamlUtils.splitString(get);
         }
 
         public String getInit() {
             return init;
         }
 
+        @UsedByReflection
         public List<String> getInitLines() {
-            return YamlUtils.splitStringToMultipleLines(init);
+            return YamlUtils.splitString(init);
         }
 
         public String getName() {
