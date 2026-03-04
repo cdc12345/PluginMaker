@@ -205,8 +205,9 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
         provider.addCompletion(new BasicCompletion(provider, "${type", "the type of variable"));
         provider.addCompletion(new BasicCompletion(provider, "${value", "the value of variable"));
         provider.addCompletion(new BasicCompletion(provider, "${entity", "the entity of variable (nullable)"));
+        provider.addCompletion(new BasicCompletion(provider,"${var","net.mcreator.workspace.elements.VariableElement"));
 
-        Utils.initCompletionWithDefaultGenerator(provider, mcreator.getGenerator());
+        Utils.initCompletionWithGenerator(provider, mcreator.getGenerator());
 
         return provider;
     }

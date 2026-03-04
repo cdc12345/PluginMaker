@@ -9,6 +9,7 @@ import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
+import net.mcreator.util.DesktopUtils;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.APIModElement;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
@@ -135,6 +136,9 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 					JButton legacyNeo = new JButton(UIRES.get("16px.neoforge"));
 					legacyNeo.setToolTipText("NeoLegacyGradle (Generator-1.20.1)");
 					toolBar.add(legacyNeo);
+					JButton curseMaven = new JButton("Curse");
+					curseMaven.setToolTipText("CurseMaven");
+					toolBar.add(curseMaven);
 
 					RSyntaxTextArea jTextArea = new RSyntaxTextArea();
 					forge.addActionListener(a -> {
@@ -160,6 +164,17 @@ public class APIModElementGUI extends ModElementGUI<APIModElement> implements IS
 					legacyNeo.addActionListener(a -> {
 						try (var stream = APIModElement.class.getResourceAsStream(
 								"/quilt-1.7.10/templates/apis/legacymoddevgradle.ftl")) {
+							if (stream != null) {
+								jTextArea.setText(new String(stream.readAllBytes()));
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					});
+					curseMaven.addActionListener(a->{
+						DesktopUtils.browseSafe("https://cursemaven.com");
+						try (var stream = APIModElement.class.getResourceAsStream(
+								"/quilt-1.7.10/templates/apis/cursemaven.ftl")) {
 							if (stream != null) {
 								jTextArea.setText(new String(stream.readAllBytes()));
 							}

@@ -206,7 +206,7 @@ public class Utils {
         jScrollPane.getGutter().setBorderColor(parent.getBackground());
     }
 
-    public static void initCompletionWithDefaultGenerator(DefaultCompletionProvider provider, Generator generator) {
+    public static void initCompletionWithGenerator(DefaultCompletionProvider provider, Generator generator) {
         new BaseDataModelProvider(generator).provide().forEach((key, value) -> {
             provider.addCompletion(new BasicCompletion(provider, "${" + key, value.getClass().getName()));
         });

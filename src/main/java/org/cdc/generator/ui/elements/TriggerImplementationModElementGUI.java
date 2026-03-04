@@ -33,6 +33,7 @@ import java.awt.event.KeyEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImplementationModElement> {
@@ -111,7 +112,7 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
                     execute(event<#if dependenciesCode?has_content>,</#if>${dependenciesCode});
                     """;
             str = str.replace("%map%",
-                    getTriggerModElement().dependencies_provided.stream().map(a -> Rules.mapDependency(a))
+                    Objects.requireNonNull(getTriggerModElement().dependencies_provided).stream().map(Rules::mapDependency)
                             .collect(Collectors.joining(",\n        ")));
             methodBody.setText(str);
         });
