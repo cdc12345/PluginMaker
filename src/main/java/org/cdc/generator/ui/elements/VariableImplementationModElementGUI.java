@@ -26,13 +26,14 @@ import org.jspecify.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 
 public class VariableImplementationModElementGUI extends ModElementGUI<VariableImplementationModElement> {
 
@@ -43,6 +44,9 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
     private final VTextField defaultValue = new VTextField();
 
     private List<VariableImplementationModElement.VariableScope> scopeList = new ArrayList<>();
+
+    private final Map<String, MethodHandle> cacheHandles = new HashMap<>();
+    private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
     public VariableImplementationModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode);
@@ -127,16 +131,30 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
                         "Edit" + columnName + " lines (one line one item)",
                         YamlUtils.splitString(Objects.requireNonNullElse(value1, "").toString()));
                 if (op == JOptionPane.YES_OPTION) {
-                    MethodHandles.Lookup lookup = MethodHandles.lookup();
                     try {
-                        lookup.findVirtual(VariableImplementationModElement.VariableScope.class, "set"+columnName,
-                                MethodType.methodType(Void.TYPE, String.class)).invoke(row, jTextArea.getText());
+                        MethodHandle set;
+                        if (cacheHandles.containsKey(columnName)) {
+                            set = cacheHandles.get(columnName);
+                        } else {
+                            set = lookup.findVirtual(VariableImplementationModElement.VariableScope.class,
+                                    "set" + columnName, MethodType.methodType(Void.TYPE, String.class));
+                        }
+                        cacheHandles.put(columnName, set);
+                        set.invoke(row, jTextArea.getText());
                     } catch (Throwable e) {
                         throw new RuntimeException(e);
                     }
-                } return null;
+                }
+                return null;
             }
-        }); scopeList.add(new VariableImplementationModElement.VariableScope(Constants.VariableScopes.LOCAL));
+        });
+        for (Field field : Constants.VariableScopes.class.getFields()) {
+            try {
+                scopeList.add(new VariableImplementationModElement.VariableScope((String) field.get(null)));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
         jTable.setFillsViewportHeight(true);
 
         JScrollPane scrollPane = new JScrollPane(jTable);
