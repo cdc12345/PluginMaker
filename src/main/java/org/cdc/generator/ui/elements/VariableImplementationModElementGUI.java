@@ -1,6 +1,5 @@
 package org.cdc.generator.ui.elements;
 
-import net.mcreator.generator.template.base.BaseDataModelProvider;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -207,9 +206,8 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
         provider.addCompletion(new BasicCompletion(provider, "${value", "the value of variable"));
         provider.addCompletion(new BasicCompletion(provider, "${entity", "the entity of variable (nullable)"));
 
-        new BaseDataModelProvider(mcreator.getGenerator()).provide().forEach((key, value) -> {
-            provider.addCompletion(new BasicCompletion(provider, "${" + key, value.getClass().getName()));
-        });
+        Utils.initCompletionWithDefaultGenerator(provider, mcreator.getGenerator());
+
         return provider;
     }
 

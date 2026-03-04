@@ -2,6 +2,7 @@ package org.cdc.generator.utils;
 
 import com.google.gson.annotations.SerializedName;
 import net.mcreator.generator.Generator;
+import net.mcreator.generator.template.base.BaseDataModelProvider;
 import net.mcreator.plugin.PluginLoader;
 import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.component.util.ComponentUtils;
@@ -13,6 +14,8 @@ import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.VariableType;
 import net.mcreator.workspace.elements.VariableTypeLoader;
 import org.cdc.generator.ui.elements.ISearchable;
+import org.fife.ui.autocomplete.BasicCompletion;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -46,8 +49,8 @@ public class Utils {
         return set;
     }
 
-    public static List<String> getAllVariableScope(){
-        return Arrays.stream(VariableType.Scope.values()).map(a-> {
+    public static List<String> getAllVariableScope() {
+        return Arrays.stream(VariableType.Scope.values()).map(a -> {
             try {
                 return a.getDeclaringClass().getDeclaredField(a.name()).getAnnotation(SerializedName.class).value();
             } catch (NoSuchFieldException e) {
@@ -201,5 +204,11 @@ public class Utils {
         RSyntaxTextAreaStyler.style(jTextArea, jScrollPane, PreferencesManager.PREFERENCES.ide.fontSize.get());
         jScrollPane.getGutter().setFoldBackground(parent.getBackground());
         jScrollPane.getGutter().setBorderColor(parent.getBackground());
+    }
+
+    public static void initCompletionWithDefaultGenerator(DefaultCompletionProvider provider, Generator generator) {
+        new BaseDataModelProvider(generator).provide().forEach((key, value) -> {
+            provider.addCompletion(new BasicCompletion(provider, "${" + key, value.getClass().getName()));
+        });
     }
 }
