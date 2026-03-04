@@ -1,5 +1,6 @@
 package org.cdc.generator.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,6 +10,7 @@ public class YamlUtils {
 
     public static String valuePrefix = "- ";
     public static String keySuffix = ": ";
+    public static String multipleLines = "|";
 
     public static String str(String value) {
         return "\"" + value + "\"";
@@ -22,6 +24,15 @@ public class YamlUtils {
         if (str == null) {
             return List.of();
         }
-        return Arrays.asList(str.split(lineSeparator));
+        return new ArrayList<>(Arrays.asList(str.split(lineSeparator)));
+    }
+
+    public static List<String> splitStringToMultipleLines(String s){
+        var lines = splitString(s);
+        if (lines.size() == 1) {
+            return lines;
+        }
+        lines.addFirst(multipleLines);
+        return lines;
     }
 }

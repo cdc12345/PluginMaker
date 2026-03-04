@@ -5,7 +5,7 @@ ${configuration.getGenerator()}:
   versionRange: "${configuration.getVersionRange()}"</#if><#if !configuration.getUpdateFiles().isEmpty()>
   update_files: <#list configuration.getUpdateFiles() as file>
     - "${file}"</#list></#if>
-  gradle: |
+  gradle:
 <#list configuration.getYamlGradle() as line>
     ${line}
 </#list>

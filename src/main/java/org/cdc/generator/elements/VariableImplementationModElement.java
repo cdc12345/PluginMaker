@@ -1,5 +1,6 @@
 package org.cdc.generator.elements;
 
+import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.utils.Constants;
@@ -7,9 +8,12 @@ import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.YamlUtils;
 
 import java.beans.BeanProperty;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-public class VariableImplementationModElement extends GeneratableElement implements IGeneratorSpecific{
+public class VariableImplementationModElement extends GeneratableElement implements IGeneratorSpecific {
 
     public String generator;
     public String variableElementName;
@@ -19,9 +23,10 @@ public class VariableImplementationModElement extends GeneratableElement impleme
 
     public VariableImplementationModElement(ModElement element) {
         super(element);
+        scopes = new ArrayList<>();
     }
 
-    public String getVariableName() {
+    @UsedByReflection public String getVariableName() {
         if (variableElementName == null) {
             return null;
         }
@@ -36,7 +41,7 @@ public class VariableImplementationModElement extends GeneratableElement impleme
         return generator;
     }
 
-    public static class VariableScope {
+    public static class VariableScope implements Cloneable{
         private String name;
         private String init;
         private String get;
@@ -80,24 +85,57 @@ public class VariableImplementationModElement extends GeneratableElement impleme
             return write;
         }
 
-        public List<String> getReadLines(){
-            return YamlUtils.splitString(read);
+        public String getSet() {
+            return set;
         }
 
-        public List<String> getSetLines() {
-            return YamlUtils.splitString(set);
+        public String getRead() {
+            return read;
         }
 
-        public List<String> getGet() {
-            return YamlUtils.splitString(get);
+        @UsedByReflection public List<String> getReadLines() {
+            return YamlUtils.splitStringToMultipleLines(read);
+        }
+
+        @UsedByReflection public List<String> getSetLines() {
+            return YamlUtils.splitStringToMultipleLines(set);
+        }
+
+        @UsedByReflection public List<String> getWriteLines() {
+            return YamlUtils.splitStringToMultipleLines(write);
+        }
+
+        public String getGet() {
+            return get;
+        }
+
+        @UsedByReflection public List<String> getGetLines() {
+            return YamlUtils.splitStringToMultipleLines(get);
         }
 
         public String getInit() {
             return init;
         }
 
+        public List<String> getInitLines() {
+            return YamlUtils.splitStringToMultipleLines(init);
+        }
+
         public String getName() {
             return name;
+        }
+
+        @UsedByReflection public boolean hasNotNull() {
+            return Stream.of(init, set, read, get, write).anyMatch(Objects::nonNull);
+        }
+
+        @Override public VariableScope clone() {
+            try {
+                VariableScope clone = (VariableScope) super.clone();
+                return clone;
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError();
+            }
         }
     }
 }
