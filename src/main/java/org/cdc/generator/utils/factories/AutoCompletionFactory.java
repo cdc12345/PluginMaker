@@ -1,4 +1,4 @@
-package org.cdc.generator.utils.builder;
+package org.cdc.generator.utils.factories;
 
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
@@ -10,11 +10,10 @@ import java.awt.event.KeyEvent;
 import java.util.function.Supplier;
 
 public class AutoCompletionFactory {
-    public static AutoCompletion createDefaultCompletion(RSyntaxTextArea rSyntaxTextArea,
+    public static void createDefaultCompletion(RSyntaxTextArea rSyntaxTextArea,
             Supplier<CompletionProvider> providerSupplier) {
         AutoCompletion autoCompletion = new AutoCompletion(providerSupplier.get());
         autoCompletion.install(rSyntaxTextArea);
         autoCompletion.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK));
-        return autoCompletion;
     }
 }

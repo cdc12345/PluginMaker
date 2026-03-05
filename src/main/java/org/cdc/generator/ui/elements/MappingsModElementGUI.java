@@ -16,7 +16,7 @@ import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
-import org.cdc.generator.utils.builder.RSyntaxTextAreaFactory;
+import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;

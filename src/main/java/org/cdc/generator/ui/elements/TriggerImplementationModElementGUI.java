@@ -14,12 +14,12 @@ import org.cdc.generator.init.ModElementTypes;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
+import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rtextarea.RTextScrollPane;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -106,8 +106,7 @@ public class TriggerImplementationModElementGUI
             methodBody.setText(str);
         });
         toolbar.add(generate);
-        var scrollpane = new RTextScrollPane(methodBody);
-        Utils.initRsyncArea(methodBody, this, scrollpane);
+        var scrollpane = RSyntaxTextAreaFactory.createDefaultTextScrollPane(methodBody, mcreator);
 
         AutoCompletion autoCompletion = new AutoCompletion(createCompletionProvider());
         autoCompletion.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK));

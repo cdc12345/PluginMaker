@@ -4,10 +4,8 @@ import com.google.gson.annotations.SerializedName;
 import net.mcreator.generator.Generator;
 import net.mcreator.generator.template.base.BaseDataModelProvider;
 import net.mcreator.plugin.PluginLoader;
-import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.ide.RSyntaxTextAreaStyler;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VTextField;
@@ -16,8 +14,6 @@ import net.mcreator.workspace.elements.VariableTypeLoader;
 import org.cdc.generator.ui.elements.ISearchable;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -182,12 +178,6 @@ public class Utils {
                     Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(sp[0]));
         }
         return Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(text));
-    }
-
-    public static void initRsyncArea(RSyntaxTextArea jTextArea, Component parent, RTextScrollPane jScrollPane) {
-        RSyntaxTextAreaStyler.style(jTextArea, jScrollPane, PreferencesManager.PREFERENCES.ide.fontSize.get());
-        jScrollPane.getGutter().setFoldBackground(parent.getBackground());
-        jScrollPane.getGutter().setBorderColor(parent.getBackground());
     }
 
     public static void initCompletionWithGenerator(DefaultCompletionProvider provider, Generator generator) {
