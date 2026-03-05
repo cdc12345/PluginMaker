@@ -3,10 +3,7 @@ package org.cdc.generator.ui.elements;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.help.HelpUtils;
-import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
-import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
@@ -36,7 +33,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImplementationModElement> {
+public class TriggerImplementationModElementGUI
+        extends AbstractConfigurationTableModElementGUI<TriggerImplementationModElement> {
 
     private final VComboBox<String> generator = new VComboBox<>();
     private final VComboBox<String> triggerElementName = new VComboBox<>();
@@ -45,7 +43,7 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
     private final RSyntaxTextArea methodBody = new RSyntaxTextArea();
 
     public TriggerImplementationModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
-        super(mcreator, modElement, editingMode);
+        super(mcreator, modElement, editingMode, null);
 
         if (editingMode) {
             generator.setEnabled(false);
@@ -57,9 +55,7 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
     }
 
     @Override protected void initGUI() {
-        JPanel configuration = new JPanel(new GridLayout(3, 2));
-        configuration.setBorder(BorderFactory.createTitledBorder("Config"));
-        configuration.setOpaque(false);
+        initConfiguration(new GridLayout(3, 2));
 
         generator.setEditable(true);
         generator.setPreferredSize(Utils.tryToGetTextFieldSize());
@@ -73,9 +69,7 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
             generator.addItem(supportedGenerator);
         }
         generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintriggerimpl/generator"),
-                L10N.label("elementgui.common.generator")));
-        configuration.add(generator);
+        addGeneratorConfiguration(generator);
 
         triggerElementName.setEditable(false);
         triggerElementName.setValidator(() -> {
@@ -84,9 +78,7 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
             }
             return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
         });
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintriggerimpl/trigger_element_name"),
-                L10N.label("elementgui.plugintriggerimpl.element_name")));
-        configuration.add(triggerElementName);
+        addConfigurationWithHelpEntry("trigger_element_name", triggerElementName);
 
         eventName.setOpaque(false);
         eventName.setValidator(() -> {
@@ -95,9 +87,7 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
             }
             return ValidationResult.PASSED;
         });
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintriggerimpl/event_name"),
-                L10N.label("elementgui.plugintriggerimpl.event_name")));
-        configuration.add(eventName);
+        addConfigurationWithHelpEntry("event_name", eventName);
 
         var toolbar = new JToolBar();
         JButton generate = new JButton(UIRES.get("18px.import"));
@@ -111,14 +101,13 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
                     </#assign>
                     execute(event<#if dependenciesCode?has_content>,</#if>${dependenciesCode});
                     """;
-            str = str.replace("%map%",
-                    Objects.requireNonNull(getTriggerModElement().dependencies_provided).stream().map(Rules::mapDependency)
-                            .collect(Collectors.joining(",\n        ")));
+            str = str.replace("%map%", Objects.requireNonNull(getTriggerModElement().dependencies_provided).stream()
+                    .map(Rules::mapDependency).collect(Collectors.joining(",\n        ")));
             methodBody.setText(str);
         });
         toolbar.add(generate);
         var scrollpane = new RTextScrollPane(methodBody);
-        Utils.initRsyncArea(methodBody,this,scrollpane);
+        Utils.initRsyncArea(methodBody, this, scrollpane);
 
         AutoCompletion autoCompletion = new AutoCompletion(createCompletionProvider());
         autoCompletion.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK));
@@ -126,8 +115,8 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
         var panel = PanelUtils.northAndCenterElement(toolbar, scrollpane);
         panel.setBorder(BorderFactory.createTitledBorder("Body(ctrl+1 to auto complete)"));
 
-        addPage(PanelUtils.northAndCenterElement(configuration, panel)).validate(generator).validate(triggerElementName)
-                .validate(eventName);
+        addPage(PanelUtils.northAndCenterElement(configurationPanel, panel)).validate(generator)
+                .validate(triggerElementName).validate(eventName);
     }
 
     @Override protected void openInEditingMode(TriggerImplementationModElement generatableElement) {
@@ -171,9 +160,9 @@ public class TriggerImplementationModElementGUI extends ModElementGUI<TriggerImp
         DefaultCompletionProvider provider = new DefaultCompletionProvider();
         provider.addCompletion(new BasicCompletion(provider, "dependencies"));
         provider.addCompletion(new BasicCompletion(provider, "${name}"));
-        provider.addCompletion(new BasicCompletion(provider,"<#assign"));
-        provider.addCompletion(new BasicCompletion(provider,"@procedureDependenciesCode"));
-        provider.addCompletion(new BasicCompletion(provider,"execute()"));
+        provider.addCompletion(new BasicCompletion(provider, "<#assign"));
+        provider.addCompletion(new BasicCompletion(provider, "@procedureDependenciesCode"));
+        provider.addCompletion(new BasicCompletion(provider, "execute()"));
 
         return provider;
 

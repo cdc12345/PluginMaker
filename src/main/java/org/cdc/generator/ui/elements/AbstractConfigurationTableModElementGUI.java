@@ -2,25 +2,30 @@ package org.cdc.generator.ui.elements;
 
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.ui.MCreator;
+import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.utils.Utils;
 import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public abstract class AbstractConfigurationTableModElementGUI<E extends GeneratableElement> extends ModElementGUI<E> {
+
+    protected final String[] columns;
 
     protected JPanel configurationPanel;
     protected JTable jTable;
 
     public AbstractConfigurationTableModElementGUI(MCreator mcreator, @NonNull ModElement modElement,
-            boolean editingMode) {
+            boolean editingMode, String[] columns) {
         super(mcreator, modElement, editingMode);
+        this.columns = columns;
     }
 
     protected void initConfiguration(LayoutManager layoutManager) {
@@ -31,12 +36,44 @@ public abstract class AbstractConfigurationTableModElementGUI<E extends Generata
 
     protected void initTable(TableModel tableModel) {
         jTable = new JTable(tableModel);
-        Utils.initTable(jTable);
+        jTable.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3 && jTable.rowAtPoint(e.getPoint()) != jTable.getSelectedRow()) {
+                    jTable.clearSelection();
+                    jTable.editCellAt(-1, 0);
+                }
+            }
+        });
+        jTable.setFillsViewportHeight(true);
+        jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        jTable.setOpaque(false);
+    }
+
+    protected void addGeneratorConfiguration(JComponent component) {
+        configurationPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry(modElement.getTypeString() + "/generator"),
+                L10N.label("elementgui.common.generator")));
+        configurationPanel.add(component);
+    }
+
+    protected void addNameConfiguration(JComponent component) {
+        configurationPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry(modElement.getTypeString() + "/name"),
+                L10N.label("elementgui.common.name")));
+        configurationPanel.add(component);
     }
 
     protected void addConfigurationWithHelpEntry(String name, JComponent component) {
         configurationPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry(modElement.getTypeString() + "/" + name),
                 L10N.label("elementgui." + modElement.getTypeString() + "." + name)));
         configurationPanel.add(component);
+    }
+
+    protected JComponent toolbarAndTable(JComponent north) {
+        JPanel panel = PanelUtils.northAndCenterElement(north, new JScrollPane(jTable));
+        panel.setBorder(BorderFactory.createTitledBorder("Table"));
+        return panel;
+    }
+
+    protected JComponent wrapTable() {
+        return new JScrollPane(jTable);
     }
 }

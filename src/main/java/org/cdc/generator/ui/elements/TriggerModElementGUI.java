@@ -9,7 +9,6 @@ import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.laf.themes.Theme;
-import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.Validator;
 import net.mcreator.ui.validation.component.VComboBox;
@@ -38,267 +37,246 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class TriggerModElementGUI extends ModElementGUI<TriggerModElement> implements ISearchable {
+public class TriggerModElementGUI extends AbstractConfigurationTableModElementGUI<TriggerModElement>
+        implements ISearchable {
 
-	private String[] columns = new String[] { "Name", "Type" };
+    private VTextField triggerName;
+    private JStringListField requiredApis;
+    private JCheckBox cancelable;
+    private JCheckBox hasResult;
+    private TranslatedComboBox side;
 
-	private VTextField triggerName;
-	private JStringListField requiredApis;
-	private JCheckBox cancelable;
-	private JCheckBox hasResult;
-	private TranslatedComboBox side;
+    public List<TriggerModElement.Dependency> dependencies;
 
-	public List<TriggerModElement.Dependency> dependencies;
+    // the 0 is the last search index
+    private final ArrayList<Integer> lastSearchResult;
 
-	// the 0 is the last search index
-	private final ArrayList<Integer> lastSearchResult;
-	private JTable jTable;
+    public TriggerModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
+        super(mcreator, modElement, editingMode, new String[] { "Name", "Type" });
 
-	public TriggerModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
-		super(mcreator, modElement, editingMode);
+        this.triggerName = new VTextField();
+        this.requiredApis = new JStringListField(mcreator, vTextField -> new Validator() {
+            private final Validator parent = new RegistryNameValidator(vTextField,
+                    L10N.t("dialog.workspace.settings.workspace_modid")).setMaxLength(32);
 
-		this.triggerName = new VTextField();
-		this.requiredApis = new JStringListField(mcreator, vTextField -> new Validator() {
-			private final Validator parent = new RegistryNameValidator(vTextField,
-					L10N.t("dialog.workspace.settings.workspace_modid")).setMaxLength(32);
-
-			@Override public ValidationResult validate() {
-				if (!Rules.VALID_MODID.matcher(vTextField.getText()).matches())
-					return new ValidationResult(ValidationResult.Type.ERROR,
-							L10N.t("dialog.workspace.settings.workspace_modid_invalid"));
-				return parent.validate();
-			}
-		});
-		this.side = new TranslatedComboBox(
-				// @formatter:off
+            @Override public ValidationResult validate() {
+                if (!Rules.VALID_MODID.matcher(vTextField.getText()).matches())
+                    return new ValidationResult(ValidationResult.Type.ERROR,
+                            L10N.t("dialog.workspace.settings.workspace_modid_invalid"));
+                return parent.validate();
+            }
+        });
+        this.side = new TranslatedComboBox(
+                // @formatter:off
 				Map.entry("SERVER", "elementgui.plugintrigger.side.server"),
 				Map.entry("CLIENT", "elementgui.plugintrigger.side.client"),
 				Map.entry("BOTH", "elementgui.plugintrigger.side.both")
 				// @formatter:on
-		);
-		this.cancelable = new JCheckBox();
-		this.hasResult = new JCheckBox();
-		this.dependencies = new ArrayList<>();
-		this.lastSearchResult = new ArrayList<>();
-		if (editingMode) {
-			triggerName.setEnabled(false);
-		}
+        );
+        this.cancelable = new JCheckBox();
+        this.hasResult = new JCheckBox();
+        this.dependencies = new ArrayList<>();
+        this.lastSearchResult = new ArrayList<>();
+        if (editingMode) {
+            triggerName.setEnabled(false);
+        }
 
-		this.initGUI();
-		this.finalizeGUI();
-	}
+        this.initGUI();
+        this.finalizeGUI();
+    }
 
-	@Override protected void initGUI() {
-		JPanel configuration = new JPanel(new GridLayout(5, 2, 5, 5));
-		configuration.setOpaque(false);
-		configuration.setBorder(BorderFactory.createTitledBorder("Configuration"));
+    @Override protected void initGUI() {
+        initConfiguration(new GridLayout(5, 2, 5, 5));
 
-		this.triggerName.setOpaque(false);
-		this.triggerName.setPreferredSize(Utils.tryToGetTextFieldSize());
-		this.triggerName.setText(modElement.getRegistryName());
-		this.triggerName.setValidator(Rules.getTextfieldValidator(this.triggerName));
-		this.triggerName.addFocusListener(new FocusAdapter() {
-			@Override public void focusLost(FocusEvent e) {
-				modElement.setRegistryName(triggerName.getText());
-			}
-		});
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/name"),
-				L10N.label("elementgui.common.name")));
-		configuration.add(triggerName);
+        this.triggerName.setOpaque(false);
+        this.triggerName.setPreferredSize(Utils.tryToGetTextFieldSize());
+        this.triggerName.setText(modElement.getRegistryName());
+        this.triggerName.setValidator(Rules.getTextfieldValidator(this.triggerName));
+        this.triggerName.addFocusListener(new FocusAdapter() {
+            @Override public void focusLost(FocusEvent e) {
+                modElement.setRegistryName(triggerName.getText());
+            }
+        });
+        addNameConfiguration(triggerName);
 
-		this.hasResult.setOpaque(false);
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/has_result"),
-				L10N.label("elementgui.plugintrigger.has_result")));
-		configuration.add(hasResult);
+        this.hasResult.setOpaque(false);
+        addConfigurationWithHelpEntry("has_result", hasResult);
 
-		this.cancelable.setOpaque(false);
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/cancelable"),
-				L10N.label("elementgui.plugintrigger.cancelable")));
-		configuration.add(cancelable);
+        this.cancelable.setOpaque(false);
+        addConfigurationWithHelpEntry("cancelable", cancelable);
 
-		this.side.setOpaque(false);
-		this.side.setSelectedItem("BOTH");
-		this.side.setPreferredSize(Utils.tryToGetTextFieldSize());
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/side"),
-				L10N.label("elementgui.plugintrigger.side")));
-		configuration.add(side);
+        this.side.setOpaque(false);
+        this.side.setSelectedItem("BOTH");
+        this.side.setPreferredSize(Utils.tryToGetTextFieldSize());
+        addConfigurationWithHelpEntry("side", side);
 
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/required_apis"),
-				L10N.label("elementgui.common.required_apis")));
-		configuration.add(requiredApis);
+        configurationPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugintrigger/required_apis"),
+                L10N.label("elementgui.common.required_apis")));
+        configurationPanel.add(requiredApis);
 
-		JPanel edit = new JPanel(new BorderLayout());
-		edit.setOpaque(false);
-		edit.setBorder(BorderFactory.createTitledBorder("Parameters"));
+        var typeComboBox = new VComboBox<String>();
+        typeComboBox.setOpaque(false);
+        typeComboBox.setEditable(true);
 
-		var typeComboBox = new VComboBox<String>();
-		typeComboBox.setOpaque(false);
-		typeComboBox.setEditable(true);
+        initTable(new TriggerModElementGUITableModul());
+        jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
+                var label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                        column);
+                label.setForeground(Theme.current().getForegroundColor());
+                if (columns[column].equals("Type")) {
+                    if (VariableTypeLoader.INSTANCE.doesVariableTypeExist(label.getText())) {
+                        label.setForeground(VariableTypeLoader.INSTANCE.fromName(label.getText()).getBlocklyColor());
+                    }
+                }
+                return label;
+            }
+        });
+        jTable.setDefaultEditor(String.class, new DefaultCellEditor(typeComboBox) {
+            @Override
+            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
+                    int columnIndex) {
+                var columnName = columns[columnIndex];
+                typeComboBox.removeAllItems();
+                if (columnName.equals("Type")) {
+                    for (String supportedType : Utils.getAllSupportedVariableTypes()) {
+                        typeComboBox.addItem(supportedType);
+                    }
+                }
+                return super.getTableCellEditorComponent(table, value, isSelected, rowIndex, columnIndex);
+            }
+        });
 
-		jTable = new JTable(new TriggerModElementGUITableModul());
-		Utils.initTable(jTable);
-		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
-			@Override
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-					boolean hasFocus, int row, int column) {
-				var label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
-						column);
-				label.setForeground(Theme.current().getForegroundColor());
-				if (columns[column].equals("Type")) {
-					if (VariableTypeLoader.INSTANCE.doesVariableTypeExist(label.getText())) {
-						label.setForeground(VariableTypeLoader.INSTANCE.fromName(label.getText()).getBlocklyColor());
-					}
-				}
-				return label;
-			}
-		});
-		jTable.setDefaultEditor(String.class, new DefaultCellEditor(typeComboBox) {
-			@Override
-			public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
-					int columnIndex) {
-				var columnName = columns[columnIndex];
-				typeComboBox.removeAllItems();
-				if (columnName.equals("Type")) {
-					for (String supportedType : Utils.getAllSupportedVariableTypes()) {
-						typeComboBox.addItem(supportedType);
-					}
-				}
-				return super.getTableCellEditorComponent(table, value, isSelected, rowIndex, columnIndex);
-			}
-		});
-		JScrollPane jScrollPane = new JScrollPane(jTable);
-		edit.add("Center", jScrollPane);
+        JToolBar bar = new JToolBar();
+        bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
+        bar.setFloatable(false);
+        bar.setOpaque(false);
+        JButton addrow = new JButton(UIRES.get("16px.add"));
+        addrow.setContentAreaFilled(false);
+        addrow.setOpaque(false);
+        ComponentUtils.deriveFont(addrow, 11);
+        addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
+        bar.add(addrow);
+        JButton remrow = new JButton(UIRES.get("16px.delete"));
+        remrow.setContentAreaFilled(false);
+        remrow.setOpaque(false);
+        ComponentUtils.deriveFont(remrow, 11);
+        remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
+        bar.add(remrow);
+        bar.add(Utils.initSearchComponent(lastSearchResult, this));
 
-		JToolBar bar = new JToolBar();
-		bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
-		bar.setFloatable(false);
-		bar.setOpaque(false);
-		JButton addrow = new JButton(UIRES.get("16px.add"));
-		addrow.setContentAreaFilled(false);
-		addrow.setOpaque(false);
-		ComponentUtils.deriveFont(addrow, 11);
-		addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
-		bar.add(addrow);
-		JButton remrow = new JButton(UIRES.get("16px.delete"));
-		remrow.setContentAreaFilled(false);
-		remrow.setOpaque(false);
-		ComponentUtils.deriveFont(remrow, 11);
-		remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
-		bar.add(remrow);
-		bar.add(Utils.initSearchComponent(lastSearchResult, this));
-		edit.add("North", bar);
+        addrow.addActionListener(a -> {
+            dependencies.add(new TriggerModElement.Dependency("name" + dependencies.size(), "type"));
+            refreshTable();
+        });
+        remrow.addActionListener(a -> {
+            jTable.editCellAt(-1, 0);
+            Arrays.stream(jTable.getSelectedRows()).mapToObj(b -> dependencies.get(b)).forEach(c -> {
+                dependencies.remove(c);
+            });
+            refreshTable();
+        });
 
-		addrow.addActionListener(a -> {
-			dependencies.add(new TriggerModElement.Dependency("name" + dependencies.size(), "type"));
-			refreshTable();
-		});
-		remrow.addActionListener(a -> {
-			jTable.editCellAt(-1, 0);
-			Arrays.stream(jTable.getSelectedRows()).mapToObj(b -> dependencies.get(b)).forEach(c -> {
-				dependencies.remove(c);
-			});
-			refreshTable();
-		});
+        addPage("trigger", PanelUtils.totalCenterInPanel(
+                PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar)))).validate(triggerName);
+    }
 
-		addPage("trigger",
-				PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(configuration, edit))).validate(
-				triggerName);
-	}
+    @Override public void doSearch(Map.Entry<String, String> search) {
+        lastSearchResult.clear();
+        // cache
+        lastSearchResult.add(0);
+        for (int i = 0; i < dependencies.size(); i++) {
+            var entry = dependencies.get(i);
+            var index = new AtomicInteger();
+            if (Stream.of(entry.getName(), entry.getType())
+                    .map(a -> Map.entry(columns[index.getAndIncrement()], Rules.SearchRules.applyIgnoreCaseRule(a)))
+                    .anyMatch(a -> {
+                        if (!search.getKey().isBlank()) {
+                            if (a.getKey().equalsIgnoreCase(search.getKey())) {
+                                return a.getValue().contains(search.getValue());
+                            }
+                            return false;
+                        }
+                        return a.getValue().contains(search.getValue());
+                    })) {
+                lastSearchResult.add(i);
+            }
+        }
 
-	@Override public void doSearch(Map.Entry<String, String> search) {
-		lastSearchResult.clear();
-		// cache
-		lastSearchResult.add(0);
-		for (int i = 0; i < dependencies.size(); i++) {
-			var entry = dependencies.get(i);
-			var index = new AtomicInteger();
-			if (Stream.of(entry.getName(), entry.getType())
-					.map(a -> Map.entry(columns[index.getAndIncrement()], Rules.SearchRules.applyIgnoreCaseRule(a)))
-					.anyMatch(a -> {
-						if (!search.getKey().isBlank()) {
-							if (a.getKey().equalsIgnoreCase(search.getKey())) {
-								return a.getValue().contains(search.getValue());
-							}
-							return false;
-						}
-						return a.getValue().contains(search.getValue());
-					})) {
-				lastSearchResult.add(i);
-			}
-		}
+    }
 
-	}
+    @Override public void refreshTable() {
+        SwingUtilities.invokeLater(() -> {
+            jTable.repaint();
+            jTable.revalidate();
+        });
+    }
 
-	@Override public void refreshTable() {
-		SwingUtilities.invokeLater(() -> {
-			jTable.repaint();
-			jTable.revalidate();
-		});
-	}
+    @Override public void showSearch(int index) {
+        jTable.changeSelection(index, 0, false, false);
+    }
 
-	@Override public void showSearch(int index) {
-		jTable.changeSelection(index, 0, false, false);
-	}
+    @Override protected void openInEditingMode(TriggerModElement generatableElement) {
+        this.triggerName.setText(generatableElement.getName());
+        this.hasResult.setSelected(generatableElement.has_result);
+        this.cancelable.setSelected(generatableElement.cancelable);
+        this.side.setSelectedItem(generatableElement.side);
+        this.requiredApis.setTextList(generatableElement.required_apis);
+        this.dependencies = generatableElement.dependencies_provided;
+    }
 
-	@Override protected void openInEditingMode(TriggerModElement generatableElement) {
-		this.triggerName.setText(generatableElement.getName());
-		this.hasResult.setSelected(generatableElement.has_result);
-		this.cancelable.setSelected(generatableElement.cancelable);
-		this.side.setSelectedItem(generatableElement.side);
-		this.requiredApis.setTextList(generatableElement.required_apis);
-		this.dependencies = generatableElement.dependencies_provided;
-	}
+    @Override public TriggerModElement getElementFromGUI() {
+        var trigger = new TriggerModElement(modElement);
+        trigger.cancelable = this.cancelable.isSelected();
+        trigger.has_result = this.hasResult.isSelected();
+        trigger.side = this.side.getSelectedItem();
+        trigger.required_apis = this.requiredApis.getTextList();
+        trigger.name = this.triggerName.getText();
+        trigger.dependencies_provided = this.dependencies.stream().map(TriggerModElement.Dependency::clone).toList();
+        return trigger;
+    }
 
-	@Override public TriggerModElement getElementFromGUI() {
-		var trigger = new TriggerModElement(modElement);
-		trigger.cancelable = this.cancelable.isSelected();
-		trigger.has_result = this.hasResult.isSelected();
-		trigger.side = this.side.getSelectedItem();
-		trigger.required_apis = this.requiredApis.getTextList();
-		trigger.name = this.triggerName.getText();
-		trigger.dependencies_provided = this.dependencies.stream().map(TriggerModElement.Dependency::clone).toList();
-		return trigger;
-	}
+    @Override public @Nullable URI contextURL() throws URISyntaxException {
+        return null;
+    }
 
-	@Override public @Nullable URI contextURL() throws URISyntaxException {
-		return null;
-	}
+    private class TriggerModElementGUITableModul extends AbstractTableModel {
 
-	private class TriggerModElementGUITableModul extends AbstractTableModel {
+        @Override public int getRowCount() {
+            return dependencies.size();
+        }
 
-		@Override public int getRowCount() {
-			return dependencies.size();
-		}
+        @Override public int getColumnCount() {
+            return columns.length;
+        }
 
-		@Override public int getColumnCount() {
-			return columns.length;
-		}
+        @Override public String getColumnName(int column) {
+            return columns[column];
+        }
 
-		@Override public String getColumnName(int column) {
-			return columns[column];
-		}
+        @Override public Class<?> getColumnClass(int columnIndex) {
+            return String.class;
+        }
 
-		@Override public Class<?> getColumnClass(int columnIndex) {
-			return String.class;
-		}
+        @Override public Object getValueAt(int rowIndex, int columnIndex) {
+            var row = dependencies.get(rowIndex);
+            var columss = new String[] { row.getName(), row.getType() };
+            return columss[columnIndex];
+        }
 
-		@Override public Object getValueAt(int rowIndex, int columnIndex) {
-			var row = dependencies.get(rowIndex);
-			var columss = new String[] { row.getName(), row.getType() };
-			return columss[columnIndex];
-		}
+        @Override public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return true;
+        }
 
-		@Override public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return true;
-		}
-
-		@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			var row = dependencies.get(rowIndex);
-			if (columns[columnIndex].equals("Name")) {
-				row.setName(aValue.toString());
-			} else if (columns[columnIndex].equals("Type")) {
-				row.setType(aValue.toString());
-			}
-		}
-	}
+        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            var row = dependencies.get(rowIndex);
+            if (columns[columnIndex].equals("Name")) {
+                row.setName(aValue.toString());
+            } else if (columns[columnIndex].equals("Type")) {
+                row.setType(aValue.toString());
+            }
+        }
+    }
 }

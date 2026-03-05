@@ -3,9 +3,6 @@ package org.cdc.generator.ui.elements;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.help.HelpUtils;
-import net.mcreator.ui.init.L10N;
-import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
@@ -39,10 +36,8 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
 
-public class VariableImplementationModElementGUI extends ModElementGUI<VariableImplementationModElement> {
-
-    private final String[] columns = new String[] { "Scope name", "Init", "Get", "Set", "Read", "Write" };
-
+public class VariableImplementationModElementGUI
+        extends AbstractConfigurationTableModElementGUI<VariableImplementationModElement> {
     private final VComboBox<String> generator = new VComboBox<>();
     private final VComboBox<String> variableElementName = new VComboBox<>();
     private final VTextField defaultValue = new VTextField();
@@ -53,7 +48,7 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
     private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
     public VariableImplementationModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
-        super(mcreator, modElement, editingMode);
+        super(mcreator, modElement, editingMode,new String[] { "Scope name", "Init", "Get", "Set", "Read", "Write" });
 
         if (editingMode) {
             generator.setEnabled(false);
@@ -65,9 +60,7 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
     }
 
     @Override protected void initGUI() {
-        JPanel configuration = new JPanel(new GridLayout(3, 2));
-        configuration.setBorder(BorderFactory.createTitledBorder("Config"));
-        configuration.setOpaque(false);
+        initConfiguration(new GridLayout(3, 2));
 
         generator.setEditable(true);
         generator.setPreferredSize(Utils.tryToGetTextFieldSize());
@@ -81,9 +74,7 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
             generator.addItem(supportedGenerator);
         }
         generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariableimpl/generator"),
-                L10N.label("elementgui.common.generator")));
-        configuration.add(generator);
+        addGeneratorConfiguration(generator);
 
         variableElementName.setEditable(false);
         variableElementName.setValidator(() -> {
@@ -105,9 +96,7 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
                 return jLabel;
             }
         });
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariableimpl/variableelementname"),
-                L10N.label("elementgui.pluginvariableimpl.variable_element_name")));
-        configuration.add(variableElementName);
+        addConfigurationWithHelpEntry("variable_element_name", variableElementName);
 
         defaultValue.setText("null");
         defaultValue.setValidator(() -> {
@@ -117,12 +106,9 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
             return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
         });
         defaultValue.setPreferredSize(Utils.tryToGetTextFieldSize());
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariableimpl/defaultvalue"),
-                L10N.label("elementgui.pluginvariableimpl.default_value")));
-        configuration.add(defaultValue);
+        addConfigurationWithHelpEntry("default_value", defaultValue);
 
-        JTable jTable = new JTable(new ScopesTableModel());
-        Utils.initTable(jTable);
+        initTable(new ScopesTableModel());
         jTable.setDefaultEditor(String.class, new DefaultCellEditor(new JTextField()) {
 
             @Override
@@ -158,13 +144,9 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
         for (String s : Utils.getAllVariableScope()) {
             scopeList.add(new VariableImplementationModElement.VariableScope(s));
         }
-        jTable.setFillsViewportHeight(true);
 
-        JScrollPane scrollPane = new JScrollPane(jTable);
-
-        addPage("Configuration",
-                PanelUtils.northAndCenterElement(PanelUtils.totalCenterInPanel(configuration), scrollPane)).validate(
-                variableElementName).validate(generator).validate(defaultValue);
+        addPage("Configuration", PanelUtils.northAndCenterElement(configurationPanel,
+                wrapTable())).validate(variableElementName).validate(generator).validate(defaultValue);
 
     }
 
@@ -205,7 +187,8 @@ public class VariableImplementationModElementGUI extends ModElementGUI<VariableI
         provider.addCompletion(new BasicCompletion(provider, "${type", "the type of variable"));
         provider.addCompletion(new BasicCompletion(provider, "${value", "the value of variable"));
         provider.addCompletion(new BasicCompletion(provider, "${entity", "the entity of variable (nullable)"));
-        provider.addCompletion(new BasicCompletion(provider,"${var","net.mcreator.workspace.elements.VariableElement"));
+        provider.addCompletion(
+                new BasicCompletion(provider, "${var", "net.mcreator.workspace.elements.VariableElement"));
 
         Utils.initCompletionWithGenerator(provider, mcreator.getGenerator());
 

@@ -1,11 +1,19 @@
 package org.cdc.generator.ui.elements;
 
+import org.cdc.generator.utils.Utils;
+
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.Map;
 
 public interface ISearchable {
-	void doSearch(Map.Entry<String,String> search);
+    void doSearch(Map.Entry<String, String> search);
 
-	void refreshTable();
+    void refreshTable();
 
-	void showSearch(int index);
+    void showSearch(int index);
+
+    default Component initSearchBar(ArrayList<Integer> lastSearchResult) {
+        return Utils.initSearchComponent(lastSearchResult, this);
+    }
 }

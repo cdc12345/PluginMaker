@@ -7,7 +7,6 @@ import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.validation.AggregatedValidationResult;
@@ -36,17 +35,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class DataListModElementGUI extends AbstractConfigurationTableModElementGUI<DataListModElement>
         implements ISearchable {
-
-    private final String[] columns = new String[] { "Name", "Readable name", "Type", "Texture", "Description",
-            "Others" };
 
     private final VComboBox<String> datalistName = new VComboBox<>();
     private final JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
@@ -59,11 +52,9 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
     private ResourcePanelIcons resourcePanelIcons;
     private HashSet<String> types;
 
-    private ThreadPoolExecutor searchThread = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(1));
-
     public DataListModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
-        super(mcreator, modElement, editingMode);
+        super(mcreator, modElement, editingMode,
+                new String[] { "Name", "Readable name", "Type", "Texture", "Description", "Others" });
 
         this.entries = new ArrayList<>();
         this.lastSearchResult = new ArrayList<>(List.of(0));
@@ -85,20 +76,14 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         datalistName.setPreferredSize(Utils.tryToGetTextFieldSize());
         var list = DataListLoader.getCache().keySet().stream().sorted().toList();
         ComboBoxUtil.updateComboBoxContents(datalistName, list);
-        configurationPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("plugindatalist/datalistname"),
-                L10N.label("elementgui.common.name")));
-        configurationPanel.add(datalistName);
+        addNameConfiguration(datalistName);
 
         generateDataList.setSelected(true);
         generateDataList.setOpaque(false);
         addConfigurationWithHelpEntry("generate_datalists", generateDataList);
 
         dialogMessage.setOpaque(false);
-        addConfigurationWithHelpEntry("dialog_message",dialogMessage);
-
-        JPanel listPanel = new JPanel(new BorderLayout());
-        listPanel.setBorder(BorderFactory.createTitledBorder("Edit"));
-        listPanel.setOpaque(false);
+        addConfigurationWithHelpEntry("dialog_message", dialogMessage);
 
         initTable(new DataListTableModel());
         jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
@@ -173,10 +158,6 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
                 return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
             }
         });
-
-        JScrollPane scrollPane = new JScrollPane(jTable);
-        scrollPane.setOpaque(false);
-
         JToolBar bar = new JToolBar();
         bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
         bar.setFloatable(false);
@@ -198,7 +179,7 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
 
         addrow.addActionListener(e -> {
             entries.add(entries.isEmpty() ?
-                    new DataListModElement.DataListEntry("name", "", "", "", "") :
+                    new DataListModElement.DataListEntry("name") :
                     DataListModElement.DataListEntry.copyCommonValueOf(entries.getLast()));
             if (!isEditingMode()) {
                 JOptionPane.showMessageDialog(mcreator, "If you edit datalist name, you will lose your work", "Warning",
@@ -221,10 +202,8 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
             refreshTable();
         });
 
-        listPanel.add("North", bar);
-        listPanel.add("Center", scrollPane);
-
-        addPage("Configuration", PanelUtils.northAndCenterElement(configurationPanel, listPanel)).lazyValidate(() -> {
+        addPage("Configuration",
+                PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar))).lazyValidate(() -> {
             Set<String> names = new HashSet<>();
             for (int i = 0; i < entries.size(); i++) {
                 var entry = entries.get(i);

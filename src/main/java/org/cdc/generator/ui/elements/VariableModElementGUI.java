@@ -4,9 +4,7 @@ import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.JColor;
 import net.mcreator.ui.component.JStringListField;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
-import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.Validator;
 import net.mcreator.ui.validation.component.VComboBox;
@@ -25,7 +23,7 @@ import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class VariableModElementGUI extends ModElementGUI<VariableModElement> {
+public class VariableModElementGUI extends AbstractConfigurationTableModElementGUI<VariableModElement> {
 
     private final VTextField name = new VTextField();
 
@@ -37,7 +35,7 @@ public class VariableModElementGUI extends ModElementGUI<VariableModElement> {
     private final VComboBox<String> builtInColor;
 
     public VariableModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
-        super(mcreator, modElement, editingMode);
+        super(mcreator, modElement, editingMode, null);
 
         this.requiredApis = new JStringListField(mcreator, vTextField -> new Validator() {
             private final Validator parent = new RegistryNameValidator(vTextField,
@@ -62,50 +60,34 @@ public class VariableModElementGUI extends ModElementGUI<VariableModElement> {
     }
 
     @Override protected void initGUI() {
-        JPanel configuration = new JPanel(new GridLayout(7, 2, 5, 5));
-        configuration.setOpaque(false);
-        configuration.setBorder(BorderFactory.createTitledBorder("Configuration"));
+        initConfiguration(new GridLayout(7, 2, 5, 5));
 
         name.setOpaque(false);
         name.setText(modElement.getRegistryName());
         name.setValidator(Rules.getTextfieldValidator(name));
         name.setPreferredSize(Utils.tryToGetTextFieldSize());
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/name"),
-                L10N.label("elementgui.common.name")));
-        configuration.add(name);
+        addNameConfiguration(name);
 
         blocklyVariableType.setOpaque(false);
         blocklyVariableType.setText(modElement.getName());
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/blocklyvariabletype"),
-                L10N.label("elementgui.pluginvariable.blockly_variable_type")));
-        configuration.add(blocklyVariableType);
+        addConfigurationWithHelpEntry("blockly_variable_type", blocklyVariableType);
 
         ignoredByCoverage.setOpaque(false);
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/ignoredbycoverage"),
-                L10N.label("elementgui.pluginvariable.ignored_by_coverage")));
-        configuration.add(ignoredByCoverage);
+        addConfigurationWithHelpEntry("ignored_by_coverage", ignoredByCoverage);
 
         nullable.setOpaque(false);
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/nullable"),
-                L10N.label("elementgui.pluginvariable.nullable")));
-        configuration.add(nullable);
+        addConfigurationWithHelpEntry("nullable", nullable);
 
         requiredApis.setOpaque(false);
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/nullable"),
-                L10N.label("elementgui.common.required_apis")));
-        configuration.add(requiredApis);
+        addConfigurationWithHelpEntry("required_apis", requiredApis);
 
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/color"),
-                L10N.label("elementgui.pluginvariable.color")));
-        configuration.add(color);
+        addConfigurationWithHelpEntry("color", color);
 
         builtInColor.setOpaque(false);
         builtInColor.setEditable(true);
-        configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginvariable/color"),
-                L10N.label("elementgui.pluginvariable.builtincolor")));
-        configuration.add(builtInColor);
+        addConfigurationWithHelpEntry("builtincolor", builtInColor);
 
-        addPage(PanelUtils.totalCenterInPanel(configuration)).validate(name);
+        addPage(PanelUtils.totalCenterInPanel(configurationPanel)).validate(name);
     }
 
     @Override protected void openInEditingMode(VariableModElement generatableElement) {

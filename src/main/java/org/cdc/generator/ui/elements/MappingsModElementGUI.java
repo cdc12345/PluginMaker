@@ -4,10 +4,7 @@ import net.mcreator.generator.Generator;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.help.HelpUtils;
-import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
-import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.workspace.elements.ModElement;
@@ -37,288 +34,270 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class MappingsModElementGUI extends ModElementGUI<MappingsModElement> implements ISearchable {
+public class MappingsModElementGUI extends AbstractConfigurationTableModElementGUI<MappingsModElement>
+        implements ISearchable {
 
-	private final String[] columns = new String[] { "Name", "Mapping" };
+    private final VComboBox<String> generator = new VComboBox<>();
+    private final VComboBox<String> datalistName = new VComboBox<>();
 
-	private final VComboBox<String> generator = new VComboBox<>();
-	private final VComboBox<String> datalistName = new VComboBox<>();
+    public List<MappingsModElement.MappingEntry> mappingEntries;
 
-	public List<MappingsModElement.MappingEntry> mappingEntries;
+    // the 0 is the last search index
+    private final ArrayList<Integer> lastSearchResult;
 
-	// the 0 is the last search index
-	private final ArrayList<Integer> lastSearchResult;
-	private JTable jTable;
+    public MappingsModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
+        super(mcreator, modElement, editingMode, new String[] { "Name", "Mapping" });
 
-	public MappingsModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
-		super(mcreator, modElement, editingMode);
+        this.mappingEntries = new ArrayList<>();
+        this.lastSearchResult = new ArrayList<>(List.of(0));
 
-		this.mappingEntries = new ArrayList<>();
-		this.lastSearchResult = new ArrayList<>(List.of(0));
+        if (editingMode) {
+            generator.setEnabled(false);
+            datalistName.setEnabled(false);
+        }
 
-		if (editingMode) {
-			generator.setEnabled(false);
-			datalistName.setEnabled(false);
-		}
+        this.initGUI();
+        this.finalizeGUI();
+    }
 
-		this.initGUI();
-		this.finalizeGUI();
-	}
+    @Override protected void initGUI() {
+        initConfiguration(new GridLayout(2, 2));
 
-	@Override protected void initGUI() {
-		JPanel configuration = new JPanel(new GridLayout(2, 2));
-		configuration.setBorder(BorderFactory.createTitledBorder("Config"));
-		configuration.setOpaque(false);
+        generator.setEditable(true);
+        generator.setPreferredSize(Utils.tryToGetTextFieldSize());
+        generator.setValidator(() -> {
+            if (generator.getSelectedItem() != null && !generator.getSelectedItem().isBlank()) {
+                return ValidationResult.PASSED;
+            }
+            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
+        });
+        for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
+            generator.addItem(supportedGenerator);
+        }
+        generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
+        addGeneratorConfiguration(generator);
 
-		generator.setEditable(true);
-		generator.setPreferredSize(Utils.tryToGetTextFieldSize());
-		generator.setValidator(() -> {
-			if (generator.getSelectedItem() != null && !generator.getSelectedItem().isBlank()) {
-				return ValidationResult.PASSED;
-			}
-			return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-		});
-		for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
-			generator.addItem(supportedGenerator);
-		}
-		generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/generator"),
-				L10N.label("elementgui.common.generator")));
-		configuration.add(generator);
+        datalistName.setEditable(false);
+        datalistName.setValidator(() -> {
+            if (datalistName.getSelectedItem() != null && !datalistName.getSelectedItem().isBlank()) {
+                return ValidationResult.PASSED;
+            }
+            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
+        });
+        addConfigurationWithHelpEntry("datalist_name", datalistName);
 
-		datalistName.setEditable(false);
-		datalistName.setValidator(() -> {
-			if (datalistName.getSelectedItem() != null && !datalistName.getSelectedItem().isBlank()) {
-				return ValidationResult.PASSED;
-			}
-			return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-		});
-		configuration.add(HelpUtils.wrapWithHelpButton(this.withEntry("pluginmappings/datalistname"),
-				L10N.label("elementgui.pluginmappings.datalist_name")));
-		configuration.add(datalistName);
+        JToolBar bar = new JToolBar();
+        bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
+        bar.setFloatable(false);
+        bar.setOpaque(false);
+        bar.setOpaque(false);
 
-		JPanel mapping = new JPanel(new BorderLayout());
-		mapping.setOpaque(false);
-		mapping.setBorder(BorderFactory.createTitledBorder("Edit"));
-		JToolBar bar = new JToolBar();
-		bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
-		bar.setFloatable(false);
-		bar.setOpaque(false);
-		bar.setOpaque(false);
+        var syncWithDatalist = new JButton(UIRES.get("impfile"));
+        syncWithDatalist.setToolTipText("Import from element and memory");
+        syncWithDatalist.setOpaque(false);
 
-		var syncWithDatalist = new JButton(UIRES.get("impfile"));
-		syncWithDatalist.setToolTipText("Import from element and memory");
-		syncWithDatalist.setOpaque(false);
+        initTable(new MappingTableModel());
 
-		jTable = new JTable(new MappingTableModel());
-		Utils.initTable(jTable);
+        jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int rowIndex, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(jTable, value, isSelected, hasFocus,
+                        rowIndex, column);
+                if (value != null)
+                    label.setToolTipText(value + ", index=" + rowIndex);
+                return label;
+            }
+        });
+        jTable.setDefaultEditor(String.class, new DefaultCellEditor(new JTextField()) {
+            @Override
+            public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
+                    int column) {
+                var row = mappingEntries.get(rowIndex);
+                if (columns[column].equals("Mapping")) {
+                    JToolBar placeholder = new JToolBar();
+                    placeholder.setFloatable(false);
+                    placeholder.setLayout(new GridLayout(2, 3));
+                    placeholder.setBorder(BorderFactory.createTitledBorder("Placeholders"));
+                    RSyntaxTextArea jTextArea = new RSyntaxTextArea();
 
-		JScrollPane scrollPane = new JScrollPane(jTable);
-		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane.setOpaque(false);
+                    Stream.of("@NAME", "@UPPERNAME", "@name", "@SnakeCaseName", "@registryname", "@REGISTRYNAME")
+                            .forEach(a -> {
+                                JButton appendName = new JButton(a);
+                                appendName.setContentAreaFilled(false);
+                                appendName.setOpaque(false);
+                                appendName.setHorizontalTextPosition(SwingConstants.LEFT);
+                                appendName.addActionListener(event -> {
+                                    jTextArea.insert(a, jTextArea.getCaretPosition());
+                                });
+                                placeholder.add(appendName);
+                            });
+                    int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, placeholder, mcreator,
+                            "Edit Mapping (one line one item)", row.getMappingContent());
+                    if (op == JOptionPane.YES_OPTION) {
+                        String str = jTextArea.getText();
+                        BufferedReader bufferedReader = new BufferedReader(new StringReader(str));
+                        try {
+                            var list = row.getMappingContent();
+                            list.clear();
+                            String line;
+                            while ((line = bufferedReader.readLine()) != null) {
+                                list.add(line);
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        row.setEdited(MappingsModElement.MappingEntry.isEdited(generator.getSelectedItem(),
+                                ElementsUtils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()),
+                                row));
+                    }
+                    return null;
+                }
+                return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
+            }
+        });
+        syncWithDatalist.addActionListener(e -> {
+            var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
+            //
+            MappingsModElementGUI.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            //
+            if (datalist != null) {
+                String dataListName = ElementsUtils.getDataListName(datalist);
+                var memory = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
+                        .getMapping(dataListName);
+                var cacheSet = new HashSet<MappingsModElement.MappingEntry>();
+                var set = new HashSet<String>();
+                mappingEntries.forEach(a -> {
+                    if (a.isEdited()) {
+                        cacheSet.add(a);
+                        set.add(a.getName());
+                    }
+                });
+                mappingEntries.clear();
+                if (memory != null) {
+                    for (Map.Entry<?, ?> entry : memory.entrySet()) {
+                        var key = entry.getKey().toString();
+                        // exclude
+                        if (!set.contains(key)) {
+                            set.add(key);
+                            mappingEntries.add(new MappingsModElement.MappingEntry(key,
+                                    Utils.convertYamlMappingToList(entry.getValue())));
+                        }
+                    }
+                }
+                // add custom
+                for (DataListModElement.DataListEntry entry : ((DataListModElement) Objects.requireNonNull(
+                        datalist.getGeneratableElement())).entries) {
+                    if (set.isEmpty() || !set.contains(entry.getName()))
+                        mappingEntries.add(new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
+                }
+                mappingEntries.addAll(cacheSet);
+                JOptionPane.showMessageDialog(mcreator,
+                        "Total: " + mappingEntries.size() + ", Edited: " + cacheSet.size());
+            }
 
-		jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
-			@Override
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-					boolean hasFocus, int rowIndex, int column) {
-				JLabel label = (JLabel) super.getTableCellRendererComponent(jTable, value, isSelected, hasFocus,
-						rowIndex, column);
-				if (value != null)
-					label.setToolTipText(value + ", index=" + rowIndex);
-				return label;
-			}
-		});
-		jTable.setDefaultEditor(String.class, new DefaultCellEditor(new JTextField()) {
-			@Override
-			public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
-					int column) {
-				var row = mappingEntries.get(rowIndex);
-				if (columns[column].equals("Mapping")) {
-					JToolBar placeholder = new JToolBar();
-					placeholder.setFloatable(false);
-					placeholder.setLayout(new GridLayout(2, 3));
-					placeholder.setBorder(BorderFactory.createTitledBorder("Placeholders"));
-					RSyntaxTextArea jTextArea = new RSyntaxTextArea();
+            MappingsModElementGUI.this.setCursor(Cursor.getDefaultCursor());
+            refreshTable();
+        });
 
-					Stream.of("@NAME", "@UPPERNAME", "@name", "@SnakeCaseName", "@registryname", "@REGISTRYNAME")
-							.forEach(a -> {
-								JButton appendName = new JButton(a);
-								appendName.setContentAreaFilled(false);
-								appendName.setOpaque(false);
-								appendName.setHorizontalTextPosition(SwingConstants.LEFT);
-								appendName.addActionListener(event -> {
-									jTextArea.insert(a, jTextArea.getCaretPosition());
-								});
-								placeholder.add(appendName);
-							});
-					int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, placeholder, mcreator,
-							"Edit Mapping (one line one item)", row.getMappingContent());
-					if (op == JOptionPane.YES_OPTION) {
-						String str = jTextArea.getText();
-						BufferedReader bufferedReader = new BufferedReader(new StringReader(str));
-						try {
-							var list = row.getMappingContent();
-							list.clear();
-							String line;
-							while ((line = bufferedReader.readLine()) != null) {
-								list.add(line);
-							}
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-						row.setEdited(MappingsModElement.MappingEntry.isEdited(generator.getSelectedItem(),
-								ElementsUtils.getDataListName(mcreator.getWorkspace(), datalistName.getSelectedItem()), row));
-					}
-					return null;
-				}
-				return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
-			}
-		});
-		syncWithDatalist.addActionListener(e -> {
-			var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
-			//
-			MappingsModElementGUI.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			//
-			if (datalist != null) {
-				String dataListName = ElementsUtils.getDataListName(datalist);
-				var memory = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
-						.getMapping(dataListName);
-				var cacheSet = new HashSet<MappingsModElement.MappingEntry>();
-				var set = new HashSet<String>();
-				mappingEntries.forEach(a -> {
-					if (a.isEdited()) {
-						cacheSet.add(a);
-						set.add(a.getName());
-					}
-				});
-				mappingEntries.clear();
-				if (memory != null) {
-					for (Map.Entry<?, ?> entry : memory.entrySet()) {
-						var key = entry.getKey().toString();
-						// exclude
-						if (!set.contains(key)) {
-							set.add(key);
-							mappingEntries.add(new MappingsModElement.MappingEntry(key,
-									Utils.convertYamlMappingToList(entry.getValue())));
-						}
-					}
-				}
-				// add custom
-				for (DataListModElement.DataListEntry entry : ((DataListModElement) Objects.requireNonNull(
-						datalist.getGeneratableElement())).entries) {
-					if (set.isEmpty() || !set.contains(entry.getName()))
-						mappingEntries.add(new MappingsModElement.MappingEntry(entry.getName(), new ArrayList<>()));
-				}
-				mappingEntries.addAll(cacheSet);
-				JOptionPane.showMessageDialog(mcreator,
-						"Total: " + mappingEntries.size() + ", Edited: " + cacheSet.size());
-			}
+        bar.add(syncWithDatalist);
+        bar.add(initSearchBar(lastSearchResult));
 
-			MappingsModElementGUI.this.setCursor(Cursor.getDefaultCursor());
-			refreshTable();
-		});
+        addPage("edit", PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar))).validate(generator)
+                .validate(datalistName);
+    }
 
-		bar.add(syncWithDatalist);
-		bar.add(Utils.initSearchComponent(lastSearchResult, this));
+    @Override protected void openInEditingMode(MappingsModElement generatableElement) {
+        datalistName.setSelectedItem(generatableElement.datalistElementName);
+        generator.setSelectedItem(generatableElement.generatorName);
+        mappingEntries = new ArrayList<>(generatableElement.mappingsContent);
+    }
 
-		mapping.add("Center", scrollPane);
-		mapping.add("North", bar);
+    @Override public MappingsModElement getElementFromGUI() {
+        var element = new MappingsModElement(modElement);
+        element.datalistElementName = datalistName.getSelectedItem();
+        element.generatorName = generator.getSelectedItem();
+        element.mappingsContent = mappingEntries.stream().map(MappingsModElement.MappingEntry::clone).toList();
+        modElement.setRegistryName(element.getDatalistName());
+        return element;
+    }
 
-		addPage("edit", PanelUtils.northAndCenterElement(configuration, mapping)).validate(generator)
-				.validate(datalistName);
-	}
+    @Override public @Nullable URI contextURL() throws URISyntaxException {
+        return null;
+    }
 
-	@Override protected void openInEditingMode(MappingsModElement generatableElement) {
-		datalistName.setSelectedItem(generatableElement.datalistElementName);
-		generator.setSelectedItem(generatableElement.generatorName);
-		mappingEntries = new ArrayList<>(generatableElement.mappingsContent);
-	}
+    @Override public void reloadDataLists() {
+        ArrayList<String> stringArrayList = new ArrayList<>();
+        for (ModElement element : mcreator.getWorkspaceInfo()
+                .getElementsOfType(ModElementTypes.DATA_LIST.getRegistryName())) {
+            stringArrayList.add(element.getName());
+        }
+        ComboBoxUtil.updateComboBoxContents(datalistName, stringArrayList);
+    }
 
-	@Override public MappingsModElement getElementFromGUI() {
-		var element = new MappingsModElement(modElement);
-		element.datalistElementName = datalistName.getSelectedItem();
-		element.generatorName = generator.getSelectedItem();
-		element.mappingsContent = mappingEntries.stream().map(MappingsModElement.MappingEntry::clone).toList();
-		modElement.setRegistryName(element.getDatalistName());
-		return element;
-	}
+    public void doSearch(Map.Entry<String, String> search) {
+        lastSearchResult.clear();
+        // cache
+        lastSearchResult.add(0);
+        for (int i = 0; i < mappingEntries.size(); i++) {
+            var entry = mappingEntries.get(i);
+            AtomicInteger index = new AtomicInteger();
+            if (Stream.of(entry.getName(), entry.getMappingContent().toString())
+                    .map(a -> Map.entry(columns[index.getAndIncrement()], Rules.SearchRules.applyIgnoreCaseRule(a)))
+                    .anyMatch(a -> {
+                        if (!search.getKey().isBlank()) {
+                            if (a.getKey().equalsIgnoreCase(search.getKey())) {
+                                return a.getValue().contains(search.getValue());
+                            }
+                            return false;
+                        }
+                        return a.getValue().contains(search.getValue());
+                    })) {
+                lastSearchResult.add(i);
+            }
+        }
+    }
 
-	@Override public @Nullable URI contextURL() throws URISyntaxException {
-		return null;
-	}
+    public void refreshTable() {
+        SwingUtilities.invokeLater(() -> {
+            jTable.repaint();
+            jTable.revalidate();
+        });
+    }
 
-	@Override public void reloadDataLists() {
-		ArrayList<String> stringArrayList = new ArrayList<>();
-		for (ModElement element : mcreator.getWorkspaceInfo()
-				.getElementsOfType(ModElementTypes.DATA_LIST.getRegistryName())) {
-			stringArrayList.add(element.getName());
-		}
-		ComboBoxUtil.updateComboBoxContents(datalistName, stringArrayList);
-	}
+    @Override public void showSearch(int index) {
+        jTable.changeSelection(index, 0, false, false);
+    }
 
-	public void doSearch(Map.Entry<String, String> search) {
-		lastSearchResult.clear();
-		// cache
-		lastSearchResult.add(0);
-		for (int i = 0; i < mappingEntries.size(); i++) {
-			var entry = mappingEntries.get(i);
-			AtomicInteger index = new AtomicInteger();
-			if (Stream.of(entry.getName(), entry.getMappingContent().toString())
-					.map(a -> Map.entry(columns[index.getAndIncrement()], Rules.SearchRules.applyIgnoreCaseRule(a)))
-					.anyMatch(a -> {
-						if (!search.getKey().isBlank()) {
-							if (a.getKey().equalsIgnoreCase(search.getKey())) {
-								return a.getValue().contains(search.getValue());
-							}
-							return false;
-						}
-						return a.getValue().contains(search.getValue());
-					})) {
-				lastSearchResult.add(i);
-			}
-		}
-	}
+    private class MappingTableModel extends AbstractTableModel {
+        @Override public int getRowCount() {
+            return mappingEntries.size();
+        }
 
-	public void refreshTable() {
-		SwingUtilities.invokeLater(() -> {
-			jTable.repaint();
-			jTable.revalidate();
-		});
-	}
+        @Override public int getColumnCount() {
+            return columns.length;
+        }
 
-	@Override public void showSearch(int index) {
-		jTable.changeSelection(index, 0, false, false);
-	}
+        @Override public Object getValueAt(int rowIndex, int columnIndex) {
+            var row = mappingEntries.get(rowIndex);
+            var columns = new String[] { row.getName(), row.getMappingContent().toString() };
+            return columns[columnIndex];
+        }
 
-	private class MappingTableModel extends AbstractTableModel {
-		@Override public int getRowCount() {
-			return mappingEntries.size();
-		}
+        @Override public String getColumnName(int column) {
+            return columns[column];
+        }
 
-		@Override public int getColumnCount() {
-			return columns.length;
-		}
+        @Override public Class<?> getColumnClass(int columnIndex) {
+            return String.class;
+        }
 
-		@Override public Object getValueAt(int rowIndex, int columnIndex) {
-			var row = mappingEntries.get(rowIndex);
-			var columns = new String[] { row.getName(), row.getMappingContent().toString() };
-			return columns[columnIndex];
-		}
+        @Override public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return true;
+        }
 
-		@Override public String getColumnName(int column) {
-			return columns[column];
-		}
-
-		@Override public Class<?> getColumnClass(int columnIndex) {
-			return String.class;
-		}
-
-		@Override public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return true;
-		}
-
-		@Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			super.setValueAt(aValue, rowIndex, columnIndex);
-		}
-	}
+        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            super.setValueAt(aValue, rowIndex, columnIndex);
+        }
+    }
 }

@@ -24,8 +24,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.*;
 import java.util.List;
@@ -184,20 +182,6 @@ public class Utils {
                     Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(sp[0]));
         }
         return Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(text));
-    }
-
-    public static void initTable(JTable jTable) {
-        jTable.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON3 && jTable.rowAtPoint(e.getPoint()) != jTable.getSelectedRow()) {
-                    jTable.clearSelection();
-                    jTable.editCellAt(-1, 0);
-                }
-            }
-        });
-        jTable.setFillsViewportHeight(true);
-        jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        jTable.setOpaque(false);
     }
 
     public static void initRsyncArea(RSyntaxTextArea jTextArea, Component parent, RTextScrollPane jScrollPane) {

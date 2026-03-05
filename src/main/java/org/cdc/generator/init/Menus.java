@@ -60,7 +60,7 @@ public class Menus {
 			menuItem.addActionListener(even -> {
 				if (mCreator.getTabs().getCurrentTab()
 						.getContent() instanceof DataListModElementGUI dataListModElementGUI) {
-					dataListModElementGUI.entries.add(new DataListModElement.DataListEntry(a, null, null, null, null));
+					dataListModElementGUI.entries.add(new DataListModElement.DataListEntry(a));
 					dataListModElementGUI.refreshTable();
 				}
 			});

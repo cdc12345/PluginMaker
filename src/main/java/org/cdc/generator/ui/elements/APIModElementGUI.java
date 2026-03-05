@@ -37,9 +37,6 @@ import java.util.stream.Stream;
 
 public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<APIModElement> implements ISearchable {
 
-    private final String[] columns = new String[] { "Generator", "Required when enable", "Update files",
-            "Version range", "Gradle" };
-
     private final VTextField name = new VTextField();
     private final VTextField displayName = new VTextField();
 
@@ -47,7 +44,8 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
     private final ArrayList<Integer> lastSearchResult = new ArrayList<>(List.of(0));
 
     public APIModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
-        super(mcreator, modElement, editingMode);
+        super(mcreator, modElement, editingMode,
+                new String[] { "Generator", "Required when enable", "Update files", "Version range", "Gradle" });
 
         if (editingMode) {
             name.setEnabled(false);
@@ -73,9 +71,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
         displayName.setText(modElement.getName());
         addConfigurationWithHelpEntry("display_name", displayName);
 
-        jTable = new JTable(new APIModElementGUITableRenderer());
-        Utils.initTable(jTable);
-        JScrollPane jScrollPane = new JScrollPane(jTable);
+        initTable(new APIModElementGUITableRenderer());
 
         JToolBar bar = new JToolBar();
         bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
@@ -99,6 +95,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
 
         VComboBox<String> generatorCom = new VComboBox<>();
         generatorCom.setEditable(true);
+
         jTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -238,9 +235,8 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
             });
             refreshTable();
         });
-        var panel = PanelUtils.northAndCenterElement(bar, jScrollPane);
 
-        addPage("edit", PanelUtils.northAndCenterElement(configurationPanel, panel)).validate(name);
+        addPage("edit", PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar))).validate(name);
     }
 
     @Override protected void openInEditingMode(APIModElement generatableElement) {
