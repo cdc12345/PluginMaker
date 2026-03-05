@@ -33,7 +33,7 @@ public class VariableImplementationModElement extends GeneratableElement impleme
         return ElementsUtils.getVariableName(getModElement().getWorkspace(), variableElementName);
     }
 
-    public String getDefaultValue() {
+    @UsedByReflection public String getDefaultValue() {
         return defaultValue;
     }
 
@@ -41,7 +41,7 @@ public class VariableImplementationModElement extends GeneratableElement impleme
         return generator;
     }
 
-    public static class VariableScope implements Cloneable{
+    public static class VariableScope implements Cloneable {
         private String name;
         private String init;
         private String get;
@@ -117,8 +117,7 @@ public class VariableImplementationModElement extends GeneratableElement impleme
             return init;
         }
 
-        @UsedByReflection
-        public List<String> getInitLines() {
+        @UsedByReflection public List<String> getInitLines() {
             return YamlUtils.splitString(init);
         }
 

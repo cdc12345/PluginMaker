@@ -17,48 +17,65 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class Menus {
-    public static final JMenu PLUGIN_MAKER = register(L10N.menu("menus.plugin_maker"));
-    public static final JMenu DATALIST_UTILS = register(L10N.menu("menus.datalist_utils"));
+    public static Supplier<JMenu> PLUGIN_MAKER = register(() -> L10N.menu("menus.plugin_maker"));
+    public static Supplier<JMenu> DATALIST_UTILS = register(() -> L10N.menu("menus.datalist_utils"));
 
-    private static ArrayList<JMenu> menus;
+    private static ArrayList<Supplier<JMenu>> menus;
 
-    private static JMenu register(JMenu menu) {
+    private static Supplier<JMenu> register(final Supplier<JMenu> menuSupplier) {
         if (menus == null) {
             menus = new ArrayList<>();
         }
-        menus.add(menu);
-        return menu;
+        var supplier = new Supplier<JMenu>() {
+            private boolean inited;
+            private JMenu menu;
+
+            @Override public JMenu get() {
+                if (!inited) {
+                    menu = menuSupplier.get();
+                    inited = true;
+                }
+                return menu;
+            }
+        };
+        menus.add(supplier);
+        return supplier;
     }
 
-    public static void registerMenuVisibleControls() {
-        PluginMain.getINSTANCE().addListener(TabEvent.Shown.class, event -> {
-            Menus.DATALIST_UTILS.setVisible(event.getTab().getContent() instanceof DataListModElementGUI);
+    public static void registerMenuVisibleControls(PluginMain pluginMain) {
+        pluginMain.addListener(TabEvent.Shown.class, event -> {
+            DATALIST_UTILS.get().setVisible(event.getTab().getContent() instanceof DataListModElementGUI);
         });
     }
 
     public static void registerAllMenus(MCreator mcreator) {
-        for (JMenu menu : menus) {
-            mcreator.getMainMenuBar().add(menu);
+        for (int i = 0; i < menus.size(); i++) {
+            var menu = menus.get(i);
+            mcreator.getMainMenuBar().add(menu.get());
+
         }
-        PLUGIN_MAKER.add(new JMenuItemBuilder().setParentMenuName("datalist_utils").setName("load_from_external_en_us")
-                .setActionListener(a -> {
-                    var file = FileDialogs.getOpenDialog(mcreator, new String[] { "*.properties" });
-                    Properties properties = new Properties();
-                    try {
-                        properties.load(new FileReader(file));
-                        var langmap = mcreator.getWorkspace().getLanguageMap();
-                        var en = langmap.get("en_us");
-                        for (Map.Entry<Object, Object> objectObjectEntry : properties.entrySet()) {
-                            en.put(objectObjectEntry.getKey().toString(), objectObjectEntry.getValue().toString());
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).build());
-        DATALIST_UTILS.add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("builtin_entries")
+        PLUGIN_MAKER.get()
+                .add(new JMenuItemBuilder().setParentMenuName("datalist_utils").setName("load_from_external_en_us")
+                        .setActionListener(a -> {
+                            var file = FileDialogs.getOpenDialog(mcreator, new String[] { "*.properties" });
+                            Properties properties = new Properties();
+                            try {
+                                properties.load(new FileReader(file));
+                                var langmap = mcreator.getWorkspace().getLanguageMap();
+                                var en = langmap.get("en_us");
+                                for (Map.Entry<Object, Object> objectObjectEntry : properties.entrySet()) {
+                                    en.put(objectObjectEntry.getKey().toString(),
+                                            objectObjectEntry.getValue().toString());
+                                }
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }).build());
+        DATALIST_UTILS.get().add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("builtin_entries")
                 .setInit(menu -> Stream.of("_default", "_mcreator_map_template", "_bypass_prefix").forEach(a -> {
                     JMenuItem menuItem = new JMenuItem(a);
                     menuItem.addActionListener(even -> {
@@ -66,12 +83,13 @@ public class Menus {
                                 .getContent() instanceof DataListModElementGUI dataListModElementGUI) {
                             dataListModElementGUI.entries.add(new DataListModElement.DataListEntry(a));
                             dataListModElementGUI.refreshTable();
+                            JOptionPane.showMessageDialog(mcreator, "Added");
                         }
                     });
                     menu.add(menuItem);
                 })).build());
-        DATALIST_UTILS.add(
-                new JMenuBuilder().setParentMenuName("datalist_utils").setName("calculate_types").setReload(a -> {
+        DATALIST_UTILS.get()
+                .add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("calculate_types").setReload(a -> {
                     JMenu jMenu = (JMenu) a.getSource();
                     if (mcreator.getTabs().getCurrentTab()
                             .getContent() instanceof DataListModElementGUI dataListModElementGUI) {

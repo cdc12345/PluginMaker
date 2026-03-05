@@ -105,7 +105,7 @@ public class PluginMain extends JavaPlugin {
             PluginMakerPreference.INSTANCE = new PluginMakerPreference("plugin_generator");
         });
 
-        Menus.registerMenuVisibleControls();
+        Menus.registerMenuVisibleControls(this);
     }
 
     public void registerAll(MCreator mcreator) {
