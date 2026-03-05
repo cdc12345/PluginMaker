@@ -6,7 +6,6 @@ import net.mcreator.plugin.JavaPlugin;
 import net.mcreator.plugin.Plugin;
 import net.mcreator.plugin.events.ApplicationLoadedEvent;
 import net.mcreator.plugin.events.PreGeneratorsLoadingEvent;
-import net.mcreator.plugin.events.ui.TabEvent;
 import net.mcreator.plugin.events.workspace.MCreatorLoadedEvent;
 import net.mcreator.plugin.events.workspace.WorkspaceBuildStartedEvent;
 import net.mcreator.ui.MCreator;
@@ -14,8 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdc.generator.init.Menus;
 import org.cdc.generator.init.ResourcePanels;
-import org.cdc.generator.ui.elements.DataListModElementGUI;
-import org.cdc.generator.ui.elements.MappingsModElementGUI;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
@@ -104,14 +101,11 @@ public class PluginMain extends JavaPlugin {
             FileIO.removeEmptyDirs(event.getMCreator().getGenerator().getModAssetsRoot());
         });
 
-        addListener(TabEvent.Shown.class, event -> {
-            Menus.DATALIST_UTILS.setVisible(event.getTab().getContent() instanceof DataListModElementGUI);
-            Menus.MAPPING_UTILS.setVisible(event.getTab().getContent() instanceof MappingsModElementGUI);
-        });
-
         addListener(ApplicationLoadedEvent.class, event -> {
             PluginMakerPreference.INSTANCE = new PluginMakerPreference("plugin_generator");
         });
+
+        Menus.registerMenuVisibleControls();
     }
 
     public void registerAll(MCreator mcreator) {
