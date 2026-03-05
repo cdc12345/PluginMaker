@@ -12,9 +12,6 @@ import java.util.stream.Collectors;
 public class DialogUtils {
     public static int showOptionPaneWithTextArea(RSyntaxTextArea jTextArea, Component parent, String title,
             Collection<?> collections) {
-        jTextArea.setOpaque(false);
-        jTextArea.setRows(15);
-        jTextArea.setColumns(60);
         RTextScrollPane jScrollPane = new RTextScrollPane(jTextArea);
         Utils.initRsyncArea(jTextArea, parent, jScrollPane);
         jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));
@@ -26,9 +23,6 @@ public class DialogUtils {
 
     public static int showOptionPaneWithTextAreaAndToolBar(RSyntaxTextArea jTextArea, JToolBar toolbar,
             Component parent, String title, Collection<?> collections) {
-        jTextArea.setOpaque(false);
-        jTextArea.setRows(15);
-        jTextArea.setColumns(60);
         RTextScrollPane jScrollPane = new RTextScrollPane(jTextArea);
         Utils.initRsyncArea(jTextArea, parent, jScrollPane);
         jScrollPane.setBorder(BorderFactory.createTitledBorder("Lines"));

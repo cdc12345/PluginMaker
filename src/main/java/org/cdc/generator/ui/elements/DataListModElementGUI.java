@@ -20,6 +20,7 @@ import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
+import org.cdc.generator.utils.builder.RSyntaxTextAreaFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -111,7 +112,7 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
                 comboBox.removeAllItems();
                 var row = entries.get(rowIndex);
                 if (columns[column].equals("Others")) {
-                    RSyntaxTextArea jTextArea = new RSyntaxTextArea();
+                    RSyntaxTextArea jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
                     JToolBar toolBar = new JToolBar();
                     toolBar.setBorder(BorderFactory.createTitledBorder("Toolbar"));
                     JButton example = new JButton("example");

@@ -15,6 +15,7 @@ import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
+import org.cdc.generator.utils.builder.RSyntaxTextAreaFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -131,7 +132,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                     curseMaven.setToolTipText("CurseMaven");
                     toolBar.add(curseMaven);
 
-                    RSyntaxTextArea jTextArea = new RSyntaxTextArea();
+                    RSyntaxTextArea jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
                     forge.addActionListener(a -> {
                         try (var stream = APIModElement.class.getResourceAsStream(
                                 "/quilt-1.7.10/templates/apis/forgegradle.ftl")) {
@@ -202,7 +203,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                     int column) {
                 var row = configurations.get(rowIndex);
 
-                var jTextArea = new RSyntaxTextArea();
+                var jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
                 int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
                         "Edit Update files (one line one item)", row.getUpdateFiles());
                 if (op == JOptionPane.YES_OPTION) {

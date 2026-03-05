@@ -15,19 +15,17 @@ import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.YamlUtils;
-import org.fife.ui.autocomplete.AutoCompletion;
+import org.cdc.generator.utils.builder.AutoCompletionFactory;
+import org.cdc.generator.utils.builder.RSyntaxTextAreaFactory;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -48,7 +46,7 @@ public class VariableImplementationModElementGUI
     private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
     public VariableImplementationModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
-        super(mcreator, modElement, editingMode,new String[] { "Scope name", "Init", "Get", "Set", "Read", "Write" });
+        super(mcreator, modElement, editingMode, new String[] { "Scope name", "Init", "Get", "Set", "Read", "Write" });
 
         if (editingMode) {
             generator.setEnabled(false);
@@ -115,10 +113,9 @@ public class VariableImplementationModElementGUI
             public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
                     int column) {
                 var row = scopeList.get(rowIndex);
-                var jTextArea = new RSyntaxTextArea();
-                AutoCompletion autoCompletion = new AutoCompletion(createCompletionProvider());
-                autoCompletion.install(jTextArea);
-                autoCompletion.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK));
+                var jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
+                AutoCompletionFactory.createDefaultCompletion(jTextArea,
+                        VariableImplementationModElementGUI.this::createCompletionProvider);
                 var columnName = columns[column];
                 int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
                         "Edit" + columnName + " lines (one line one item)",
@@ -145,8 +142,8 @@ public class VariableImplementationModElementGUI
             scopeList.add(new VariableImplementationModElement.VariableScope(s));
         }
 
-        addPage("Configuration", PanelUtils.northAndCenterElement(configurationPanel,
-                wrapTable())).validate(variableElementName).validate(generator).validate(defaultValue);
+        addPage("Configuration", PanelUtils.northAndCenterElement(configurationPanel, wrapTable())).validate(
+                variableElementName).validate(generator).validate(defaultValue);
 
     }
 
