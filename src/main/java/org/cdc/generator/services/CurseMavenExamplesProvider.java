@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.io.IOException;
 
 @Description("Gradles")
+// It is cursed....
 public class CurseMavenExamplesProvider implements IExamplesProvider {
 
     @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea) {
