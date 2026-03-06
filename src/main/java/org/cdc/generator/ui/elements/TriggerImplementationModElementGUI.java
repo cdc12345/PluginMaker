@@ -12,8 +12,8 @@ import org.cdc.generator.elements.TriggerImplementationModElement;
 import org.cdc.generator.elements.TriggerModElement;
 import org.cdc.generator.init.ModElementTypes;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
-import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
+import org.cdc.generator.utils.YamlUtils;
 import org.cdc.generator.utils.factories.AutoCompletionFactory;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
 import org.cdc.generator.utils.validators.NotEmptyValidator;
@@ -91,7 +91,8 @@ public class TriggerImplementationModElementGUI
                     execute(event<#if dependenciesCode?has_content>,</#if>${dependenciesCode});
                     """;
             str = str.replace("%map%", Objects.requireNonNull(getTriggerModElement().dependencies_provided).stream()
-                    .map(Rules::mapDependency).collect(Collectors.joining(",\n        ")));
+                    .map(a -> YamlUtils.keyAndValue(YamlUtils.str(a.getName()), YamlUtils.str(a.getName())))
+                    .collect(Collectors.joining(",\n        ")));
             methodBody.setText(str);
         });
         toolbar.add(generate);

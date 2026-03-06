@@ -9,6 +9,7 @@ import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VTextField;
+import net.mcreator.util.ColorUtils;
 import net.mcreator.workspace.elements.VariableType;
 import org.cdc.generator.ui.elements.ISearchable;
 import org.cdc.generator.utils.interfaces.ITypeProvider;
@@ -184,5 +185,23 @@ public class Utils {
         new BaseDataModelProvider(generator).provide().forEach((key, value) -> {
             provider.addCompletion(new BasicCompletion(provider, "${" + key, value.getClass().getName()));
         });
+    }
+
+    public static String convertColor(Color color) {
+        if (color == null) {
+            return "0";
+        }
+
+        float[] hsbvals = new float[3];
+        Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbvals);
+
+        double hue = Math.ceil(hsbvals[0] * 360);
+        double saturation = Math.ceil(hsbvals[1] * 100);
+        double brightness = Math.ceil(hsbvals[2] * 100);
+
+        if (saturation == Rules.defaultHsvSaturation && brightness == Rules.defaultHsvValue) {
+            return String.valueOf((int) hue);
+        }
+        return "\"" + ColorUtils.formatColor(color) + "\"";
     }
 }

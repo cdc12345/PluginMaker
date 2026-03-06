@@ -64,7 +64,7 @@ public class VariableModElementGUI extends AbstractConfigurationTableModElementG
 
         name.setOpaque(false);
         name.setText(modElement.getRegistryName());
-        name.setValidator(Rules.getTextfieldValidator(name));
+        name.setValidator(Rules.getFileNameValidator(name::getText));
         name.setPreferredSize(Utils.tryToGetTextFieldSize());
         addNameConfiguration(name);
 

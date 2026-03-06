@@ -91,7 +91,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         this.triggerName.setOpaque(false);
         this.triggerName.setPreferredSize(Utils.tryToGetTextFieldSize());
         this.triggerName.setText(modElement.getRegistryName());
-        this.triggerName.setValidator(Rules.getTextfieldValidator(this.triggerName));
+        this.triggerName.setValidator(Rules.getFileNameValidator(this.triggerName::getText));
         this.triggerName.addFocusListener(new FocusAdapter() {
             @Override public void focusLost(FocusEvent e) {
                 modElement.setRegistryName(triggerName.getText());

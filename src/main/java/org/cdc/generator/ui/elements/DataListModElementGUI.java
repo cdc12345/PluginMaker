@@ -71,7 +71,7 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
     @Override protected void initGUI() {
         initConfiguration(new GridLayout(3, 2));
 
-        datalistName.setValidator(Rules.getComboBoxValidator(datalistName));
+        datalistName.setValidator(Rules.getFileNameValidator(datalistName::getSelectedItem));
         datalistName.setEditable(true);
         datalistName.setSelectedItem(modElement.getRegistryName());
         datalistName.setPreferredSize(Utils.tryToGetTextFieldSize());

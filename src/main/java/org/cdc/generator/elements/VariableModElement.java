@@ -3,7 +3,7 @@ package org.cdc.generator.elements;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.utils.Rules;
+import org.cdc.generator.utils.Utils;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -30,7 +30,7 @@ public class VariableModElement extends GeneratableElement {
 		if (strColor != null) {
 			return "\"" + strColor + "\"";
 		}
-		return Rules.convertColor(color);
+		return Utils.convertColor(color);
 	}
 
 	public String getName() {

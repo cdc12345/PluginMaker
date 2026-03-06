@@ -2,18 +2,12 @@ package org.cdc.generator.utils;
 
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.Validator;
-import net.mcreator.ui.validation.component.VComboBox;
-import net.mcreator.ui.validation.component.VTextField;
-import net.mcreator.util.ColorUtils;
 import org.cdc.generator.PluginMain;
-import org.cdc.generator.elements.TriggerModElement;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
 
-import java.awt.*;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class Rules {
@@ -24,58 +18,14 @@ public class Rules {
     public static final int defaultHsvSaturation = 45;
     public static final int defaultHsvValue = 65;
 
-    public static final Map<String, String> defaultDependencies = new HashMap<>() {
-        {
-            this.put("entity:entity", "event.getEntity()");
-            this.put("world:world", "event.getLevel()");
-        }
-    };
-
-    public static Validator getComboBoxValidator(VComboBox<String> comboBox) {
+    public static Validator getFileNameValidator(Supplier<String> supplier) {
         return () -> {
-            if (Rules.FILE_NAME.matcher(Objects.requireNonNull(comboBox.getSelectedItem())).matches()) {
+            if (Rules.FILE_NAME.matcher(Objects.requireNonNull(supplier.get())).matches()) {
                 return ValidationResult.PASSED;
             }
             return new ValidationResult(ValidationResult.Type.ERROR,
                     "You must use whole english and whole lower letters");
         };
-    }
-
-    public static Validator getTextfieldValidator(VTextField textField) {
-        return () -> {
-            if (Rules.FILE_NAME.matcher(Objects.requireNonNull(textField.getText())).matches()) {
-                return ValidationResult.PASSED;
-            }
-            return new ValidationResult(ValidationResult.Type.ERROR,
-                    "You must use whole english and whole lower letters");
-        };
-    }
-
-    public static String convertColor(Color color) {
-        if (color == null) {
-            return "0";
-        }
-
-        float[] hsbvals = new float[3];
-        Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbvals);
-
-        double hue = Math.ceil(hsbvals[0] * 360);
-        double saturation = Math.ceil(hsbvals[1] * 100);
-        double brightness = Math.ceil(hsbvals[2] * 100);
-
-        if (saturation == defaultHsvSaturation && brightness == defaultHsvValue) {
-            return String.valueOf((int) hue);
-        }
-        return "\"" + ColorUtils.formatColor(color) + "\"";
-    }
-
-    public static String mapDependency(TriggerModElement.Dependency dependency) {
-        var mapped = dependency.getName() + ":" + dependency.getType();
-        var value = dependency.getName();
-        if (defaultDependencies.containsKey(mapped)) {
-            value = defaultDependencies.get(mapped);
-        }
-        return YamlUtils.keyAndValue(YamlUtils.str(dependency.getName()), YamlUtils.str(value));
     }
 
     public static class SearchRules {

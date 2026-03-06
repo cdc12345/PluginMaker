@@ -62,7 +62,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
 
         name.setOpaque(false);
         name.setPreferredSize(Utils.tryToGetTextFieldSize());
-        name.setValidator(Rules.getTextfieldValidator(name));
+        name.setValidator(Rules.getFileNameValidator(name::getText));
         name.setText(modElement.getRegistryName());
         configurationPanel.add(
                 HelpUtils.wrapWithHelpButton(this.withEntry("pluginapi/name"), L10N.label("elementgui.common.name")));
