@@ -2,8 +2,10 @@ package org.cdc.generator.utils;
 
 public class Constants {
     public static final String NONE = "None";
+    public static final String[] mappingPlaceholders = new String[] { "@NAME", "@UPPERNAME", "@name", "@SnakeCaseName",
+            "@registryname", "@REGISTRYNAME" };
 
-    public static class VariableScopes{
+    public static class VariableScopes {
         public static final String LOCAL = "local";
         public static final String GLOBAL_SESSION = "global_session";
         public static final String GLOBAL_WORLD = "global_world";
@@ -11,6 +13,7 @@ public class Constants {
         public static final String PLAYER_LIFETIME = "player_lifetime";
         public static final String PLAYER_PERSISTENT = "player_persistent";
     }
+
     public static class Generators {
         public static final String FORGE1201 = "forge-1.20.1";
 
@@ -24,7 +27,7 @@ public class Constants {
         public static final String SPIGOT1214 = "spigot-1.21.4";
     }
 
-    public static class BuiltInColors{
+    public static class BuiltInColors {
         public static final String BKY_MATH_HUE = "%{BKY_MATH_HUE}";
         public static final String BKY_LOGIC_HUE = "%{BKY_LOGIC_HUE}";
         public static final String BKY_TEXTS_HUE = "%{BKY_TEXTS_HUE}";

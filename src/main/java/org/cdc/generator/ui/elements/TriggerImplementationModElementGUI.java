@@ -16,6 +16,7 @@ import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.factories.AutoCompletionFactory;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
+import org.cdc.generator.utils.validators.NotEmptyValidator;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
@@ -57,12 +58,7 @@ public class TriggerImplementationModElementGUI
 
         generator.setEditable(true);
         generator.setPreferredSize(Utils.tryToGetTextFieldSize());
-        generator.setValidator(() -> {
-            if (generator.getSelectedItem() != null && !generator.getSelectedItem().isBlank()) {
-                return ValidationResult.PASSED;
-            }
-            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-        });
+        generator.setValidator(new NotEmptyValidator(generator::getSelectedItem));
         for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
             generator.addItem(supportedGenerator);
         }
@@ -70,12 +66,7 @@ public class TriggerImplementationModElementGUI
         addGeneratorConfiguration(generator);
 
         triggerElementName.setEditable(false);
-        triggerElementName.setValidator(() -> {
-            if (triggerElementName.getSelectedItem() != null && !triggerElementName.getSelectedItem().isBlank()) {
-                return ValidationResult.PASSED;
-            }
-            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-        });
+        triggerElementName.setValidator(new NotEmptyValidator(triggerElementName::getSelectedItem));
         addConfigurationWithHelpEntry("trigger_element_name", triggerElementName);
 
         eventName.setOpaque(false);

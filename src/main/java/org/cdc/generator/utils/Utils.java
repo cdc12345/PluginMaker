@@ -10,8 +10,8 @@ import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.VariableType;
-import net.mcreator.workspace.elements.VariableTypeLoader;
 import org.cdc.generator.ui.elements.ISearchable;
+import org.cdc.generator.utils.interfaces.ITypeProvider;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 
@@ -36,10 +36,9 @@ public class Utils {
 
     public static List<String> getAllSupportedVariableTypes() {
         ArrayList<String> set = new ArrayList<>();
-        for (VariableType allVariableType : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
-            set.add(allVariableType.getName());
-        }
-        set.add("world");
+        ITypeProvider.serviceLoader.stream().forEach(a -> {
+            set.addAll(a.get().provide());
+        });
         return set;
     }
 

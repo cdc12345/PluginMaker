@@ -17,6 +17,7 @@ import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.YamlUtils;
 import org.cdc.generator.utils.factories.AutoCompletionFactory;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
+import org.cdc.generator.utils.validators.NotEmptyValidator;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
@@ -62,12 +63,7 @@ public class VariableImplementationModElementGUI
 
         generator.setEditable(true);
         generator.setPreferredSize(Utils.tryToGetTextFieldSize());
-        generator.setValidator(() -> {
-            if (generator.getSelectedItem() != null && !generator.getSelectedItem().isBlank()) {
-                return ValidationResult.PASSED;
-            }
-            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-        });
+        generator.setValidator(new NotEmptyValidator(generator::getSelectedItem));
         for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
             generator.addItem(supportedGenerator);
         }
@@ -75,12 +71,7 @@ public class VariableImplementationModElementGUI
         addGeneratorConfiguration(generator);
 
         variableElementName.setEditable(false);
-        variableElementName.setValidator(() -> {
-            if (variableElementName.getSelectedItem() != null && !variableElementName.getSelectedItem().isBlank()) {
-                return ValidationResult.PASSED;
-            }
-            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-        });
+        variableElementName.setValidator(new NotEmptyValidator(variableElementName::getSelectedItem));
         variableElementName.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,

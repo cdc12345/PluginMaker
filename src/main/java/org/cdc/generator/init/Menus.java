@@ -74,13 +74,13 @@ public class Menus {
                                 throw new RuntimeException(e);
                             }
                         }).build());
-        PLUGIN_MAKER.get()
+/*        PLUGIN_MAKER.get()
                 .add(new JMenuBuilder().setParentMenuName("plugin_maker").setName("link_mcreator").setReload(a -> {
                     for (MCreator openMCreator : mcreator.getApplication().getOpenMCreators()) {
                         var menuItem = new JMenuItem(openMCreator.getTitle());
                         a.add(menuItem);
                     }
-                }).build());
+                }).build());*/
         DATALIST_UTILS.get().add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("builtin_entries")
                 .setInit(menu -> Stream.of("_default", "_mcreator_map_template", "_bypass_prefix").forEach(a -> {
                     JMenuItem menuItem = new JMenuItem(a);

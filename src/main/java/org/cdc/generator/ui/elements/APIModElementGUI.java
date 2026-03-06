@@ -1,5 +1,6 @@
 package org.cdc.generator.ui.elements;
 
+import jdk.jfr.Description;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -8,7 +9,6 @@ import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
-import net.mcreator.util.DesktopUtils;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.APIModElement;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
@@ -16,6 +16,7 @@ import org.cdc.generator.utils.DialogUtils;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
+import org.cdc.generator.utils.interfaces.IExamplesProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -119,59 +120,13 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                     JToolBar toolBar = new JToolBar();
                     toolBar.setOpaque(false);
                     toolBar.setBorder(BorderFactory.createTitledBorder("Gradles"));
-                    JButton forge = new JButton(UIRES.get("16px.forge"));
-                    forge.setToolTipText("ForgeGradle");
-                    toolBar.add(forge);
-                    JButton neo = new JButton(UIRES.get("16px.neoforge"));
-                    neo.setToolTipText("ModDevGradle");
-                    toolBar.add(neo);
-                    JButton legacyNeo = new JButton(UIRES.get("16px.neoforge"));
-                    legacyNeo.setToolTipText("NeoLegacyGradle (Generator-1.20.1)");
-                    toolBar.add(legacyNeo);
-                    JButton curseMaven = new JButton("Curse");
-                    curseMaven.setToolTipText("CurseMaven");
-                    toolBar.add(curseMaven);
-
                     RSyntaxTextArea jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
-                    forge.addActionListener(a -> {
-                        try (var stream = APIModElement.class.getResourceAsStream(
-                                "/quilt-1.7.10/templates/apis/forgegradle.ftl")) {
-                            if (stream != null) {
-                                jTextArea.setText(new String(stream.readAllBytes()));
+                    IExamplesProvider.examplesProviders.stream().forEach(a -> {
+                        if (a.type().isAnnotationPresent(Description.class)) {
+                            var desc = a.type().getAnnotation(Description.class);
+                            if ("Gradles".equals(desc.value())) {
+                                a.get().provideExamples(toolBar, jTextArea);
                             }
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    neo.addActionListener(a -> {
-                        try (var stream = APIModElement.class.getResourceAsStream(
-                                "/quilt-1.7.10/templates/apis/moddevgradle.ftl")) {
-                            if (stream != null) {
-                                jTextArea.setText(new String(stream.readAllBytes()));
-                            }
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    legacyNeo.addActionListener(a -> {
-                        try (var stream = APIModElement.class.getResourceAsStream(
-                                "/quilt-1.7.10/templates/apis/legacymoddevgradle.ftl")) {
-                            if (stream != null) {
-                                jTextArea.setText(new String(stream.readAllBytes()));
-                            }
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    curseMaven.addActionListener(a -> {
-                        DesktopUtils.browseSafe("https://cursemaven.com");
-                        try (var stream = APIModElement.class.getResourceAsStream(
-                                "/quilt-1.7.10/templates/apis/cursemaven.ftl")) {
-                            if (stream != null) {
-                                jTextArea.setText(new String(stream.readAllBytes()));
-                            }
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
                         }
                     });
                     int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, toolBar, mcreator,
@@ -201,8 +156,8 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
             @Override
             public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
                     int column) {
+                // Update files
                 var row = configurations.get(rowIndex);
-
                 var jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
                 int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
                         "Edit Update files (one line one item)", row.getUpdateFiles());

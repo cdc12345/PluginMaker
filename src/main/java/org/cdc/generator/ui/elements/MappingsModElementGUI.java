@@ -12,10 +12,7 @@ import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.elements.MappingsModElement;
 import org.cdc.generator.init.ModElementTypes;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
-import org.cdc.generator.utils.DialogUtils;
-import org.cdc.generator.utils.ElementsUtils;
-import org.cdc.generator.utils.Rules;
-import org.cdc.generator.utils.Utils;
+import org.cdc.generator.utils.*;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
@@ -118,21 +115,20 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
                 if (columns[column].equals("Mapping")) {
                     JToolBar placeholder = new JToolBar();
                     placeholder.setFloatable(false);
-                    placeholder.setLayout(new GridLayout(2, 3));
+                    placeholder.setLayout(new FlowLayout());
                     placeholder.setBorder(BorderFactory.createTitledBorder("Placeholders"));
                     RSyntaxTextArea jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
 
-                    Stream.of("@NAME", "@UPPERNAME", "@name", "@SnakeCaseName", "@registryname", "@REGISTRYNAME")
-                            .forEach(a -> {
-                                JButton appendName = new JButton(a);
-                                appendName.setContentAreaFilled(false);
-                                appendName.setOpaque(false);
-                                appendName.setHorizontalTextPosition(SwingConstants.LEFT);
-                                appendName.addActionListener(event -> {
-                                    jTextArea.insert(a, jTextArea.getCaretPosition());
-                                });
-                                placeholder.add(appendName);
-                            });
+                    Stream.of(Constants.mappingPlaceholders).forEach(a -> {
+                        JButton appendName = new JButton(a);
+                        appendName.setContentAreaFilled(false);
+                        appendName.setOpaque(false);
+                        appendName.setHorizontalTextPosition(SwingConstants.LEFT);
+                        appendName.addActionListener(event -> {
+                            jTextArea.insert(a, jTextArea.getCaretPosition());
+                        });
+                        placeholder.add(appendName);
+                    });
                     int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, placeholder, mcreator,
                             "Edit Mapping (one line one item)", row.getMappingContent());
                     if (op == JOptionPane.YES_OPTION) {
