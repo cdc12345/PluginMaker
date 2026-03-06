@@ -14,8 +14,8 @@ import org.cdc.generator.init.ModElementTypes;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
+import org.cdc.generator.utils.factories.AutoCompletionFactory;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
-import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
@@ -25,8 +25,6 @@ import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -107,12 +105,9 @@ public class TriggerImplementationModElementGUI
         });
         toolbar.add(generate);
         var scrollpane = RSyntaxTextAreaFactory.createDefaultTextScrollPane(methodBody, mcreator);
-
-        AutoCompletion autoCompletion = new AutoCompletion(createCompletionProvider());
-        autoCompletion.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK));
-        autoCompletion.install(methodBody);
+        AutoCompletionFactory.createDefaultCompletion(methodBody, this::createCompletionProvider);
         var panel = PanelUtils.northAndCenterElement(toolbar, scrollpane);
-        panel.setBorder(BorderFactory.createTitledBorder("Body(ctrl+1 to auto complete)"));
+        panel.setBorder(BorderFactory.createTitledBorder("Body (ctrl+1 to auto complete)"));
 
         addPage(PanelUtils.northAndCenterElement(configurationPanel, panel)).validate(generator)
                 .validate(triggerElementName).validate(eventName);

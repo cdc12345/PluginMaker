@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 public class JMenuBuilder {
     private String parentMenuName;
     private String name;
-    private Consumer<MenuEvent> reload;
+    private Consumer<JMenu> reload;
     private Consumer<JMenu> init;
 
     public JMenuBuilder() {
@@ -27,7 +27,7 @@ public class JMenuBuilder {
         return this;
     }
 
-    public JMenuBuilder setReload(Consumer<MenuEvent> reload) {
+    public JMenuBuilder setReload(Consumer<JMenu> reload) {
         this.reload = reload;
         return this;
     }
@@ -46,7 +46,8 @@ public class JMenuBuilder {
         if (reload != null) {
             menu.addMenuListener(new MenuListener() {
                 @Override public void menuSelected(MenuEvent e) {
-                    reload.accept(e);
+                    menu.removeAll();
+                    reload.accept(menu);
                 }
 
                 @Override public void menuDeselected(MenuEvent e) {

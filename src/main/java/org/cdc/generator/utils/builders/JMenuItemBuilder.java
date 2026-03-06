@@ -5,6 +5,9 @@ import net.mcreator.ui.init.L10N;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
+/**
+ * if you hope to localization your menuitem, please use it.
+ */
 public class JMenuItemBuilder {
     private String parentMenuName;
     private String name;

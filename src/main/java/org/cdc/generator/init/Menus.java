@@ -34,7 +34,7 @@ public class Menus {
             private JMenu menu;
 
             @Override public JMenu get() {
-                if (menu != null) {
+                if (menu == null) {
                     menu = menuSupplier.get();
                 }
                 return menu;
@@ -58,7 +58,7 @@ public class Menus {
 
     public static void registerAllSubMenus(MCreator mcreator) {
         PLUGIN_MAKER.get()
-                .add(new JMenuItemBuilder().setParentMenuName("datalist_utils").setName("load_from_external_en_us")
+                .add(new JMenuItemBuilder().setParentMenuName("plugin_maker").setName("load_from_external_en_us")
                         .setActionListener(a -> {
                             var file = FileDialogs.getOpenDialog(mcreator, new String[] { "*.properties" });
                             Properties properties = new Properties();
@@ -74,6 +74,13 @@ public class Menus {
                                 throw new RuntimeException(e);
                             }
                         }).build());
+        PLUGIN_MAKER.get()
+                .add(new JMenuBuilder().setParentMenuName("plugin_maker").setName("link_mcreator").setReload(a -> {
+                    for (MCreator openMCreator : mcreator.getApplication().getOpenMCreators()) {
+                        var menuItem = new JMenuItem(openMCreator.getTitle());
+                        a.add(menuItem);
+                    }
+                }).build());
         DATALIST_UTILS.get().add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("builtin_entries")
                 .setInit(menu -> Stream.of("_default", "_mcreator_map_template", "_bypass_prefix").forEach(a -> {
                     JMenuItem menuItem = new JMenuItem(a);
@@ -87,9 +94,8 @@ public class Menus {
                     });
                     menu.add(menuItem);
                 })).build());
-        DATALIST_UTILS.get()
-                .add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("calculate_types").setReload(a -> {
-                    JMenu jMenu = (JMenu) a.getSource();
+        DATALIST_UTILS.get().add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("calculate_types")
+                .setReload(jMenu -> {
                     if (mcreator.getTabs().getCurrentTab()
                             .getContent() instanceof DataListModElementGUI dataListModElementGUI) {
                         jMenu.removeAll();
