@@ -82,7 +82,7 @@ public class APIModElement extends GeneratableElement {
             this.gradle = gradle;
         }
 
-        public void setUpdateFiles(List<String> updateFiles) {
+        @UsedByReflection public void setUpdateFiles(List<String> updateFiles) {
             this.updateFiles = updateFiles;
         }
 

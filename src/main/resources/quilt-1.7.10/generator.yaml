@@ -6,6 +6,7 @@ is_plugin_maker: true
 # gradle task definitions
 gradle:
   export_file: "build/libs/demo-plugin.zip"
+  # this will keep the resource tab still exist.
   run_client: exportToMCreator
 
 import_formatter:

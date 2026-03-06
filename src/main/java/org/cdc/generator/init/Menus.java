@@ -31,13 +31,11 @@ public class Menus {
             menus = new ArrayList<>();
         }
         var supplier = new Supplier<JMenu>() {
-            private boolean inited;
             private JMenu menu;
 
             @Override public JMenu get() {
-                if (!inited) {
+                if (menu != null) {
                     menu = menuSupplier.get();
-                    inited = true;
                 }
                 return menu;
             }
@@ -53,11 +51,12 @@ public class Menus {
     }
 
     public static void registerAllMenus(MCreator mcreator) {
-        for (int i = 0; i < menus.size(); i++) {
-            var menu = menus.get(i);
+        for (Supplier<JMenu> menu : menus) {
             mcreator.getMainMenuBar().add(menu.get());
-
         }
+    }
+
+    public static void registerAllSubMenus(MCreator mcreator) {
         PLUGIN_MAKER.get()
                 .add(new JMenuItemBuilder().setParentMenuName("datalist_utils").setName("load_from_external_en_us")
                         .setActionListener(a -> {

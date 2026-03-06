@@ -28,12 +28,18 @@ public abstract class AbstractConfigurationTableModElementGUI<E extends Generata
         this.columns = columns;
     }
 
+    /**
+     * init configurationPanel. You can call it optional.
+     */
     protected void initConfiguration(LayoutManager layoutManager) {
         configurationPanel = new JPanel(layoutManager);
         configurationPanel.setOpaque(false);
         configurationPanel.setBorder(BorderFactory.createTitledBorder("Configuration"));
     }
 
+    /**
+     * init table. You can call it optional.
+     */
     protected void initTable(TableModel tableModel) {
         jTable = new JTable(tableModel);
         jTable.addMouseListener(new MouseAdapter() {
@@ -49,6 +55,9 @@ public abstract class AbstractConfigurationTableModElementGUI<E extends Generata
         jTable.setOpaque(false);
     }
 
+    /**
+     * a builtin configuration.
+     */
     protected void addGeneratorConfiguration(JComponent component) {
         configurationPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry(modElement.getTypeString() + "/generator"),
                 L10N.label("elementgui.common.generator")));

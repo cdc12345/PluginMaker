@@ -111,5 +111,6 @@ public class PluginMain extends JavaPlugin {
     public void registerAll(MCreator mcreator) {
         ResourcePanels.register(mcreator);
         Menus.registerAllMenus(mcreator);
+        Menus.registerAllSubMenus(mcreator);
     }
 }
