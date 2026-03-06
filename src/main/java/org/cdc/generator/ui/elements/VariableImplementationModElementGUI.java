@@ -3,7 +3,6 @@ package org.cdc.generator.ui.elements;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.util.image.ImageUtils;
@@ -88,12 +87,7 @@ public class VariableImplementationModElementGUI
         addConfigurationWithHelpEntry("variable_element_name", variableElementName);
 
         defaultValue.setText("null");
-        defaultValue.setValidator(() -> {
-            if (defaultValue.getText() != null && !defaultValue.getText().isBlank()) {
-                return ValidationResult.PASSED;
-            }
-            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-        });
+        defaultValue.setValidator(new NotEmptyValidator(defaultValue::getText));
         defaultValue.setPreferredSize(Utils.tryToGetTextFieldSize());
         addConfigurationWithHelpEntry("default_value", defaultValue);
 

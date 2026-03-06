@@ -34,8 +34,9 @@ public class Utils {
         return Generator.GENERATOR_CACHE.keySet();
     }
 
-    public static List<String> getAllSupportedVariableTypes() {
-        ArrayList<String> set = new ArrayList<>();
+    public static Set<String> getAllSupportedVariableTypes() {
+        // remove duplicated strs.
+        var set = new HashSet<String>();
         ITypeProvider.serviceLoader.stream().forEach(a -> {
             set.addAll(a.get().provide());
         });
