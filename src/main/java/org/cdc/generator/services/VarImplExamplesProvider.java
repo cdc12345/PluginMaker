@@ -12,7 +12,7 @@ import org.jspecify.annotations.NonNull;
 import javax.swing.*;
 import java.util.List;
 
-@Description("VarImplExamples") public class VarImplExampleProvider implements IExamplesProvider {
+@Description("VarImplExamples") public class VarImplExamplesProvider implements IExamplesProvider {
 
     @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea, String[] args) {
         String generatorName = args[0];
