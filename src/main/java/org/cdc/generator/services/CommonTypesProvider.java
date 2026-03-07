@@ -14,6 +14,7 @@ public class CommonTypesProvider implements ITypeProvider {
             list.add(allVariableType.getName());
         }
         list.add("world");
+        //TODO: use prefergenerator to load hidden types.
         return list;
     }
 }

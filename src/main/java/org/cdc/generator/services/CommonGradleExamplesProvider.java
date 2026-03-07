@@ -9,10 +9,9 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import javax.swing.*;
 import java.io.IOException;
 
-@Description("Gradles")
-public class CommonGradleExamplesProvider implements IExamplesProvider {
+@Description("Gradles") public class CommonGradleExamplesProvider implements IExamplesProvider {
 
-    @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea jTextArea) {
+    @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea jTextArea, String[] args) {
         JButton forge = new JButton(UIRES.get("16px.forge"));
         forge.setToolTipText("ForgeGradle");
         toolBar.add(forge);
@@ -22,7 +21,6 @@ public class CommonGradleExamplesProvider implements IExamplesProvider {
         JButton legacyNeo = new JButton(UIRES.get("16px.neoforge"));
         legacyNeo.setToolTipText("NeoLegacyGradle (Generator-1.20.1)");
         toolBar.add(legacyNeo);
-
 
         forge.addActionListener(a -> {
             try (var stream = APIModElement.class.getResourceAsStream("/quilt-1.7.10/templates/apis/forgegradle.ftl")) {

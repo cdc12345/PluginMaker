@@ -12,5 +12,5 @@ public interface IExamplesProvider {
     ServiceLoader<IExamplesProvider> examplesProviders = ServiceLoader.load(IExamplesProvider.class,
             IExamplesProvider.class.getClassLoader());
 
-    void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea);
+    void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea,String[] args);
 }

@@ -65,7 +65,7 @@ public class Utils {
         } else if (oe instanceof List<?> list) {
             return new ArrayList<>(list.stream().map(Object::toString).toList());
         } else {
-            return new ArrayList<>(List.of(oe.toString()));
+            return new ArrayList<>(List.of(Objects.toString(oe)));
         }
     }
 

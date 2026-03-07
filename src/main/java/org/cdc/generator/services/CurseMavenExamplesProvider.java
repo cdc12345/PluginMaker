@@ -13,7 +13,7 @@ import java.io.IOException;
 // It is cursed....
 public class CurseMavenExamplesProvider implements IExamplesProvider {
 
-    @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea) {
+    @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea, String[] args) {
         JButton curseMaven = new JButton("Curse");
         curseMaven.setToolTipText("CurseMaven");
         toolBar.add(curseMaven);

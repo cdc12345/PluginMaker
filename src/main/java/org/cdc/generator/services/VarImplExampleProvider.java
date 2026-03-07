@@ -4,7 +4,6 @@ import jdk.jfr.Description;
 import net.mcreator.generator.Generator;
 import net.mcreator.generator.GeneratorConfiguration;
 import net.mcreator.workspace.elements.VariableTypeLoader;
-import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.interfaces.IExamplesProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -15,13 +14,16 @@ import java.util.List;
 
 @Description("VarImplExamples") public class VarImplExampleProvider implements IExamplesProvider {
 
-    @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea) {
+    @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea, String[] args) {
+        String generatorName = args[0];
+        String scopeName = args[1];
+        String definitionName = args[2];
         JButton number = new JButton("Number");
         number.setOpaque(false);
         number.addActionListener(a -> {
-            var generator = Generator.GENERATOR_CACHE.get(PluginMakerPreference.INSTANCE.preferGenerator.get());
+            var generator = Generator.GENERATOR_CACHE.get(generatorName);
             if (generator != null) {
-                var num = getVariableScope("number", toolBar.getName(), rSyntaxTextArea.getName(), generator);
+                var num = getVariableScope("number", scopeName, definitionName, generator);
                 rSyntaxTextArea.setText(String.join("\n", num));
             }
         });
@@ -29,7 +31,7 @@ import java.util.List;
         JButton logic = new JButton("Logic");
         logic.setOpaque(false);
         logic.addActionListener(a -> {
-            var generator = Generator.GENERATOR_CACHE.get(PluginMakerPreference.INSTANCE.preferGenerator.get());
+            var generator = Generator.GENERATOR_CACHE.get(generatorName);
             if (generator != null) {
                 var num = getVariableScope("logic", toolBar.getName(), rSyntaxTextArea.getName(), generator);
                 rSyntaxTextArea.setText(String.join("\n", num));
@@ -38,9 +40,9 @@ import java.util.List;
         toolBar.add(logic);
     }
 
-    private static @NonNull List<String> getVariableScope(String variableName, String phaseName, String scope,
+    private static @NonNull List<String> getVariableScope(String variableName, String scopeName, String definitionName,
             GeneratorConfiguration generator) {
         return Utils.convertYamlToList(generator.getVariableTypes()
-                .getScopeDefinition(VariableTypeLoader.INSTANCE.fromName(variableName), scope).get(phaseName));
+                .getScopeDefinition(VariableTypeLoader.INSTANCE.fromName(variableName), scopeName).get(definitionName));
     }
 }

@@ -103,16 +103,16 @@ public class VariableImplementationModElementGUI
                 var jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
                 AutoCompletionFactory.createDefaultCompletion(jTextArea,
                         VariableImplementationModElementGUI.this::createCompletionProvider);
-                jTextArea.setName(row.getName());
                 var toolbar = new JToolBar();
                 toolbar.setBorder(BorderFactory.createTitledBorder("Examples"));
                 var columnName = columns[column];
-                toolbar.setName(columnName.toLowerCase());
                 IExamplesProvider.examplesProviders.stream().forEach(a -> {
                     if (a.type().isAnnotationPresent(Description.class)) {
                         var des = a.type().getAnnotation(Description.class);
                         if (des.value().equals("VarImplExamples")) {
-                            a.get().provideExamples(toolbar, jTextArea);
+                            a.get().provideExamples(toolbar, jTextArea,
+                                    new String[] { generator.getSelectedItem(), row.getName(),
+                                            columnName.toLowerCase(Locale.ROOT) });
                         }
                     }
                 });

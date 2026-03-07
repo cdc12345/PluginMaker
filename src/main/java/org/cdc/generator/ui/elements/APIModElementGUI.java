@@ -125,7 +125,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                         if (a.type().isAnnotationPresent(Description.class)) {
                             var desc = a.type().getAnnotation(Description.class);
                             if ("Gradles".equals(desc.value())) {
-                                a.get().provideExamples(toolBar, jTextArea);
+                                a.get().provideExamples(toolBar, jTextArea, new String[0]);
                             }
                         }
                     });
