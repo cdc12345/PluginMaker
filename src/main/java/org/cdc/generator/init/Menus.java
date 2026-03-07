@@ -8,6 +8,7 @@ import net.mcreator.util.DesktopUtils;
 import org.cdc.generator.PluginMain;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.ui.elements.DataListModElementGUI;
+import org.cdc.generator.utils.Constants;
 import org.cdc.generator.utils.builders.JMenuBuilder;
 import org.cdc.generator.utils.builders.JMenuItemBuilder;
 
@@ -86,9 +87,9 @@ public class Menus {
                     DesktopUtils.browseSafe("https://mcreator.net/changelog");
                 }).build());
         DATALIST_UTILS.get().add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("builtin_entries")
-                .setInit(menu -> Stream.of("_default", "_mcreator_map_template", "_bypass_prefix").forEach(a -> {
+                .setInit(menu -> Stream.of(Constants.builtEntriesInDataList).forEach(a -> {
                     JMenuItem menuItem = new JMenuItem(a);
-                    menuItem.addActionListener(even -> {
+                    menuItem.addActionListener(event -> {
                         if (mcreator.getTabs().getCurrentTab()
                                 .getContent() instanceof DataListModElementGUI dataListModElementGUI) {
                             dataListModElementGUI.entries.add(new DataListModElement.DataListEntry(a));
