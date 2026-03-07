@@ -79,6 +79,10 @@ public class Menus {
                 .setActionListener(a -> {
                     DesktopUtils.browseSafe("https://mcreator.net/repository");
                 }).build());
+        PLUGIN_MAKER.get().add(new JMenuItemBuilder().setParentMenuName("plugin_maker").setName("visit_changelog")
+                .setActionListener(a -> {
+                    DesktopUtils.browseSafe("https://mcreator.net/changelog");
+                }).build());
         DATALIST_UTILS.get().add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("builtin_entries")
                 .setInit(menu -> Stream.of("_default", "_mcreator_map_template", "_bypass_prefix").forEach(a -> {
                     JMenuItem menuItem = new JMenuItem(a);
