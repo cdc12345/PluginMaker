@@ -1,6 +1,5 @@
 package org.cdc.generator.utils;
 
-import com.google.gson.annotations.SerializedName;
 import net.mcreator.generator.Generator;
 import net.mcreator.generator.template.base.BaseDataModelProvider;
 import net.mcreator.plugin.PluginLoader;
@@ -45,13 +44,8 @@ public class Utils {
     }
 
     public static List<String> getAllVariableScope() {
-        return Arrays.stream(VariableType.Scope.values()).map(a -> {
-            try {
-                return a.getDeclaringClass().getDeclaredField(a.name()).getAnnotation(SerializedName.class).value();
-            } catch (NoSuchFieldException e) {
-                throw new RuntimeException(e);
-            }
-        }).toList().reversed();
+        return Arrays.stream(VariableType.Scope.values()).map(a -> a.name().toLowerCase(Locale.ROOT)).toList()
+                .reversed();
     }
 
     public static List<String> getMappingResult(String generator, String datalist, String name) {
@@ -59,13 +53,13 @@ public class Utils {
         if (memory != null) {
             if (memory.containsKey(name)) {
                 var oe = memory.get(name);
-                return convertYamlMappingToList(oe);
+                return convertYamlToList(oe);
             }
         }
         return null;
     }
 
-    public static List<String> convertYamlMappingToList(Object oe) {
+    public static List<String> convertYamlToList(Object oe) {
         if (oe instanceof String str) {
             return new ArrayList<>(List.of(str));
         } else if (oe instanceof List<?> list) {

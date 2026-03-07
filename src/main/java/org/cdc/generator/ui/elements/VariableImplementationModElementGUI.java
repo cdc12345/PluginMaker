@@ -1,5 +1,6 @@
 package org.cdc.generator.ui.elements;
 
+import jdk.jfr.Description;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -16,6 +17,7 @@ import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.YamlUtils;
 import org.cdc.generator.utils.factories.AutoCompletionFactory;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
+import org.cdc.generator.utils.interfaces.IExamplesProvider;
 import org.cdc.generator.utils.validators.NotEmptyValidator;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
@@ -101,8 +103,21 @@ public class VariableImplementationModElementGUI
                 var jTextArea = RSyntaxTextAreaFactory.createDefaultRSyntaxTextArea();
                 AutoCompletionFactory.createDefaultCompletion(jTextArea,
                         VariableImplementationModElementGUI.this::createCompletionProvider);
+                jTextArea.setName(row.getName());
+                var toolbar = new JToolBar();
+                toolbar.setBorder(BorderFactory.createTitledBorder("Examples"));
                 var columnName = columns[column];
-                int op = DialogUtils.showOptionPaneWithTextArea(jTextArea, mcreator,
+                toolbar.setName(columnName.toLowerCase());
+                IExamplesProvider.examplesProviders.stream().forEach(a -> {
+                    if (a.type().isAnnotationPresent(Description.class)) {
+                        var des = a.type().getAnnotation(Description.class);
+                        if (des.value().equals("VarImplExamples")) {
+                            a.get().provideExamples(toolbar, jTextArea);
+                        }
+                    }
+                });
+
+                int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, toolbar, mcreator,
                         "Edit" + columnName + " lines (one line one item)",
                         YamlUtils.splitString(Objects.requireNonNullElse(value1, "").toString()));
                 if (op == JOptionPane.YES_OPTION) {

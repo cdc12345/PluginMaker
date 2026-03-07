@@ -4,6 +4,7 @@ import net.mcreator.plugin.events.ui.TabEvent;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.dialogs.file.FileDialogs;
 import net.mcreator.ui.init.L10N;
+import net.mcreator.util.DesktopUtils;
 import org.cdc.generator.PluginMain;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.ui.elements.DataListModElementGUI;
@@ -74,13 +75,10 @@ public class Menus {
                                 throw new RuntimeException(e);
                             }
                         }).build());
-/*        PLUGIN_MAKER.get()
-                .add(new JMenuBuilder().setParentMenuName("plugin_maker").setName("link_mcreator").setReload(a -> {
-                    for (MCreator openMCreator : mcreator.getApplication().getOpenMCreators()) {
-                        var menuItem = new JMenuItem(openMCreator.getTitle());
-                        a.add(menuItem);
-                    }
-                }).build());*/
+        PLUGIN_MAKER.get().add(new JMenuItemBuilder().setParentMenuName("plugin_maker").setName("visit_repository")
+                .setActionListener(a -> {
+                    DesktopUtils.browseSafe("https://mcreator.net/repository");
+                }).build());
         DATALIST_UTILS.get().add(new JMenuBuilder().setParentMenuName("datalist_utils").setName("builtin_entries")
                 .setInit(menu -> Stream.of("_default", "_mcreator_map_template", "_bypass_prefix").forEach(a -> {
                     JMenuItem menuItem = new JMenuItem(a);

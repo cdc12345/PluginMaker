@@ -178,7 +178,7 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
                         if (!set.contains(key)) {
                             set.add(key);
                             mappingEntries.add(new MappingsModElement.MappingEntry(key,
-                                    Utils.convertYamlMappingToList(entry.getValue())));
+                                    Utils.convertYamlToList(entry.getValue())));
                         }
                     }
                 }
