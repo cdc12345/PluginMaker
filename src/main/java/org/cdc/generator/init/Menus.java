@@ -78,6 +78,8 @@ public class Menus {
         PLUGIN_MAKER.get().add(new JMenuItemBuilder().setParentMenuName("plugin_maker").setName("visit_repository")
                 .setActionListener(a -> {
                     DesktopUtils.browseSafe("https://mcreator.net/repository");
+                    // TODO: change to use updateinfo to select supported mcreator version.
+                    // MCreatorApplication.WEB_API.getUpdateInfo();
                 }).build());
         PLUGIN_MAKER.get().add(new JMenuItemBuilder().setParentMenuName("plugin_maker").setName("visit_changelog")
                 .setActionListener(a -> {
@@ -112,5 +114,6 @@ public class Menus {
                         });
                     }
                 }).build());
+        // TODO: Mapping_utils functions: like temporary plugin to add item and blocks.
     }
 }
