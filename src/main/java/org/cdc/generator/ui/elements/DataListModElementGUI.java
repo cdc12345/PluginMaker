@@ -74,8 +74,6 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         datalistName.setEditable(true);
         datalistName.setValidator(Rules.getFileNameValidator(datalistName::getSelectedItem));
         datalistName.setSelectedItem(modElement.getRegistryName());
-        var list = DataListLoader.getCache().keySet().stream().sorted().toList();
-        ComboBoxUtil.updateComboBoxContents(datalistName, list);
         addNameConfiguration(datalistName);
 
         generateDataList.setSelected(true);
@@ -278,6 +276,8 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
                 entries.add(dataListEntry1);
             }
         }
+        var list = DataListLoader.getCache().keySet().stream().sorted().toList();
+        ComboBoxUtil.updateComboBoxContents(datalistName, list);
     }
 
     public HashSet<String> getTypes() {

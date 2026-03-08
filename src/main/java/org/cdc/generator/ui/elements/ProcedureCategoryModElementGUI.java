@@ -79,14 +79,11 @@ public class ProcedureCategoryModElementGUI
             stringArrayList.add(element.getRegistryName());
         }
         stringArrayList.addAll(BlocklyLoader.getBuiltinCategories());
-
-        HashSet<String> set = new HashSet<>();
         BlocklyLoader.INSTANCE.getBlockLoader(BlocklyEditorType.PROCEDURE).getDefinedBlocks().values().forEach(a -> {
             if (a.getToolboxCategory() != null) {
-                set.add(a.getToolboxCategoryRaw());
+                stringArrayList.add(a.getToolboxCategoryRaw());
             }
         });
-        stringArrayList.addAll(set);
         ComboBoxUtil.updateComboBoxContents(parentCategory, stringArrayList.stream().sorted().toList());
     }
 }
