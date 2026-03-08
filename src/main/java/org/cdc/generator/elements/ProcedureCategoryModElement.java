@@ -31,4 +31,8 @@ public class ProcedureCategoryModElement extends GeneratableElement implements I
     @Override public String getBlocklyFolder() {
         return "procedures";
     }
+
+    @UsedByReflection public String getSuggestedName() {
+        return getModElement().getName();
+    }
 }
