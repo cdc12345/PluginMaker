@@ -11,5 +11,5 @@ public interface IExamplesProvider {
     ServiceLoader<IExamplesProvider> examplesProviders = ServiceLoader.load(IExamplesProvider.class,
             IExamplesProvider.class.getClassLoader());
 
-    void provideExamples(Consumer<JComponent> toolBar, Consumer<String> exampleConsumer,String[] args);
+    void provideExamples(Consumer<JComponent> componentConsumer, Consumer<String> exampleConsumer,String[] args);
 }

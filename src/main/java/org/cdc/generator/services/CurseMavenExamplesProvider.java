@@ -13,10 +13,10 @@ import java.util.function.Consumer;
 // It is cursed....
 public class CurseMavenExamplesProvider implements IExamplesProvider {
 
-    @Override public void provideExamples(Consumer<JComponent> toolBar, Consumer<String> exampleConsumer, String[] args) {
+    @Override public void provideExamples(Consumer<JComponent> componentConsumer, Consumer<String> exampleConsumer, String[] args) {
         JButton curseMaven = new JButton("Curse");
         curseMaven.setToolTipText("CurseMaven");
-        toolBar.accept(curseMaven);
+        componentConsumer.accept(curseMaven);
         curseMaven.addActionListener(a -> {
             DesktopUtils.browseSafe("https://cursemaven.com");
             try (var stream = APIModElement.class.getResourceAsStream("/quilt-1.7.10/templates/apis/cursemaven.ftl")) {

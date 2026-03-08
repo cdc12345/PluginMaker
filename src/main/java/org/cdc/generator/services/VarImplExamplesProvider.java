@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 @Description("VarImplExamples") public class VarImplExamplesProvider implements IExamplesProvider {
 
     @Override
-    public void provideExamples(Consumer<JComponent> toolBar, Consumer<String> exampleConsumer, String[] args) {
+    public void provideExamples(Consumer<JComponent> componentConsumer, Consumer<String> exampleConsumer, String[] args) {
         String generatorName = args[0];
         String scopeName = args[1];
         String definitionName = args[2];
@@ -28,7 +28,7 @@ import java.util.function.Consumer;
                 exampleConsumer.accept(String.join("\n", num));
             }
         });
-        toolBar.accept(number);
+        componentConsumer.accept(number);
         JButton logic = new JButton("Logic");
         logic.setOpaque(false);
         logic.addActionListener(a -> {
@@ -38,7 +38,7 @@ import java.util.function.Consumer;
                 exampleConsumer.accept(String.join("\n", num));
             }
         });
-        toolBar.accept(logic);
+        componentConsumer.accept(logic);
     }
 
     private static @NonNull List<String> getVariableScope(String variableName, String scopeName, String phaseName,
