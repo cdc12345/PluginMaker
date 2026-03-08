@@ -62,13 +62,6 @@ public class VariableImplementationModElementGUI
     @Override protected void initGUI() {
         initConfiguration(new GridLayout(3, 2));
 
-        generator.setEditable(true);
-        generator.setPreferredSize(Utils.tryToGetTextFieldSize());
-        generator.setValidator(new NotEmptyValidator(generator::getSelectedItem));
-        for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
-            generator.addItem(supportedGenerator);
-        }
-        generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
         addGeneratorConfiguration(generator);
 
         variableElementName.setEditable(false);
@@ -79,14 +72,15 @@ public class VariableImplementationModElementGUI
                     boolean cellHasFocus) {
                 JLabel jLabel = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected,
                         cellHasFocus);
-                if (mcreator.getWorkspace().getModElementByName(value.toString())
-                        .getGeneratableElement() instanceof VariableModElement variableModElement) {
-                    jLabel.setIcon(ImageUtils.createColorSquare(variableModElement.color, 32, 32));
+                var element = mcreator.getWorkspace().getModElementByName(Objects.toString(value));
+                if (element != null) {
+                    if (element.getGeneratableElement() instanceof VariableModElement variableModElement) {
+                        jLabel.setIcon(ImageUtils.createColorSquare(variableModElement.color, 32, 32));
+                    }
                 }
                 return jLabel;
             }
-        });
-        addConfigurationWithHelpEntry("variable_element_name", variableElementName);
+        }); addConfigurationWithHelpEntry("variable_element_name", variableElementName);
 
         defaultValue.setText("null");
         defaultValue.setValidator(new NotEmptyValidator(defaultValue::getText));

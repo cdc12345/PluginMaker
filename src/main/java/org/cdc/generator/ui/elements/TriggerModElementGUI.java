@@ -88,8 +88,6 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     @Override protected void initGUI() {
         initConfiguration(new GridLayout(5, 2, 5, 5));
 
-        this.triggerName.setOpaque(false);
-        this.triggerName.setPreferredSize(Utils.tryToGetTextFieldSize());
         this.triggerName.setText(modElement.getRegistryName());
         this.triggerName.setValidator(Rules.getFileNameValidator(this.triggerName::getText));
         this.triggerName.addFocusListener(new FocusAdapter() {
@@ -99,13 +97,10 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         });
         addNameConfiguration(triggerName);
 
-        this.hasResult.setOpaque(false);
         addConfigurationWithHelpEntry("has_result", hasResult);
 
-        this.cancelable.setOpaque(false);
         addConfigurationWithHelpEntry("cancelable", cancelable);
 
-        this.side.setOpaque(false);
         this.side.setSelectedItem("BOTH");
         this.side.setPreferredSize(Utils.tryToGetTextFieldSize());
         addConfigurationWithHelpEntry("side", side);

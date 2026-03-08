@@ -14,6 +14,7 @@ import org.cdc.generator.init.ModElementTypes;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.*;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
+import org.cdc.generator.utils.validators.NotEmptyValidator;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -61,27 +62,10 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
     @Override protected void initGUI() {
         initConfiguration(new GridLayout(2, 2));
 
-        generator.setEditable(true);
-        generator.setPreferredSize(Utils.tryToGetTextFieldSize());
-        generator.setValidator(() -> {
-            if (generator.getSelectedItem() != null && !generator.getSelectedItem().isBlank()) {
-                return ValidationResult.PASSED;
-            }
-            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-        });
-        for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
-            generator.addItem(supportedGenerator);
-        }
-        generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
         addGeneratorConfiguration(generator);
 
         datalistName.setEditable(false);
-        datalistName.setValidator(() -> {
-            if (datalistName.getSelectedItem() != null && !datalistName.getSelectedItem().isBlank()) {
-                return ValidationResult.PASSED;
-            }
-            return new ValidationResult(ValidationResult.Type.ERROR, "can not be empty");
-        });
+        datalistName.setValidator(new NotEmptyValidator(datalistName::getSelectedItem));
         addConfigurationWithHelpEntry("datalist_name", datalistName);
 
         JToolBar bar = new JToolBar();

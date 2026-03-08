@@ -23,6 +23,8 @@ import javax.annotation.Nullable;
             null, TriggerImplementationModElementGUI::new, TriggerImplementationModElement.class);
     public static final ModElementType<VariableImplementationModElement> VARIABLE_IMPL = register("pluginvariableimpl",
             null, VariableImplementationModElementGUI::new, VariableImplementationModElement.class);
+    public static final ModElementType<ProcedureCategoryModElement> PROCEDURE_CATEGORY = register(
+            "pluginprocedurecategory", null, ProcedureCategoryModElementGUI::new, ProcedureCategoryModElement.class);
 
     private static <E extends GeneratableElement> ModElementType<E> register(String registryName,
             @Nullable Character shortcut, ModElementType.ModElementGUIProvider<E> modElementGUIProvider,

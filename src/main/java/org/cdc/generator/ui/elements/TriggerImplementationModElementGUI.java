@@ -56,20 +56,12 @@ public class TriggerImplementationModElementGUI
     @Override protected void initGUI() {
         initConfiguration(new GridLayout(3, 2));
 
-        generator.setEditable(true);
-        generator.setPreferredSize(Utils.tryToGetTextFieldSize());
-        generator.setValidator(new NotEmptyValidator(generator::getSelectedItem));
-        for (String supportedGenerator : Utils.getAllSupportedGenerators()) {
-            generator.addItem(supportedGenerator);
-        }
-        generator.setSelectedItem(PluginMakerPreference.INSTANCE.preferGenerator.get());
         addGeneratorConfiguration(generator);
 
         triggerElementName.setEditable(false);
         triggerElementName.setValidator(new NotEmptyValidator(triggerElementName::getSelectedItem));
         addConfigurationWithHelpEntry("trigger_element_name", triggerElementName);
 
-        eventName.setOpaque(false);
         eventName.setValidator(() -> {
             if (eventName.getText() == null || eventName.getText().isEmpty()) {
                 return new ValidationResult(ValidationResult.Type.ERROR, "Not empty");

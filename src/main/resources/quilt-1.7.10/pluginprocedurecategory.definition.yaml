@@ -1,0 +1,4 @@
+templates:
+  - template: proecedurecategory.json.ftl
+    writer: json
+    name: "@RESROOT/procedures/$@registryname.json"
