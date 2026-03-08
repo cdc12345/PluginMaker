@@ -9,6 +9,8 @@ import java.awt.*;
 
 public class ProcedureCategoryModElement extends GeneratableElement {
 
+    //TODO general category
+    public String blocklyFolder = "procedures";
     public Color color;
     // mapped parent_category
     public String parentCategory;
