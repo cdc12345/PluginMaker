@@ -250,9 +250,7 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
     @Override protected void openInEditingMode(DataListModElement generatableElement) {
         this.entries = new ArrayList<>(generatableElement.entries);
         this.generateDataList.setSelected(generatableElement.generateDataList);
-        this.datalistName.setSelectedItem(generatableElement.datalistName);
         this.dialogMessage.setText(generatableElement.dialogMessage);
-
         for (DataListModElement.DataListEntry entry : entries) {
             types.add(entry.getType());
         }
@@ -261,7 +259,6 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
     @Override public DataListModElement getElementFromGUI() {
         modElement.setRegistryName(datalistName.getSelectedItem());
         DataListModElement dataListModElement = new DataListModElement(modElement);
-        dataListModElement.datalistName = datalistName.getSelectedItem();
         dataListModElement.generateDataList = generateDataList.isSelected();
         dataListModElement.entries = entries.stream().map(DataListModElement.DataListEntry::clone).toList();
         dataListModElement.dialogMessage = dialogMessage.getText();

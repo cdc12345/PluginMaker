@@ -12,23 +12,13 @@ public class ElementsUtils {
         if (datalist == null) {
             return null;
         }
-        return getDataListName(datalist);
-    }
-
-    public static String getDataListName(ModElement modElement) {
-        if (modElement.getGeneratableElement() instanceof DataListModElement dataListModElement) {
-            return dataListModElement.datalistName;
-        }
-        return modElement.getRegistryName();
+        return datalist.getRegistryName();
     }
 
     public static String getTriggerName(Workspace workspace, String name) {
         var trigger = workspace.getModElementByName(name);
         if (trigger == null) {
             return null;
-        }
-        if (trigger.getGeneratableElement() instanceof TriggerModElement triggerModElement) {
-            return triggerModElement.getName();
         }
         return trigger.getRegistryName();
     }

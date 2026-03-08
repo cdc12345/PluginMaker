@@ -3,6 +3,7 @@ package org.cdc.generator.elements;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
+import org.cdc.generator.elements.interfaces.IGeneratorSpecific;
 import org.cdc.generator.utils.Constants;
 import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.YamlUtils;

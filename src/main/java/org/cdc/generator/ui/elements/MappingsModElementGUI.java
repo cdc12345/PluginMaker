@@ -143,7 +143,7 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
             MappingsModElementGUI.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             //
             if (datalist != null) {
-                String dataListName = ElementsUtils.getDataListName(datalist);
+                String dataListName = datalist.getRegistryName();
                 var memory = Generator.GENERATOR_CACHE.get(generator.getSelectedItem()).getMappingLoader()
                         .getMapping(dataListName);
                 var cacheSet = new HashSet<MappingsModElement.MappingEntry>();

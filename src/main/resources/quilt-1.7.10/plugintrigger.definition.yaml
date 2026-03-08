@@ -1,7 +1,7 @@
 templates:
   - template: trigger.json.ftl
     writer: json
-    name: "@RESROOT/triggers/@[getName()].json"
+    name: "@RESROOT/triggers/@registryname.json"
 
 localizationkeys:
   - key: trigger.@registryname

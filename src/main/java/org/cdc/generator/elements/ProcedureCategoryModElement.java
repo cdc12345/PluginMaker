@@ -3,14 +3,12 @@ package org.cdc.generator.elements;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
+import org.cdc.generator.elements.interfaces.IBlocklyCategory;
 import org.cdc.generator.utils.Utils;
 
 import java.awt.*;
 
-public class ProcedureCategoryModElement extends GeneratableElement {
-
-    //TODO general category
-    public String blocklyFolder = "procedures";
+public class ProcedureCategoryModElement extends GeneratableElement implements IBlocklyCategory {
     public Color color;
     // mapped parent_category
     public String parentCategory;
@@ -28,5 +26,9 @@ public class ProcedureCategoryModElement extends GeneratableElement {
             return null;
         }
         return parentCategory;
+    }
+
+    @Override public String getBlocklyFolder() {
+        return "procedures";
     }
 }

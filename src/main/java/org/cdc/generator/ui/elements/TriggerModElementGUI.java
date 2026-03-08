@@ -90,11 +90,6 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
 
         this.triggerName.setText(modElement.getRegistryName());
         this.triggerName.setValidator(Rules.getFileNameValidator(this.triggerName::getText));
-        this.triggerName.addFocusListener(new FocusAdapter() {
-            @Override public void focusLost(FocusEvent e) {
-                modElement.setRegistryName(triggerName.getText());
-            }
-        });
         addNameConfiguration(triggerName);
 
         addConfigurationWithHelpEntry("has_result", hasResult);
@@ -214,7 +209,6 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     }
 
     @Override protected void openInEditingMode(TriggerModElement generatableElement) {
-        this.triggerName.setText(generatableElement.getName());
         this.hasResult.setSelected(generatableElement.has_result);
         this.cancelable.setSelected(generatableElement.cancelable);
         this.side.setSelectedItem(generatableElement.side);
@@ -223,12 +217,12 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     }
 
     @Override public TriggerModElement getElementFromGUI() {
+        modElement.setRegistryName(triggerName.getText());
         var trigger = new TriggerModElement(modElement);
         trigger.cancelable = this.cancelable.isSelected();
         trigger.has_result = this.hasResult.isSelected();
         trigger.side = this.side.getSelectedItem();
         trigger.required_apis = this.requiredApis.getTextList();
-        trigger.name = this.triggerName.getText();
         trigger.dependencies_provided = this.dependencies.stream().map(TriggerModElement.Dependency::clone).toList();
         return trigger;
     }

@@ -67,13 +67,13 @@ public class VariableModElementGUI extends AbstractConfigurationTableModElementG
     @Override protected void initGUI() {
         initConfiguration(new GridLayout(8, 2, 5, 5));
 
-        generate.setSelected(true);
-        addConfigurationWithHelpEntry("generate", generate);
-
         name.setEditable(true);
         name.setSelectedItem(modElement.getRegistryName());
         name.setValidator(Rules.getFileNameValidator(name::getSelectedItem));
         addNameConfiguration(name);
+
+        generate.setSelected(true);
+        addConfigurationWithHelpEntry("generate", generate);
 
         blocklyVariableType.setOpaque(false);
         blocklyVariableType.setText(modElement.getName());

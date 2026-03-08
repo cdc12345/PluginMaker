@@ -1,4 +1,4 @@
-package org.cdc.generator.elements;
+package org.cdc.generator.elements.interfaces;
 
 import com.google.j2objc.annotations.UsedByReflection;
 

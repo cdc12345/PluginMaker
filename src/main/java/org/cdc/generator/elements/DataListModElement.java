@@ -1,6 +1,5 @@
 package org.cdc.generator.elements;
 
-import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
 
@@ -12,17 +11,12 @@ import java.util.Set;
 public class DataListModElement extends GeneratableElement {
 
     public boolean generateDataList;
-    public String datalistName;
     public String dialogMessage;
 
     public List<DataListEntry> entries;
 
     public DataListModElement(ModElement element) {
         super(element);
-    }
-
-    @UsedByReflection public String getDatalistName() {
-        return datalistName;
     }
 
     public static class DataListEntry implements Cloneable {

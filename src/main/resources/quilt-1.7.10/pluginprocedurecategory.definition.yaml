@@ -1,4 +1,4 @@
 templates:
   - template: proecedurecategory.json.ftl
     writer: json
-    name: "@RESROOT/@[blocklyFolder]/$@registryname.json"
+    name: "@RESROOT/@[getBlocklyFolder()]/$@registryname.json"

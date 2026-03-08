@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 
 public class TriggerModElement extends GeneratableElement {
-	public String name;
 	@Nullable public List<String> required_apis;
 
 	@Nullable public List<Dependency> dependencies_provided;
@@ -20,10 +19,6 @@ public class TriggerModElement extends GeneratableElement {
 
 	public TriggerModElement(ModElement element) {
 		super(element);
-	}
-
-	@UsedByReflection public String getName() {
-		return name;
 	}
 
 	@UsedByReflection public String getLowerLetterSide() {
