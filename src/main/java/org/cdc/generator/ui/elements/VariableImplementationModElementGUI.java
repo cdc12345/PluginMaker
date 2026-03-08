@@ -110,7 +110,7 @@ public class VariableImplementationModElementGUI
                     if (a.type().isAnnotationPresent(Description.class)) {
                         var des = a.type().getAnnotation(Description.class);
                         if (des.value().equals("VarImplExamples")) {
-                            a.get().provideExamples(toolbar, jTextArea,
+                            a.get().provideExamples(toolbar::add, jTextArea::setText,
                                     new String[] { generator.getSelectedItem(), row.getName(),
                                             columnName.toLowerCase(Locale.ROOT) });
                         }

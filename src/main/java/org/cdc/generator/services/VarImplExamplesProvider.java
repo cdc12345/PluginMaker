@@ -6,15 +6,16 @@ import net.mcreator.generator.GeneratorConfiguration;
 import net.mcreator.workspace.elements.VariableTypeLoader;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.interfaces.IExamplesProvider;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Description("VarImplExamples") public class VarImplExamplesProvider implements IExamplesProvider {
 
-    @Override public void provideExamples(JToolBar toolBar, RSyntaxTextArea rSyntaxTextArea, String[] args) {
+    @Override
+    public void provideExamples(Consumer<JComponent> toolBar, Consumer<String> exampleConsumer, String[] args) {
         String generatorName = args[0];
         String scopeName = args[1];
         String definitionName = args[2];
@@ -24,25 +25,25 @@ import java.util.List;
             var generator = Generator.GENERATOR_CACHE.get(generatorName);
             if (generator != null) {
                 var num = getVariableScope("number", scopeName, definitionName, generator);
-                rSyntaxTextArea.setText(String.join("\n", num));
+                exampleConsumer.accept(String.join("\n", num));
             }
         });
-        toolBar.add(number);
+        toolBar.accept(number);
         JButton logic = new JButton("Logic");
         logic.setOpaque(false);
         logic.addActionListener(a -> {
             var generator = Generator.GENERATOR_CACHE.get(generatorName);
             if (generator != null) {
-                var num = getVariableScope("logic", toolBar.getName(), rSyntaxTextArea.getName(), generator);
-                rSyntaxTextArea.setText(String.join("\n", num));
+                var num = getVariableScope("logic", scopeName, definitionName, generator);
+                exampleConsumer.accept(String.join("\n", num));
             }
         });
-        toolBar.add(logic);
+        toolBar.accept(logic);
     }
 
-    private static @NonNull List<String> getVariableScope(String variableName, String scopeName, String definitionName,
+    private static @NonNull List<String> getVariableScope(String variableName, String scopeName, String phaseName,
             GeneratorConfiguration generator) {
         return Utils.convertYamlToList(generator.getVariableTypes()
-                .getScopeDefinition(VariableTypeLoader.INSTANCE.fromName(variableName), scopeName).get(definitionName));
+                .getScopeDefinition(VariableTypeLoader.INSTANCE.fromName(variableName), scopeName).get(phaseName));
     }
 }
