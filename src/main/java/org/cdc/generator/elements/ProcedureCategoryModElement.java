@@ -9,6 +9,9 @@ import org.cdc.generator.utils.Utils;
 import java.awt.*;
 
 public class ProcedureCategoryModElement extends GeneratableElement implements IBlocklyCategory {
+
+    public String readableName;
+
     public Color color;
     // mapped parent_category
     public String parentCategory;
@@ -33,6 +36,9 @@ public class ProcedureCategoryModElement extends GeneratableElement implements I
     }
 
     @UsedByReflection public String getSuggestedName() {
+        if (readableName != null && !readableName.isBlank()) {
+            return readableName;
+        }
         return getModElement().getName();
     }
 }

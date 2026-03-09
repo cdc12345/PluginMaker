@@ -74,6 +74,8 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         datalistName.setEditable(true);
         datalistName.setValidator(Rules.getFileNameValidator(datalistName::getSelectedItem));
         datalistName.setSelectedItem(modElement.getRegistryName());
+        var list = DataListLoader.getCache().keySet().stream().sorted().toList();
+        ComboBoxUtil.updateComboBoxContents(datalistName, list);
         addNameConfiguration(datalistName);
 
         generateDataList.setSelected(true);
@@ -91,10 +93,10 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
                 var row = entries.get(rowIndex);
                 JLabel label = (JLabel) super.getTableCellRendererComponent(jTable, value, isSelected, hasFocus,
                         rowIndex, column);
-                if (value != null)
-                    label.setToolTipText(value + ", index=" + rowIndex);
-                if (row.isBuiltIn())
-                    label.setToolTipText("BuiltIn: " + label.getToolTipText());
+                var attributes = new ArrayList<>();
+                attributes.add("Builtin=" + row.isBuiltIn());
+                attributes.add("Index=" + rowIndex);
+                label.setToolTipText(value + attributes.toString());
                 return label;
             }
         });
@@ -161,22 +163,14 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         bar.setFloatable(false);
         bar.setOpaque(false);
 
-        JButton addrow = new JButton(UIRES.get("16px.add"));
-        addrow.setContentAreaFilled(false);
-        addrow.setOpaque(false);
-        ComponentUtils.deriveFont(addrow, 11);
-        addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
+        JButton addrow = createAddButton();
         bar.add(addrow);
-        JButton remrow = new JButton(UIRES.get("16px.delete"));
-        remrow.setContentAreaFilled(false);
-        remrow.setOpaque(false);
-        ComponentUtils.deriveFont(remrow, 11);
-        remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
+        JButton remrow = createRemoveRowButton();
         bar.add(remrow);
         bar.add(Utils.initSearchComponent(lastSearchResult, this));
 
         addrow.addActionListener(e -> {
-            entries.add(entries.isEmpty() ?
+            entries.addFirst(entries.isEmpty() ?
                     new DataListModElement.DataListEntry("name") :
                     DataListModElement.DataListEntry.copyCommonValueOf(entries.getLast()));
             if (!isEditingMode()) {
@@ -276,8 +270,6 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
                 entries.add(dataListEntry1);
             }
         }
-        var list = DataListLoader.getCache().keySet().stream().sorted().toList();
-        ComboBoxUtil.updateComboBoxContents(datalistName, list);
     }
 
     public HashSet<String> getTypes() {
@@ -327,7 +319,7 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
 
         @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
             var row = entries.get(rowIndex);
-            if (aValue == null) {
+            if (aValue == null || row.isBuiltIn()) {
                 return;
             }
             switch (getColumnName(columnIndex)) {

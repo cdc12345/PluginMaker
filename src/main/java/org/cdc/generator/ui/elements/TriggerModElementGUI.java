@@ -41,6 +41,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         implements ISearchable {
 
     private VTextField triggerName;
+    private VTextField readableName;
     private JStringListField requiredApis;
     private JCheckBox cancelable;
     private JCheckBox hasResult;
@@ -55,6 +56,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         super(mcreator, modElement, editingMode, new String[] { "Name", "Type" });
 
         this.triggerName = new VTextField();
+        this.readableName = new VTextField();
         this.requiredApis = new JStringListField(mcreator, vTextField -> new Validator() {
             private final Validator parent = new RegistryNameValidator(vTextField,
                     L10N.t("dialog.workspace.settings.workspace_modid")).setMaxLength(32);
@@ -86,11 +88,14 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     }
 
     @Override protected void initGUI() {
-        initConfiguration(new GridLayout(5, 2, 5, 5));
+        initConfiguration(new GridLayout(6, 2, 5, 5));
 
         this.triggerName.setText(modElement.getRegistryName());
         this.triggerName.setValidator(Rules.getFileNameValidator(this.triggerName::getText));
         addNameConfiguration(triggerName);
+
+        this.readableName.setText(modElement.getName());
+        addConfigurationWithHelpEntry("readable_name", readableName);
 
         addConfigurationWithHelpEntry("has_result", hasResult);
 
@@ -143,17 +148,9 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
         bar.setFloatable(false);
         bar.setOpaque(false);
-        JButton addrow = new JButton(UIRES.get("16px.add"));
-        addrow.setContentAreaFilled(false);
-        addrow.setOpaque(false);
-        ComponentUtils.deriveFont(addrow, 11);
-        addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
+        JButton addrow = createAddButton();
         bar.add(addrow);
-        JButton remrow = new JButton(UIRES.get("16px.delete"));
-        remrow.setContentAreaFilled(false);
-        remrow.setOpaque(false);
-        ComponentUtils.deriveFont(remrow, 11);
-        remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
+        JButton remrow = createRemoveRowButton();
         bar.add(remrow);
         bar.add(Utils.initSearchComponent(lastSearchResult, this));
 
@@ -169,8 +166,9 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
             refreshTable();
         });
 
-        addPage("trigger", PanelUtils.totalCenterInPanel(
-                PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar)))).validate(triggerName);
+        addPage("Attributes", PanelUtils.totalCenterInPanel(configurationPanel)).validate(triggerName);
+
+        addPage("Parameters", toolbarAndTable(bar));
     }
 
     @Override public void doSearch(Map.Entry<String, String> search) {
@@ -209,6 +207,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     }
 
     @Override protected void openInEditingMode(TriggerModElement generatableElement) {
+        this.readableName.setText(generatableElement.readableName);
         this.hasResult.setSelected(generatableElement.has_result);
         this.cancelable.setSelected(generatableElement.cancelable);
         this.side.setSelectedItem(generatableElement.side);
@@ -219,6 +218,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     @Override public TriggerModElement getElementFromGUI() {
         modElement.setRegistryName(triggerName.getText());
         var trigger = new TriggerModElement(modElement);
+        trigger.readableName = readableName.getText();
         trigger.cancelable = this.cancelable.isSelected();
         trigger.has_result = this.hasResult.isSelected();
         trigger.side = this.side.getSelectedItem();

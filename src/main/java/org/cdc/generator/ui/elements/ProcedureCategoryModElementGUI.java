@@ -25,13 +25,18 @@ public class ProcedureCategoryModElementGUI
 
     // aitasks and so on can extends the class.
     protected final VTextField name;
+    protected final VTextField readableName;
     protected final JColor color;
-    protected final SearchableComboBox<String> parentCategory = new SearchableComboBox<>();
+    protected final SearchableComboBox<String> parentCategory;
+    protected final VTextField customCategory;
 
     public ProcedureCategoryModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode, null);
         this.name = new VTextField();
+        this.readableName = new VTextField();
         this.color = new JColor(mcreator, false, false);
+        this.parentCategory = new SearchableComboBox<>();
+        this.customCategory = new VTextField();
 
         if (editingMode) {
             name.setEnabled(false);
@@ -42,20 +47,26 @@ public class ProcedureCategoryModElementGUI
     }
 
     @Override protected void initGUI() {
-        initConfiguration(new GridLayout(4, 2, 5, 5));
+        initConfiguration(new GridLayout(5, 2, 5, 5));
 
         name.setText(modElement.getRegistryName());
         name.setValidator(Rules.getFileNameValidator(name::getText));
         addNameConfiguration(name);
 
+        readableName.setText(modElement.getName());
+        addConfigurationWithHelpEntry("readable_name", readableName);
+
         addConfigurationWithHelpEntry("color", color);
 
         addConfigurationWithHelpEntry("parent_category", parentCategory);
+
+        addConfigurationWithHelpEntry("custom_parent_category", customCategory);
 
         addPage("edit", PanelUtils.totalCenterInPanel(configurationPanel));
     }
 
     @Override protected void openInEditingMode(ProcedureCategoryModElement generatableElement) {
+        this.readableName.setText(generatableElement.readableName);
         this.color.setColor(generatableElement.color);
         this.parentCategory.setSelectedItem(generatableElement.parentCategory);
     }
@@ -63,7 +74,12 @@ public class ProcedureCategoryModElementGUI
     @Override public ProcedureCategoryModElement getElementFromGUI() {
         modElement.setRegistryName(name.getText());
         var element = new ProcedureCategoryModElement(modElement);
-        element.parentCategory = parentCategory.getSelectedItem();
+        element.readableName = readableName.getText();
+        if (customCategory.getText() != null && !customCategory.getText().isBlank()) {
+            element.parentCategory = customCategory.getText();
+        } else {
+            element.parentCategory = parentCategory.getSelectedItem();
+        }
         element.color = color.getColor();
         return element;
     }

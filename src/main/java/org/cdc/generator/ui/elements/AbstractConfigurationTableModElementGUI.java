@@ -2,9 +2,11 @@ package org.cdc.generator.ui.elements;
 
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.ui.MCreator;
+import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
+import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.workspace.elements.ModElement;
@@ -98,5 +100,25 @@ public abstract class AbstractConfigurationTableModElementGUI<E extends Generata
 
     protected JComponent wrapTable() {
         return new JScrollPane(jTable);
+    }
+
+    protected JButton createRemoveRowButton() {
+        JButton remrow = new JButton(UIRES.get("16px.delete"));
+        remrow.setContentAreaFilled(false);
+        remrow.setOpaque(false);
+        ComponentUtils.deriveFont(remrow, 11);
+        remrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
+        remrow.setToolTipText("Remove");
+        return remrow;
+    }
+
+    protected JButton createAddButton() {
+        JButton addrow = new JButton(UIRES.get("16px.add"));
+        addrow.setContentAreaFilled(false);
+        addrow.setOpaque(false);
+        ComponentUtils.deriveFont(addrow, 11);
+        addrow.setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 2));
+        addrow.setToolTipText("Add");
+        return addrow;
     }
 }

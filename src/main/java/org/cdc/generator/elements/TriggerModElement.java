@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Locale;
 
 public class TriggerModElement extends GeneratableElement {
-    @Nullable public List<String> required_apis;
+    public String readableName;
 
-    @Nullable public List<Dependency> dependencies_provided;
+    public List<String> required_apis;
+
+    public List<Dependency> dependencies_provided;
 
     public boolean cancelable;
     public boolean has_result;
@@ -26,6 +28,9 @@ public class TriggerModElement extends GeneratableElement {
     }
 
     @UsedByReflection public String getSuggestedName() {
+        if (readableName != null && !readableName.isBlank()) {
+            return readableName;
+        }
         return getModElement().getName();
     }
 
