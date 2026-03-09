@@ -17,6 +17,7 @@ import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
 import org.cdc.generator.utils.interfaces.IExamplesProvider;
+import org.cdc.generator.utils.ioc.Inject;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -44,6 +45,8 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
 
     public List<APIModElement.Configuration> configurations = new ArrayList<>();
     private final ArrayList<Integer> lastSearchResult = new ArrayList<>(List.of(0));
+
+    @Inject private PluginMakerPreference preferences;
 
     public APIModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode,
@@ -175,7 +178,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
         });
         addrow.addActionListener(e -> {
             var config = new APIModElement.Configuration();
-            config.setGenerator(PluginMakerPreference.INSTANCE.preferGenerator.get());
+            config.setGenerator(preferences.preferGenerator.get());
             configurations.add(config);
             refreshTable();
         });
@@ -285,8 +288,6 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
             case "Generator" -> row.setGenerator(aValue.toString());
             case "Required when enable" -> row.setRequiredWhenEnable((boolean) aValue);
             case "Version range" -> row.setVersionRange(aValue.toString());
-            case "Gradle" -> {
-            }
             }
         }
     }

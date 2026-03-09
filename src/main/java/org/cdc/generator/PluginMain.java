@@ -17,6 +17,7 @@ import org.cdc.generator.init.ResourcePanels;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
+import org.cdc.generator.utils.ioc.Container;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,9 @@ public class PluginMain extends JavaPlugin {
         super(plugin);
 
         INSTANCE = this;
+
+        Container.getInstance().registerObject("pluginMain", () -> INSTANCE);
+
         addListener(MCreatorLoadedEvent.class, this::initPluginMakerWorkspace);
 
         addListener(PreGeneratorsLoadingEvent.class, event -> {
@@ -54,6 +58,7 @@ public class PluginMain extends JavaPlugin {
 
         addListener(ApplicationLoadedEvent.class, event -> {
             PluginMakerPreference.INSTANCE = new PluginMakerPreference("plugin_generator");
+            Container.getInstance().registerObject("preferences", () -> PluginMakerPreference.INSTANCE);
         });
 
         Menus.registerMenuVisibleControls(this);

@@ -3,8 +3,12 @@ package org.cdc.generator.init;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.element.ModElementType;
 import net.mcreator.element.ModElementTypeLoader;
+import net.mcreator.ui.MCreator;
+import net.mcreator.ui.modgui.ModElementGUI;
+import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.*;
 import org.cdc.generator.ui.elements.*;
+import org.cdc.generator.utils.ioc.Container;
 
 import javax.annotation.Nullable;
 
@@ -29,7 +33,8 @@ import javax.annotation.Nullable;
     private static <E extends GeneratableElement> ModElementType<E> register(String registryName,
             @Nullable Character shortcut, ModElementType.ModElementGUIProvider<E> modElementGUIProvider,
             Class<E> modElementStorageClass) {
-        var modElementType = new ModElementType<>(registryName, shortcut, modElementGUIProvider,
+        var modElementType = new ModElementType<>(registryName, shortcut,
+                (mcreator, modElement, editingMode) -> Container.getInstance().inject(modElementGUIProvider.get(mcreator, modElement, editingMode)),
                 modElementStorageClass);
         ModElementTypeLoader.register(modElementType);
         return modElementType;

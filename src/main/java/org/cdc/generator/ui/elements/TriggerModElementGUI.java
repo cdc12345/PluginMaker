@@ -57,17 +57,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
 
         this.triggerName = new VTextField();
         this.readableName = new VTextField();
-        this.requiredApis = new JStringListField(mcreator, vTextField -> new Validator() {
-            private final Validator parent = new RegistryNameValidator(vTextField,
-                    L10N.t("dialog.workspace.settings.workspace_modid")).setMaxLength(32);
-
-            @Override public ValidationResult validate() {
-                if (!Rules.VALID_MODID.matcher(vTextField.getText()).matches())
-                    return new ValidationResult(ValidationResult.Type.ERROR,
-                            L10N.t("dialog.workspace.settings.workspace_modid_invalid"));
-                return parent.validate();
-            }
-        });
+        this.requiredApis = new JStringListField(mcreator, vTextField -> Rules.getModidValidator(vTextField::getText));
         this.side = new TranslatedComboBox(
                 // @formatter:off
 				Map.entry("SERVER", "elementgui.plugintrigger.side.server"),

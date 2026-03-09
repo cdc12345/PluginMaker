@@ -8,6 +8,7 @@ import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.util.image.ImageUtils;
 import net.mcreator.workspace.elements.ModElement;
+import org.apache.logging.log4j.Logger;
 import org.cdc.generator.elements.VariableImplementationModElement;
 import org.cdc.generator.elements.VariableModElement;
 import org.cdc.generator.init.ModElementTypes;
@@ -18,6 +19,8 @@ import org.cdc.generator.utils.YamlUtils;
 import org.cdc.generator.utils.factories.AutoCompletionFactory;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
 import org.cdc.generator.utils.interfaces.IExamplesProvider;
+import org.cdc.generator.utils.ioc.Container;
+import org.cdc.generator.utils.ioc.Inject;
 import org.cdc.generator.utils.validators.NotEmptyValidator;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
@@ -46,6 +49,9 @@ public class VariableImplementationModElementGUI
 
     private final Map<String, MethodHandle> cacheHandles = new HashMap<>();
     private final MethodHandles.Lookup lookup = MethodHandles.lookup();
+
+    @Inject private Logger LOGGER;
+    @Inject private Container container;
 
     public VariableImplementationModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode, new String[] { "Scope name", "Init", "Get", "Set", "Read", "Write" });
@@ -80,7 +86,8 @@ public class VariableImplementationModElementGUI
                 }
                 return jLabel;
             }
-        }); addConfigurationWithHelpEntry("variable_element_name", variableElementName);
+        });
+        addConfigurationWithHelpEntry("variable_element_name", variableElementName);
 
         defaultValue.setText("null");
         defaultValue.setValidator(new NotEmptyValidator(defaultValue::getText));
@@ -100,21 +107,26 @@ public class VariableImplementationModElementGUI
                 var toolbar = new JToolBar();
                 toolbar.setBorder(BorderFactory.createTitledBorder("Examples"));
                 var columnName = columns[column];
+                container.registerObject("generatorName", generator::getSelectedItem);
+                container.registerTemporaryObject("name", row::getName);
+                container.registerTemporaryObject("columnName", () -> columnName.toLowerCase(Locale.ROOT));
                 IExamplesProvider.examplesProviders.stream().forEach(a -> {
                     if (a.type().isAnnotationPresent(Description.class)) {
                         var des = a.type().getAnnotation(Description.class);
                         if (des.value().equals("VarImplExamples")) {
-                            a.get().provideExamples(toolbar::add, jTextArea::setText,
+                            container.inject(a.get()).provideExamples(toolbar::add, jTextArea::setText,
                                     new String[] { generator.getSelectedItem(), row.getName(),
                                             columnName.toLowerCase(Locale.ROOT) });
                         }
                     }
                 });
+                container.endTemporaryLife();
 
                 int op = DialogUtils.showOptionPaneWithTextAreaAndToolBar(jTextArea, toolbar, mcreator,
                         "Edit" + columnName + " lines (one line one item)",
                         YamlUtils.splitString(Objects.requireNonNullElse(value1, "").toString()));
                 if (op == JOptionPane.YES_OPTION) {
+                    LOGGER.info("Notify {} has changed to {}", columnName, jTextArea.getText());
                     try {
                         MethodHandle set;
                         if (cacheHandles.containsKey(columnName)) {
@@ -153,8 +165,7 @@ public class VariableImplementationModElementGUI
         element.generator = generator.getSelectedItem();
         element.variableElementName = variableElementName.getSelectedItem();
         element.defaultValue = defaultValue.getText();
-        element.scopes = scopeList.stream().filter(VariableImplementationModElement.VariableScope::hasNotNull)
-                .map(VariableImplementationModElement.VariableScope::clone).toList();
+        element.scopes = scopeList.stream().map(VariableImplementationModElement.VariableScope::clone).toList();
         return element;
     }
 

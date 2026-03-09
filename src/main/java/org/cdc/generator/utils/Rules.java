@@ -1,9 +1,11 @@
 package org.cdc.generator.utils;
 
+import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.Validator;
 import org.cdc.generator.PluginMain;
 import org.cdc.generator.ui.preferences.PluginMakerPreference;
+import org.cdc.generator.utils.validators.RegistryNameValidator;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -25,6 +27,20 @@ public class Rules {
             }
             return new ValidationResult(ValidationResult.Type.ERROR,
                     "You must use whole english and whole lower letters");
+        };
+    }
+
+    public static Validator getModidValidator(Supplier<String> getter) {
+        return new Validator() {
+            private final Validator parent = new RegistryNameValidator(getter,
+                    L10N.t("dialog.workspace.settings.workspace_modid")).setMaxLength(32);
+
+            @Override public ValidationResult validate() {
+                if (!Rules.VALID_MODID.matcher(getter.get()).matches())
+                    return new ValidationResult(ValidationResult.Type.ERROR,
+                            L10N.t("dialog.workspace.settings.workspace_modid_invalid"));
+                return parent.validate();
+            }
         };
     }
 

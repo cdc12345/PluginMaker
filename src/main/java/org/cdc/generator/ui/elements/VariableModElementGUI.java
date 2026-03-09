@@ -42,17 +42,7 @@ public class VariableModElementGUI extends AbstractConfigurationTableModElementG
     public VariableModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode, null);
 
-        this.requiredApis = new JStringListField(mcreator, vTextField -> new Validator() {
-            private final Validator parent = new RegistryNameValidator(vTextField,
-                    L10N.t("dialog.workspace.settings.workspace_modid")).setMaxLength(32);
-
-            @Override public ValidationResult validate() {
-                if (!Rules.VALID_MODID.matcher(vTextField.getText()).matches())
-                    return new ValidationResult(ValidationResult.Type.ERROR,
-                            L10N.t("dialog.workspace.settings.workspace_modid_invalid"));
-                return parent.validate();
-            }
-        });
+        this.requiredApis = new JStringListField(mcreator, vTextField -> Rules.getModidValidator(vTextField::getText));
         this.color = new JColor(mcreator, false, false);
         this.builtInColor = new VComboBox<>(new String[] { Constants.NONE, Constants.BuiltInColors.BKY_TEXTS_HUE,
                 Constants.BuiltInColors.BKY_LOGIC_HUE, Constants.BuiltInColors.BKY_MATH_HUE });
