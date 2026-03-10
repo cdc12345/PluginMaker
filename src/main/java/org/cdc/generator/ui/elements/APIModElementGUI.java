@@ -135,6 +135,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                     }
                     return null;
                 }
+
                 generatorCom.removeAllItems();
                 if (column1.equals("Generator")) {
                     var selected = generatorCom.getSelectedItem();
