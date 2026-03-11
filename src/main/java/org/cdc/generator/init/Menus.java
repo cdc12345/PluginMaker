@@ -60,14 +60,16 @@ public class Menus {
 
     public static void registerAllSubMenus(MCreator mcreator) {
         PLUGIN_MAKER.get()
-                .add(new JMenuItemBuilder().setParentMenuName("plugin_maker").setName("load_from_external_en_us")
-                        .setActionListener(a -> {
+                .add(new JMenuBuilder().setParentMenuName("plugin_maker").setName("load_from_external").setReload(a -> {
+                    final var langmap = mcreator.getWorkspace().getLanguageMap();
+                    for (String s : langmap.keySet()) {
+                        var menuItem = new JMenuItem(s);
+                        menuItem.addActionListener(b -> {
                             var file = FileDialogs.getOpenDialog(mcreator, new String[] { "*.properties" });
                             Properties properties = new Properties();
                             try {
                                 properties.load(new FileReader(file));
-                                var langmap = mcreator.getWorkspace().getLanguageMap();
-                                var en = langmap.get("en_us");
+                                var en = langmap.get(s);
                                 for (Map.Entry<Object, Object> objectObjectEntry : properties.entrySet()) {
                                     en.put(objectObjectEntry.getKey().toString(),
                                             objectObjectEntry.getValue().toString());
@@ -75,7 +77,10 @@ public class Menus {
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
-                        }).build());
+                        });
+                        a.add(menuItem);
+                    }
+                }).build());
         PLUGIN_MAKER.get().add(new JMenuItemBuilder().setParentMenuName("plugin_maker").setName("visit_repository")
                 .setActionListener(a -> {
                     DesktopUtils.browseSafe("https://mcreator.net/repository");
