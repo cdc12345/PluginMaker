@@ -3,12 +3,12 @@ package org.cdc.generator.elements;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.elements.interfaces.IBlocklyCategory;
+import org.cdc.generator.elements.interfaces.IBlocklyType;
 import org.cdc.generator.utils.Utils;
 
 import java.awt.*;
 
-public class ProcedureCategoryModElement extends GeneratableElement implements IBlocklyCategory {
+public class ProcedureCategoryModElement extends GeneratableElement implements IBlocklyType {
 
     public String readableName;
 

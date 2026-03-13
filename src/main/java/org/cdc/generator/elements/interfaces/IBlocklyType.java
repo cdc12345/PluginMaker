@@ -2,6 +2,6 @@ package org.cdc.generator.elements.interfaces;
 
 import com.google.j2objc.annotations.UsedByReflection;
 
-public interface IBlocklyCategory {
+public interface IBlocklyType {
     @UsedByReflection String getBlocklyFolder();
 }

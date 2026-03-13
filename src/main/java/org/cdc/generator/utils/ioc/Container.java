@@ -47,6 +47,7 @@ public class Container {
         map.putAll(objectMap);
         map.putAll(tempObjectMap);
         map.put("LOGGER", () -> LogManager.getLogger(cls));
+        map.put("LOG", () -> LogManager.getLogger(cls));
 
         for (Field field : cls.getDeclaredFields()) {
             if (field.isAnnotationPresent(Inject.class) && map.containsKey(field.getName())) {

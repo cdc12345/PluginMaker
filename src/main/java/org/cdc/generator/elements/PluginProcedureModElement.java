@@ -1,11 +1,59 @@
 package org.cdc.generator.elements;
 
+
+import com.google.gson.JsonObject;
+import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
+import org.cdc.generator.elements.interfaces.IBlocklyType;
+import org.cdc.generator.utils.Utils;
+import org.cdc.generator.utils.YamlUtils;
 
-//Todo
-public class PluginProcedureModElement extends GeneratableElement {
+import javax.annotation.Nullable;
+import java.awt.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class PluginProcedureModElement extends GeneratableElement implements IBlocklyType {
+
+    public List<JsonObject> arg0;
+    public boolean inputsInline;
+    public String previousStatement;
+    public String nextStatement;
+    public Color colour;
+    // parent category
+    public List<String> output;
+
+    public String toolbox_id;
+    public List<String> toolbox_init;
+    // sort group
+    public String group;
+    public List<Dependency> dependencies;
+    @Nullable private List<String> warnings;
+    @Nullable private List<String> required_apis;
+
     public PluginProcedureModElement(ModElement element) {
         super(element);
+    }
+
+    @UsedByReflection public String getColor() {
+        return Utils.convertColor(colour);
+    }
+
+    public String getOutput() {
+        if (output.size() == 1) {
+            return output.getFirst();
+        }
+        return "[" + output.stream().map(YamlUtils::str).collect(Collectors.joining(",")) + "]";
+    }
+
+    @Override public String getBlocklyFolder() {
+        return "procedures";
+    }
+
+    public record Dependency(String name, String type) {
+        public net.mcreator.blockly.data.Dependency toMCreatorDependency() {
+            return new net.mcreator.blockly.data.Dependency(name, type);
+        }
     }
 }
