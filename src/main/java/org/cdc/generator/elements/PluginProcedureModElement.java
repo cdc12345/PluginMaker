@@ -1,6 +1,5 @@
 package org.cdc.generator.elements;
 
-
 import com.google.gson.JsonObject;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
@@ -31,6 +30,8 @@ public class PluginProcedureModElement extends GeneratableElement implements IBl
     public List<Dependency> dependencies;
     @Nullable private List<String> warnings;
     @Nullable private List<String> required_apis;
+    public List<String> inputs;
+    public List<String> field;
 
     public PluginProcedureModElement(ModElement element) {
         super(element);
