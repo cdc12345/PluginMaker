@@ -121,4 +121,8 @@ public abstract class AbstractConfigurationTableModElementGUI<E extends Generata
         addrow.setToolTipText("Add");
         return addrow;
     }
+
+    protected JCheckBox createDefaultCheckBox() {
+        return L10N.checkbox("elementgui.common.enable");
+    }
 }

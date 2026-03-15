@@ -15,6 +15,7 @@ public class ProcedureCategoryModElement extends GeneratableElement implements I
     public Color color;
     // mapped parent_category
     public String parentCategory;
+    public boolean api;
 
     public ProcedureCategoryModElement(ModElement element) {
         super(element);

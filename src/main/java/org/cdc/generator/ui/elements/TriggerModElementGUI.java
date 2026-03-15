@@ -65,8 +65,8 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
 				Map.entry("BOTH", "elementgui.plugintrigger.side.both")
 				// @formatter:on
         );
-        this.cancelable = new JCheckBox();
-        this.hasResult = new JCheckBox();
+        this.cancelable = createDefaultCheckBox();
+        this.hasResult = createDefaultCheckBox();
         this.dependencies = new ArrayList<>();
         this.lastSearchResult = new ArrayList<>();
         if (editingMode) {

@@ -13,7 +13,7 @@
 		"${api}"<#sep>,
 	</#list>
 	]</#if>
-	<#if data.cancelable>	,"cancelable": "${data.cancelable}"</#if>
-	<#if data.has_result>	,"has_result": "${data.has_result}"</#if>
+	<#if data.cancelable>	,"cancelable": "true"</#if>
+	<#if data.has_result>	,"has_result": "true"</#if>
 	<#if data.side != "BOTH">	,"side": "${data.getLowerLetterSide()}"</#if>
 }

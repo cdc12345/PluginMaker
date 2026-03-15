@@ -7,6 +7,7 @@ import net.mcreator.ui.component.JColor;
 import net.mcreator.ui.component.SearchableComboBox;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
+import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.ProcedureCategoryModElement;
@@ -15,6 +16,7 @@ import org.cdc.generator.utils.Rules;
 import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
+import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +31,7 @@ public class ProcedureCategoryModElementGUI
     protected final JColor color;
     protected final SearchableComboBox<String> parentCategory;
     protected final VTextField customCategory;
+    protected final JCheckBox isApi;
 
     public ProcedureCategoryModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode, null);
@@ -37,6 +40,7 @@ public class ProcedureCategoryModElementGUI
         this.color = new JColor(mcreator, false, false);
         this.parentCategory = new SearchableComboBox<>();
         this.customCategory = new VTextField();
+        this.isApi = createDefaultCheckBox();
 
         if (editingMode) {
             name.setEnabled(false);
@@ -47,7 +51,7 @@ public class ProcedureCategoryModElementGUI
     }
 
     @Override protected void initGUI() {
-        initConfiguration(new GridLayout(5, 2, 5, 5));
+        initConfiguration(new GridLayout(6, 2, 5, 5));
 
         name.setText(modElement.getRegistryName());
         name.setValidator(Rules.getFileNameValidator(name::getText));
@@ -61,6 +65,8 @@ public class ProcedureCategoryModElementGUI
         addConfigurationWithHelpEntry("parent_category", parentCategory);
 
         addConfigurationWithHelpEntry("custom_parent_category", customCategory);
+
+        addConfigurationWithHelpEntry("is_api", isApi);
 
         addPage("edit", PanelUtils.totalCenterInPanel(configurationPanel));
     }
