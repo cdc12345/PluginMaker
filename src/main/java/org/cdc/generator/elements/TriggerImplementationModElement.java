@@ -2,16 +2,15 @@ package org.cdc.generator.elements;
 
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
-import net.mcreator.generator.Generator;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.elements.interfaces.IGeneratorSpecific;
+import org.cdc.generator.elements.interfaces.IGeneratorElement;
 import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.YamlUtils;
 
 import java.util.List;
 import java.util.Locale;
 
-public class TriggerImplementationModElement extends GeneratableElement implements IGeneratorSpecific {
+public class TriggerImplementationModElement extends GeneratableElement implements IGeneratorElement {
 
     public String generatorName;
     public String triggerElementName;

@@ -33,12 +33,19 @@ import java.util.stream.Stream;
 public class TriggerModElementGUI extends AbstractConfigurationTableModElementGUI<TriggerModElement>
         implements ISearchable {
 
-    private final VTextField name;
-    private final VTextField readableName;
-    private final JStringListField requiredApis;
-    private final JCheckBox cancelable;
-    private final JCheckBox hasResult;
-    private final TranslatedComboBox side;
+    private final VTextField name = new VTextField();
+    private final VTextField readableName = new VTextField();
+    private final JStringListField requiredApis = new JStringListField(mcreator,
+            vTextField -> Rules.getModidValidator(vTextField::getText));
+    private final JCheckBox cancelable = createDefaultCheckBox();
+    private final JCheckBox hasResult = createDefaultCheckBox();
+    private final TranslatedComboBox side = new TranslatedComboBox(
+            // @formatter:off
+            Map.entry("SERVER", "elementgui.plugintrigger.side.server"),
+            Map.entry("CLIENT", "elementgui.plugintrigger.side.client"),
+            Map.entry("BOTH", "elementgui.plugintrigger.side.both")
+            // @formatter:on
+    );
 
     public List<TriggerModElement.Dependency> dependencies;
 
@@ -47,21 +54,9 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
 
     public TriggerModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode, new String[] { "Name", "Type" });
-
-        this.name = new VTextField();
-        this.readableName = new VTextField();
-        this.requiredApis = new JStringListField(mcreator, vTextField -> Rules.getModidValidator(vTextField::getText));
-        this.side = new TranslatedComboBox(
-                // @formatter:off
-				Map.entry("SERVER", "elementgui.plugintrigger.side.server"),
-				Map.entry("CLIENT", "elementgui.plugintrigger.side.client"),
-				Map.entry("BOTH", "elementgui.plugintrigger.side.both")
-				// @formatter:on
-        );
-        this.cancelable = createDefaultCheckBox();
-        this.hasResult = createDefaultCheckBox();
         this.dependencies = new ArrayList<>();
         this.lastSearchResult = new ArrayList<>();
+
         if (editingMode) {
             name.setEnabled(false);
         }

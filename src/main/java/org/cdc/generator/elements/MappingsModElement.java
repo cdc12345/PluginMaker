@@ -3,14 +3,14 @@ package org.cdc.generator.elements;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.elements.interfaces.IGeneratorSpecific;
+import org.cdc.generator.elements.interfaces.IGeneratorElement;
 import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MappingsModElement extends GeneratableElement implements IGeneratorSpecific {
+public class MappingsModElement extends GeneratableElement implements IGeneratorElement {
 
     public String generatorName;
     public String datalistElementName;

@@ -3,7 +3,7 @@ package org.cdc.generator.elements;
 import com.google.j2objc.annotations.UsedByReflection;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.workspace.elements.ModElement;
-import org.cdc.generator.elements.interfaces.IGeneratorSpecific;
+import org.cdc.generator.elements.interfaces.IGeneratorElement;
 import org.cdc.generator.utils.Constants;
 import org.cdc.generator.utils.ElementsUtils;
 import org.cdc.generator.utils.YamlUtils;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class VariableImplementationModElement extends GeneratableElement implements IGeneratorSpecific {
+public class VariableImplementationModElement extends GeneratableElement implements IGeneratorElement {
 
     public String generator;
     public String variableElementName;
