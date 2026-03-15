@@ -43,7 +43,7 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         implements ISearchable {
 
     private final VComboBox<String> datalistName = new VComboBox<>();
-    private final JCheckBox generateDataList = L10N.checkbox("elementgui.common.enable");
+    private final JCheckBox generateDataList = createDefaultCheckBox();
     private final VTextField dialogMessage = new VTextField();
 
     public List<DataListModElement.DataListEntry> entries;

@@ -75,6 +75,7 @@ public class ProcedureCategoryModElementGUI
         this.readableName.setText(generatableElement.readableName);
         this.color.setColor(generatableElement.color);
         this.parentCategory.setSelectedItem(generatableElement.parentCategory);
+        this.isApi.setSelected(generatableElement.api);
     }
 
     @Override public ProcedureCategoryModElement getElementFromGUI() {
@@ -87,6 +88,7 @@ public class ProcedureCategoryModElementGUI
             element.parentCategory = parentCategory.getSelectedItem();
         }
         element.color = color.getColor();
+        element.api = isApi.isSelected();
         return element;
     }
 

@@ -3,17 +3,12 @@ package org.cdc.generator.ui.elements;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.JStringListField;
 import net.mcreator.ui.component.TranslatedComboBox;
-import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
-import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.laf.themes.Theme;
-import net.mcreator.ui.validation.ValidationResult;
-import net.mcreator.ui.validation.Validator;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
-import net.mcreator.ui.validation.validators.RegistryNameValidator;
 import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.elements.VariableTypeLoader;
 import org.cdc.generator.elements.TriggerModElement;
@@ -26,8 +21,6 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -40,12 +33,12 @@ import java.util.stream.Stream;
 public class TriggerModElementGUI extends AbstractConfigurationTableModElementGUI<TriggerModElement>
         implements ISearchable {
 
-    private VTextField triggerName;
-    private VTextField readableName;
-    private JStringListField requiredApis;
-    private JCheckBox cancelable;
-    private JCheckBox hasResult;
-    private TranslatedComboBox side;
+    private final VTextField name;
+    private final VTextField readableName;
+    private final JStringListField requiredApis;
+    private final JCheckBox cancelable;
+    private final JCheckBox hasResult;
+    private final TranslatedComboBox side;
 
     public List<TriggerModElement.Dependency> dependencies;
 
@@ -55,7 +48,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     public TriggerModElementGUI(MCreator mcreator, @NonNull ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode, new String[] { "Name", "Type" });
 
-        this.triggerName = new VTextField();
+        this.name = new VTextField();
         this.readableName = new VTextField();
         this.requiredApis = new JStringListField(mcreator, vTextField -> Rules.getModidValidator(vTextField::getText));
         this.side = new TranslatedComboBox(
@@ -70,7 +63,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         this.dependencies = new ArrayList<>();
         this.lastSearchResult = new ArrayList<>();
         if (editingMode) {
-            triggerName.setEnabled(false);
+            name.setEnabled(false);
         }
 
         this.initGUI();
@@ -80,9 +73,9 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     @Override protected void initGUI() {
         initConfiguration(new GridLayout(6, 2, 5, 5));
 
-        this.triggerName.setText(modElement.getRegistryName());
-        this.triggerName.setValidator(Rules.getFileNameValidator(this.triggerName::getText));
-        addNameConfiguration(triggerName);
+        this.name.setText(modElement.getRegistryName());
+        this.name.setValidator(Rules.getFileNameValidator(this.name::getText));
+        addNameConfiguration(name);
 
         this.readableName.setText(modElement.getName());
         addConfigurationWithHelpEntry("readable_name", readableName);
@@ -156,7 +149,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
             refreshTable();
         });
 
-        addPage("Attributes", PanelUtils.totalCenterInPanel(configurationPanel)).validate(triggerName);
+        addPage("Attributes", PanelUtils.totalCenterInPanel(configurationPanel)).validate(name);
 
         addPage("Parameters", toolbarAndTable(bar));
     }
@@ -206,7 +199,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
     }
 
     @Override public TriggerModElement getElementFromGUI() {
-        modElement.setRegistryName(triggerName.getText());
+        modElement.setRegistryName(name.getText());
         var trigger = new TriggerModElement(modElement);
         trigger.readableName = readableName.getText();
         trigger.cancelable = this.cancelable.isSelected();
