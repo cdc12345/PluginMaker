@@ -108,6 +108,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
             }
         });
         jTable.setDefaultEditor(String.class, new DefaultCellEditor(typeComboBox) {
+
             @Override
             public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
                     int columnIndex) {
@@ -126,10 +127,20 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         bar.setBorder(BorderFactory.createEmptyBorder(2, 0, 5, 0));
         bar.setFloatable(false);
         bar.setOpaque(false);
+
         JButton addrow = createAddButton();
         bar.add(addrow);
         JButton remrow = createRemoveRowButton();
         bar.add(remrow);
+        JButton xyz = new JButton("XYZ");
+        xyz.setToolTipText("Add xyz");
+        xyz.setOpaque(false);
+        xyz.addActionListener(a -> {
+            Stream.of("x", "y", "z").forEach(b -> dependencies.add(new TriggerModElement.Dependency(b, "number")));
+            refreshTable();
+        });
+        bar.add(xyz);
+
         bar.add(Utils.initSearchComponent(lastSearchResult, this));
 
         addrow.addActionListener(a -> {

@@ -7,7 +7,7 @@ plugins {
 repositories {
     mavenCentral()
     maven { url "https://repo.gradle.org/gradle/libs-releases" } // for gradle-tooling-api
-    flatDir { dirs System.getenv("MCREATOR_PROJECT_DIR") + '/lib' }
+    flatDir { dirs mcreator_path + '/lib' }
     maven {
         url "https://jitpack.io"
     }
@@ -53,7 +53,7 @@ tasks.register('runMCreatorWithPlugin', JavaExec) {
 
     mainClass = 'net.mcreator.Launcher'
 
-    workingDir = System.getenv("MCREATOR_PROJECT_DIR")
+    workingDir = mcreator_path
 }
 
 subprojects { subproject ->
@@ -61,9 +61,9 @@ subprojects { subproject ->
         test {
             dependsOn rootProject.jar
 
-            environment("MCREATOR_PLUGINS_FOLDER", new File(rootProject.projectDir, "/build/libs"))
+            environment("MCREATOR_PLUGINS_FOLDER", new File(mcreator_path, "/build/libs"))
 
-            workingDir = System.getenv("MCREATOR_PROJECT_DIR")
+            workingDir = mcreator_path
         }
     }
 }

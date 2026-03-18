@@ -151,7 +151,7 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                 return super.getTableCellEditorComponent(table, value, isSelected, rowIndex, columnIndex);
             }
         });
-        jTable.setDefaultEditor(List.class, new DefaultCellEditor(new JTextField()) {
+        jTable.setDefaultEditor(List.class, new DefaultCellEditor(new VComboBox<>()) {
             @Override
             public Component getTableCellEditorComponent(JTable table, Object value1, boolean isSelected, int rowIndex,
                     int column) {
@@ -176,6 +176,8 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                 }
                 return null;
             }
+
+
         });
         addrow.addActionListener(e -> {
             var config = new APIModElement.Configuration();

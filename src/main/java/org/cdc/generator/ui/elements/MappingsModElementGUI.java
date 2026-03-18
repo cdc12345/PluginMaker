@@ -5,13 +5,11 @@ import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.init.UIRES;
-import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.workspace.elements.ModElement;
 import org.cdc.generator.elements.DataListModElement;
 import org.cdc.generator.elements.MappingsModElement;
 import org.cdc.generator.init.ModElementTypes;
-import org.cdc.generator.ui.preferences.PluginMakerPreference;
 import org.cdc.generator.utils.*;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
 import org.cdc.generator.utils.validators.NotEmptyValidator;
@@ -209,7 +207,7 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
 
     @Override public void reloadDataLists() {
         ArrayList<String> stringArrayList = new ArrayList<>();
-        for (ModElement element : mcreator.getWorkspaceInfo()
+        for (ModElement element : mcreator.getWorkspace().getWorkspaceInfo()
                 .getElementsOfType(ModElementTypes.DATA_LIST.getRegistryName())) {
             stringArrayList.add(element.getName());
         }
