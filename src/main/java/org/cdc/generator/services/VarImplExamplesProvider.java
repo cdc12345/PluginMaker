@@ -20,7 +20,7 @@ import java.util.function.Consumer;
     @Inject String columnName;
 
     @Override
-    public void provideExamples(Consumer<JComponent> componentConsumer, Consumer<String> exampleConsumer,
+    public void provideExamples(Consumer<JComponent> componentConsumer, Consumer<Object> exampleConsumer,
             String[] args) {
         JButton number = new JButton("Number");
         number.setOpaque(false);

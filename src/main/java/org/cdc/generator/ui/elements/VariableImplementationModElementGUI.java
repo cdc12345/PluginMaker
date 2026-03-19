@@ -114,9 +114,10 @@ public class VariableImplementationModElementGUI
                     if (a.type().isAnnotationPresent(Description.class)) {
                         var des = a.type().getAnnotation(Description.class);
                         if (des.value().equals("VarImplExamples")) {
-                            container.inject(a.get()).provideExamples(toolbar::add, jTextArea::setText,
-                                    new String[] { generator.getSelectedItem(), row.getName(),
-                                            columnName.toLowerCase(Locale.ROOT) });
+                            container.inject(a.get())
+                                    .provideExamples(toolbar::add, text -> jTextArea.setText(Objects.toString(text)),
+                                            new String[] { generator.getSelectedItem(), row.getName(),
+                                                    columnName.toLowerCase(Locale.ROOT) });
                         }
                     }
                 });

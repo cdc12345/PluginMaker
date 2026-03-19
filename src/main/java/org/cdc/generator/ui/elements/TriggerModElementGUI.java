@@ -14,6 +14,7 @@ import net.mcreator.workspace.elements.VariableTypeLoader;
 import org.cdc.generator.elements.TriggerModElement;
 import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
+import org.cdc.generator.utils.validators.DuplicatedElementValidator;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -133,7 +134,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         JButton remrow = createRemoveRowButton();
         bar.add(remrow);
         JButton xyz = new JButton("XYZ");
-        xyz.setToolTipText("Add xyz");
+        xyz.setToolTipText("Add xyz parameters");
         xyz.setOpaque(false);
         xyz.addActionListener(a -> {
             Stream.of("x", "y", "z").forEach(b -> dependencies.add(new TriggerModElement.Dependency(b, "number")));
@@ -157,7 +158,9 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
 
         addPage("Attributes", PanelUtils.totalCenterInPanel(configurationPanel)).validate(name);
 
-        addPage("Parameters", toolbarAndTable(bar));
+        addPage("Parameters", toolbarAndTable(bar)).lazyValidate(new DuplicatedElementValidator(
+                dependencies.stream().map(TriggerModElement.Dependency::getName).toList(),
+                a -> jTable.changeSelection(a, 0, false, false)));
     }
 
     @Override public void doSearch(Map.Entry<String, String> search) {

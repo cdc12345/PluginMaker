@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 @Description("Gradles") public class CommonGradleExamplesProvider implements IExamplesProvider {
 
-    @Override public void provideExamples(Consumer<JComponent> componentConsumer, Consumer<String> exampleConsumer, String[] args) {
+    @Override public void provideExamples(Consumer<JComponent> componentConsumer, Consumer<Object> exampleConsumer, String[] args) {
         JButton forge = new JButton(UIRES.get("16px.forge"));
         forge.setToolTipText("ForgeGradle");
         componentConsumer.accept(forge);

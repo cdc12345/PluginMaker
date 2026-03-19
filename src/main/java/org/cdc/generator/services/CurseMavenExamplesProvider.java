@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 // It is cursed....
 public class CurseMavenExamplesProvider implements IExamplesProvider {
 
-    @Override public void provideExamples(Consumer<JComponent> componentConsumer, Consumer<String> exampleConsumer, String[] args) {
+    @Override public void provideExamples(Consumer<JComponent> componentConsumer, Consumer<Object> exampleConsumer, String[] args) {
         JButton curseMaven = new JButton("Curse");
         curseMaven.setToolTipText("CurseMaven");
         componentConsumer.accept(curseMaven);

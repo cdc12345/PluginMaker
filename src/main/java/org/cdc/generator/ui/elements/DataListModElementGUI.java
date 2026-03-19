@@ -6,7 +6,6 @@ import net.mcreator.minecraft.DataListLoader;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.validation.AggregatedValidationResult;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
 import net.mcreator.ui.workspace.WorkspacePanel;
@@ -18,6 +17,7 @@ import org.cdc.generator.utils.Rules;
 import org.cdc.generator.utils.Utils;
 import org.cdc.generator.utils.ZipUtils;
 import org.cdc.generator.utils.factories.RSyntaxTextAreaFactory;
+import org.cdc.generator.utils.validators.DuplicatedElementValidator;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -113,7 +113,7 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
                     toolBar.setBorder(BorderFactory.createTitledBorder("Toolbar"));
                     JButton example = new JButton("example");
                     example.addActionListener(actionEvent -> {
-                        jTextArea.setText("registry_name=attached");
+                        jTextArea.setText("registry_name=null");
                     });
                     toolBar.add(example);
 
@@ -192,20 +192,10 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         });
 
         addPage("Configuration",
-                PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar))).lazyValidate(() -> {
-            Set<String> names = new HashSet<>();
-            for (int i = 0; i < entries.size(); i++) {
-                var entry = entries.get(i);
-                if (!names.contains(entry.getName())) {
-                    names.add(entry.getName());
-                } else {
-                    jTable.changeSelection(i, 0, false, false);
-                    return new AggregatedValidationResult.FAIL("Duplicative name in datalist");
-                }
-
-            }
-            return new AggregatedValidationResult.PASS();
-        }).validate(datalistName);
+                PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar))).lazyValidate(
+                new DuplicatedElementValidator(
+                        entries.stream().map(DataListModElement.DataListEntry::getName).toList(),
+                        b -> jTable.changeSelection(b, 0, false, false))).validate(datalistName);
 
         resourcePanelIcons = new ResourcePanelIcons((WorkspacePanel) mcreator.getWorkspacePanel(), this);
         resourcePanelIcons.reloadElements();

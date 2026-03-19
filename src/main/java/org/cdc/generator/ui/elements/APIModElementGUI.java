@@ -31,10 +31,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -123,7 +121,8 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                         if (a.type().isAnnotationPresent(Description.class)) {
                             var desc = a.type().getAnnotation(Description.class);
                             if ("Gradles".equals(desc.value())) {
-                                a.get().provideExamples(toolBar::add, jTextArea::setText, new String[0]);
+                                a.get().provideExamples(toolBar::add, text -> jTextArea.setText(Objects.toString(text)),
+                                        new String[0]);
                             }
                         }
                     });
@@ -176,7 +175,6 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
                 }
                 return null;
             }
-
 
         });
         addrow.addActionListener(e -> {
