@@ -4,8 +4,6 @@ import jdk.jfr.Description;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.help.HelpUtils;
-import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.validation.component.VComboBox;
 import net.mcreator.ui.validation.component.VTextField;
@@ -33,6 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -236,8 +235,8 @@ public class APIModElementGUI extends AbstractConfigurationTableModElementGUI<AP
         }
     }
 
-    @Override public void refreshTable() {
-        SwingUtilities.invokeLater(() -> {
+    @Override public CompletableFuture<Void> refreshTable() {
+        return CompletableFuture.runAsync(()->{
             jTable.repaint();
             jTable.revalidate();
         });

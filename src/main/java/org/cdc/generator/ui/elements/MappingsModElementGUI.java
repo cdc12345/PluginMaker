@@ -28,6 +28,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -72,9 +73,9 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
         bar.setOpaque(false);
         bar.setOpaque(false);
 
-        var syncWithDatalist = new JButton(UIRES.get("impfile"));
-        syncWithDatalist.setToolTipText("Import from element and memory");
-        syncWithDatalist.setOpaque(false);
+        var syncDatalist = new JButton(UIRES.get("impfile"));
+        syncDatalist.setToolTipText("Import from element and memory");
+        syncDatalist.setOpaque(false);
 
         initTable(new MappingTableModel());
 
@@ -135,7 +136,7 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
                 return super.getTableCellEditorComponent(jTable, value1, isSelected, rowIndex, column);
             }
         });
-        syncWithDatalist.addActionListener(e -> {
+        syncDatalist.addActionListener(e -> {
             var datalist = mcreator.getWorkspace().getModElementByName(datalistName.getSelectedItem());
             //
             MappingsModElementGUI.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -179,7 +180,7 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
             refreshTable();
         });
 
-        bar.add(syncWithDatalist);
+        bar.add(syncDatalist);
         bar.add(initSearchBar(lastSearchResult));
 
         addPage("edit", PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar))).validate(generator)
@@ -237,8 +238,8 @@ public class MappingsModElementGUI extends AbstractConfigurationTableModElementG
         }
     }
 
-    public void refreshTable() {
-        SwingUtilities.invokeLater(() -> {
+    @Override public CompletableFuture<Void> refreshTable() {
+        return CompletableFuture.runAsync(()->{
             jTable.repaint();
             jTable.revalidate();
         });

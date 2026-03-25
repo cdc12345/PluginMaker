@@ -29,7 +29,7 @@ public class DuplicatedElementValidator implements Validator, Supplier<Aggregate
                 names.add(uids.get(i));
             } else {
                 notifier.accept(i);
-                return new ValidationResult(ValidationResult.Type.ERROR, "Has duplicated keys");
+                return new ValidationResult(ValidationResult.Type.ERROR, "Duplicated keys exists");
             }
         }
         return ValidationResult.PASSED;
@@ -43,7 +43,7 @@ public class DuplicatedElementValidator implements Validator, Supplier<Aggregate
                 names.add(uids.get(i));
             } else {
                 notifier.accept(i);
-                return new AggregatedValidationResult.FAIL("Has duplicated keys");
+                return new AggregatedValidationResult.FAIL("Duplicated keys exists");
             }
         }
         return new AggregatedValidationResult.PASS();

@@ -33,6 +33,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -167,14 +168,16 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         bar.add(Utils.initSearchComponent(lastSearchResult, this));
 
         addrow.addActionListener(e -> {
-            entries.addFirst(entries.isEmpty() ?
+            entries.add(entries.isEmpty() ?
                     new DataListModElement.DataListEntry("name") :
                     DataListModElement.DataListEntry.copyCommonValueOf(entries.getLast()));
             if (!isEditingMode()) {
                 JOptionPane.showMessageDialog(mcreator, "If you edit datalist name, you will lose your work", "Warning",
                         JOptionPane.WARNING_MESSAGE);
             }
-            refreshTable();
+            refreshTable().thenAcceptAsync(a -> {
+                jTable.changeSelection(entries.size() - 1, 0, false, false);
+            });
         });
         remrow.addActionListener(e -> {
             jTable.editCellAt(-1, 0);
@@ -263,8 +266,8 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         return types;
     }
 
-    public void refreshTable() {
-        SwingUtilities.invokeLater(() -> {
+    @Override public CompletableFuture<Void> refreshTable() {
+        return CompletableFuture.runAsync(() -> {
             jTable.repaint();
             jTable.revalidate();
         });

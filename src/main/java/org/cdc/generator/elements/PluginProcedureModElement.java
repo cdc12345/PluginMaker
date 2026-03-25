@@ -19,7 +19,7 @@ public class PluginProcedureModElement extends GeneratableElement implements IBl
     public String previousStatement;
     public String nextStatement;
     public Color colour;
-    public List<String> output;
+    public List<String> outputs;
 
     // mcreator:
     // parent category
@@ -28,8 +28,8 @@ public class PluginProcedureModElement extends GeneratableElement implements IBl
     // sort group
     public String group;
     public List<Dependency> dependencies;
-    private List<String> warnings;
-    private List<String> required_apis;
+    public List<String> warnings;
+    public List<String> required_apis;
     public List<String> inputs;
     public List<String> fields;
 
@@ -41,11 +41,11 @@ public class PluginProcedureModElement extends GeneratableElement implements IBl
         return Utils.convertColor(colour);
     }
 
-    public String getOutput() {
-        if (output.size() == 1) {
-            return output.getFirst();
+    public String getOutputs() {
+        if (outputs.size() == 1) {
+            return outputs.getFirst();
         }
-        return "[" + output.stream().map(YamlUtils::str).collect(Collectors.joining(",")) + "]";
+        return "[" + outputs.stream().map(YamlUtils::str).collect(Collectors.joining(",")) + "]";
     }
 
     @Override public String getBlocklyFolder() {

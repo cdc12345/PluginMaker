@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -187,8 +188,8 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
 
     }
 
-    @Override public void refreshTable() {
-        SwingUtilities.invokeLater(() -> {
+    @Override public CompletableFuture<Void> refreshTable() {
+        return CompletableFuture.runAsync(()->{
             jTable.repaint();
             jTable.revalidate();
         });

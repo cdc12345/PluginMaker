@@ -10,9 +10,9 @@ public interface IArg0Type {
 
     ServiceLoader<IArg0Type> arg0types = ServiceLoader.load(IArg0Type.class, IExamplesProvider.class.getClassLoader());
 
-    String name();
+    String getName();
 
     Component getEditor(JsonObject jsonObject);
 
-    Arg0InputType type();
+    Arg0InputType getType();
 }

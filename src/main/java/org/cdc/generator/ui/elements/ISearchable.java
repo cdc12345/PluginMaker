@@ -5,11 +5,12 @@ import org.cdc.generator.utils.Utils;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public interface ISearchable {
     void doSearch(Map.Entry<String, String> search);
 
-    void refreshTable();
+    CompletableFuture<Void> refreshTable();
 
     void showSearch(int index);
 
