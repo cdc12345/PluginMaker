@@ -194,7 +194,7 @@ public class DataListModElementGUI extends AbstractConfigurationTableModElementG
         addPage("Configuration",
                 PanelUtils.northAndCenterElement(configurationPanel, toolbarAndTable(bar))).lazyValidate(
                 new DuplicatedElementValidator(
-                        entries.stream().map(DataListModElement.DataListEntry::getName).toList(),
+                        () -> entries.stream().map(DataListModElement.DataListEntry::getName).toList(),
                         b -> jTable.changeSelection(b, 0, false, false))).validate(datalistName);
 
         resourcePanelIcons = new ResourcePanelIcons((WorkspacePanel) mcreator.getWorkspacePanel(), this);

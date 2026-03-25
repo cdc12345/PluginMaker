@@ -13,16 +13,17 @@ import java.util.function.Supplier;
 public class DuplicatedElementValidator implements Validator, Supplier<AggregatedValidationResult> {
 
     // unique id list
-    private final List<String> uids;
+    private final Supplier<List<String>> uidsGetter;
     private final Consumer<Integer> notifier;
 
-    public DuplicatedElementValidator(List<String> uids, Consumer<Integer> notifier) {
-        this.uids = uids;
+    public DuplicatedElementValidator(Supplier<List<String>> uidsGetter, Consumer<Integer> notifier) {
+        this.uidsGetter = uidsGetter;
         this.notifier = notifier;
     }
 
     @Override public ValidationResult validate() {
         Set<String> names = new HashSet<>();
+        var uids = uidsGetter.get();
         for (int i = 0; i < uids.size(); i++) {
             if (!names.contains(uids.get(i))) {
                 names.add(uids.get(i));
@@ -36,6 +37,7 @@ public class DuplicatedElementValidator implements Validator, Supplier<Aggregate
 
     @Override public AggregatedValidationResult get() {
         Set<String> names = new HashSet<>();
+        var uids = uidsGetter.get();
         for (int i = 0; i < uids.size(); i++) {
             if (!names.contains(uids.get(i))) {
                 names.add(uids.get(i));

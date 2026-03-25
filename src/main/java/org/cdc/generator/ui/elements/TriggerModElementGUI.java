@@ -159,7 +159,7 @@ public class TriggerModElementGUI extends AbstractConfigurationTableModElementGU
         addPage("Attributes", PanelUtils.totalCenterInPanel(configurationPanel)).validate(name);
 
         addPage("Parameters", toolbarAndTable(bar)).lazyValidate(new DuplicatedElementValidator(
-                dependencies.stream().map(TriggerModElement.Dependency::getName).toList(),
+                () -> dependencies.stream().map(TriggerModElement.Dependency::getName).toList(),
                 a -> jTable.changeSelection(a, 0, false, false)));
     }
 
