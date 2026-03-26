@@ -57,7 +57,18 @@ public class PluginProceduresElementGUI extends AbstractConfigurationTableModEle
     }
 
     @Override public PluginProcedureModElement getElementFromGUI() {
-        return null;
+        this.modElement.setRegistryName(name.getText());
+        var element = new PluginProcedureModElement(modElement);
+        element.inputsInline = this.inputsInline.isSelected();
+        element.previousStatement = this.previousStatement.getText();
+        element.nextStatement = this.nextStatement.getText();
+        element.colour = this.color.getColor();
+        element.outputs = this.outputs.getTextList();
+        element.toolbox_id = this.toolboxId.getSelectedItem();
+        element.group = this.group.getText();
+        element.warnings = this.warnings.getTextList();
+        element.required_apis = this.requiredApis.getTextList();
+        return element;
     }
 
     @Override @Nullable public URI contextURL() throws URISyntaxException {
