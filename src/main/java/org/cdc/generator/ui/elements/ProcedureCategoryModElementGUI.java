@@ -42,10 +42,6 @@ public class ProcedureCategoryModElementGUI
         this.customCategory = new VTextField();
         this.isApi = createDefaultCheckBox();
 
-        if (editingMode) {
-            name.setEnabled(false);
-        }
-
         this.initGUI();
         this.finalizeGUI();
     }
@@ -72,6 +68,7 @@ public class ProcedureCategoryModElementGUI
     }
 
     @Override protected void openInEditingMode(ProcedureCategoryModElement generatableElement) {
+        this.name.setEnabled(false);
         this.readableName.setText(generatableElement.readableName);
         this.color.setColor(generatableElement.color);
         this.parentCategory.setSelectedItem(generatableElement.parentCategory);
