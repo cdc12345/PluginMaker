@@ -142,6 +142,8 @@ public class TriggerImplementationModElementGUI
         provider.addCompletion(new BasicCompletion(provider, "@procedureDependenciesCode"));
         provider.addCompletion(new BasicCompletion(provider, "execute()"));
 
+        Utils.initCompletionWithGenerator(provider, mcreator.getGenerator());
+
         return provider;
 
     }

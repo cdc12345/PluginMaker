@@ -175,6 +175,11 @@ public class Utils {
         return Map.entry("", Rules.SearchRules.applyIgnoreCaseRule(text));
     }
 
+    /**
+     * add the base data variables
+     * @param provider provider
+     * @param generator generator of current mcreator. Do not need the specific generator.
+     */
     public static void initCompletionWithGenerator(DefaultCompletionProvider provider, Generator generator) {
         new BaseDataModelProvider(generator).provide().forEach((key, value) -> {
             provider.addCompletion(new BasicCompletion(provider, "${" + key, value.getClass().getName()));
